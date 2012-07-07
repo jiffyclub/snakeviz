@@ -3,21 +3,20 @@
 <html>
   <head>
     <title>WebSnakeViz</title>
-  </head>
 
-  <style>
-    body {
-      position: relative;
-      font-family: sans-serif;
-      width: 800px;
-      margin: 0 auto;
-      padding: 10px;
-    }
-  </style>
+    <link type="text/css" rel="stylesheet" href="/static/main.css" />
+  </head>
 
   <body>
     <p>
       <h2>WebSnakeViz - The Online Python Profile Viewer</h2>
     </p>
+
+    <form method="post" enctype="multipart/form-data">
+      <label>Display:
+        <input type="file" name="profile">
+      </label>
+      <input type="submit">
+    </form>
   </body>
 </html>

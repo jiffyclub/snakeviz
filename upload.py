@@ -31,11 +31,33 @@ class JSONHandler(handler.Handler):
 
         return json.dumps(d, indent=1)
 
-    def stats_to_tree_dict(self, d, node):
+    def stats_to_tree_dict(self, d, node, parent=None):
         d['name'] = node.name
-        d['size'] = 1
+        d['filename'] = node.filename
+        d['directory'] = node.directory
+
+        if isinstance(node, pstatsloader.PStatRow):
+            d['calls'] = node.calls
+            d['recursive'] = node.recursive
+            d['local'] = node.local
+            d['localPer'] = node.localPer
+            d['cummulative'] = node.cummulative
+            d['cummulativePer'] = node.cummulativePer
+            d['line_number'] = node.lineno
+
+        if parent:
+            if isinstance(parent, pstatsloader.PStatGroup):
+                if parent.cummulative:
+                    d['size'] = node.cummulative / parent.cummulative
+                else:
+                    d['size'] = 0
+            else:
+                d['size'] = parent.child_cumulative_time(node)
+        else:
+            d['size'] = 1
+
         if node.children:
             d['children'] = []
             for child in node.children:
-                d['children'].append(self.stats_to_tree_dict({}, child))
+                d['children'].append(self.stats_to_tree_dict({}, child, node))
         return d

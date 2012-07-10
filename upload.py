@@ -1,7 +1,13 @@
+import pstats
 import json
+import tempfile
+import os
 
 import pstatsloader
 import handler
+
+def storage_name(filename):
+    return os.path.join(tempfile.gettempdir(), filename)
 
 class UploadHandler(handler.Handler):
     def get(self):
@@ -9,17 +15,29 @@ class UploadHandler(handler.Handler):
 
     def post(self):
         filename = self.request.files['profile'][0]['filename']
+        sfilename = storage_name(filename)
 
         # save the stats info to a file so it can be loaded by pstats
-        with open(filename, 'wb') as f:
+        with open(sfilename, 'wb') as f:
             f.write(self.request.files['profile'][0]['body'])
 
-        self.redirect(filename + '.json')
+        # test whether this can be opened with pstats
+        try:
+            pstats.Stats(sfilename)
+
+        except:
+            os.remove(sfilename)
+            error = 'There was an error parsing {} with pstats.'
+            error = error.format(filename)
+            self.render('upload.html', error=error)
+
+        else:
+            self.redirect(filename + '.json')
 
 
 class JSONHandler(handler.Handler):
     def get(self, prof_name):
-        s = self.prof_to_json(prof_name)
+        s = self.prof_to_json(storage_name(prof_name))
 
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.write(s)

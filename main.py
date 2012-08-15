@@ -10,8 +10,15 @@ settings = {
     'debug': True
 }
 
+import handler
+
+class SunburstHandler(handler.Handler):
+    def get(self):
+        self.render('sunburst.html')
+
 handlers = [(r'/', 'upload.UploadHandler'),
-            (r'/(.*)\.json', 'upload.JSONHandler')]
+            (r'/(.*)\.json', 'upload.JSONHandler'),
+            (r'/sunburst', SunburstHandler)]
 
 app = tornado.web.Application(handlers, **settings)
 

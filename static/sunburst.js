@@ -6,7 +6,7 @@ var width = 960,
 var vis = d3.select("#chart").append("svg")
     .attr("width", width)
     .attr("height", height)
-  .append("g")
+    .append("g")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
 var partition = d3.layout.partition()
@@ -19,40 +19,6 @@ var arc = d3.svg.arc()
     .endAngle(function(d) { return d.x + d.dx; })
     .innerRadius(function(d) { return Math.sqrt(d.y); })
     .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-
-d3.json("/norm_fit.prof.json", function(json) {
-  var path = vis.data([json]).selectAll("path")
-      .data(partition.nodes)
-    .enter().append("path")
-      .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
-      .attr("d", arc)
-      .attr("fill-rule", "evenodd")
-      .style("stroke", "#fff")
-      .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-      .each(stash);
-
-  d3.select("#size").on("click", function() {
-    path
-        .data(partition.value(function(d) { return d.size; }))
-      .transition()
-        .duration(1500)
-        .attrTween("d", arcTween);
-
-    d3.select("#size").classed("active", true);
-    d3.select("#count").classed("active", false);
-  });
-
-  d3.select("#count").on("click", function() {
-    path
-        .data(partition.value(function(d) { return 1; }))
-      .transition()
-        .duration(1500)
-        .attrTween("d", arcTween);
-
-    d3.select("#size").classed("active", false);
-    d3.select("#count").classed("active", true);
-  });
-});
 
 // Stash the old values for transition.
 function stash(d) {

@@ -1,21 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html>
   <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8">
+    <meta charset="utf-8">
     <title>d3.js ~ Sunburst</title>
-    <script type="text/javascript" src="static/d3.v2.js?2.9.5"></script>
+    <script src="/static/d3.v2.js?2.9.5"> </script>
   </head>
   <body>
 
-<h1 id='sunburst'>Sunburst</h1>
-<div class='gallery' id='chart'>
-  <button class='first' id='size'>
-    Size
-  </button><button class='last active' id='count'>
-    Count
-  </button><p />
-</div>
-<script src='static/sunburst.js' type='text/javascript'> </script>
+    <h1 id='sunburst'>Sunburst</h1>
+    <div class='gallery' id='chart'>
+      <button class='first' id='size'>
+        Size
+      </button><button class='last active' id='count'>
+        Count
+      </button><p>
+    </div>
+    <script src='/static/sunburst.js'> </script>
+    <script>
+    d3.json("/json/{{profile_name}}.json", function(json) {
+      var path = vis.data([json]).selectAll("path")
+          .data(partition.nodes)
+          .enter().append("path")
+          .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+          .attr("d", arc)
+          .attr("fill-rule", "evenodd")
+          .style("stroke", "#fff")
+          .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+          .each(stash);
+
+      d3.select("#size").on("click", function() {
+        path
+          .data(partition.value(function(d) { return d.size; }))
+          .transition()
+          .duration(1500)
+          .attrTween("d", arcTween);
+
+        d3.select("#size").classed("active", true);
+        d3.select("#count").classed("active", false);
+      });
+
+      d3.select("#count").on("click", function() {
+        path
+          .data(partition.value(function(d) { return 1; }))
+          .transition()
+          .duration(1500)
+          .attrTween("d", arcTween);
+
+        d3.select("#size").classed("active", false);
+        d3.select("#count").classed("active", true);
+      });
+    });
+    </script>
 
   </body>
 </html>

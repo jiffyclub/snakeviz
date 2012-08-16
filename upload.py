@@ -32,8 +32,7 @@ class UploadHandler(handler.Handler):
             self.render('upload.html', error=error)
 
         else:
-            #self.redirect(filename + '.json')
-            self.redirect('sunburst')
+            self.redirect('sunburst/' + filename)
 
 
 class JSONHandler(handler.Handler):

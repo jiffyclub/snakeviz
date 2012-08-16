@@ -5,6 +5,9 @@
     <meta charset="utf-8">
     <title>d3.js ~ Sunburst</title>
     <script src="http://d3js.org/d3.v2.min.js"></script>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="/static/jquery.tipsy.js"></script>
+    <link href="/static/tipsy.css" rel="stylesheet">
   </head>
   <body>
 
@@ -27,9 +30,16 @@
           .attr("fill-rule", "evenodd")
           .style("stroke", "#fff")
           .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-          .append("svg:title")
-          .text(function(d) {return d.filename + ':' + d.line_number + ' (' + d.name + ')';})
           .each(stash);
+
+          $('svg path').tipsy({
+            gravity: $.fn.tipsy.autoWE,
+            html: true,
+            title: function() {
+              var d = this.__data__;
+              return d.filename + ':' + d.line_number + ' (' + d.name + ')';
+            }
+          });
 
       d3.select("#size").on("click", function() {
         path

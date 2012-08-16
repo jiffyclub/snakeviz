@@ -34,7 +34,7 @@
 
           $('svg path').tipsy({
             gravity: $.fn.tipsy.autoWE,
-            html: true,
+            html: false,
             title: function() {
               var d = this.__data__;
               return d.filename + ':' + d.line_number + ' (' + d.name + ')';

@@ -27,6 +27,8 @@
           .attr("fill-rule", "evenodd")
           .style("stroke", "#fff")
           .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
+          .append("svg:title")
+          .text(function(d) {return d.filename + ':' + d.line_number + ' (' + d.name + ')';})
           .each(stash);
 
       d3.select("#size").on("click", function() {

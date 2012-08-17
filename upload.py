@@ -51,7 +51,14 @@ class JSONHandler(handler.Handler):
 
         return json.dumps(d, indent=1)
 
-    def stats_to_tree_dict(self, d, node, parent=None):
+    def stats_to_tree_dict(self, d, node, parent=None, already_done=None):
+        if already_done is None:
+            already_done = {}
+        elif node in already_done:
+            return d
+
+        already_done[node] = True
+
         d['name'] = node.name
         d['filename'] = node.filename
         d['directory'] = node.directory
@@ -79,11 +86,14 @@ class JSONHandler(handler.Handler):
         if node.children:
             d['children'] = []
             for child in node.children:
-                d['children'].append(self.stats_to_tree_dict({}, child, node))
+                d_child = self.stats_to_tree_dict({}, child, node, already_done)
+                if d_child:
+                    d['children'].append(d_child)
 
             # make a "child" that represents the internal time of this function
+            #print d['children']
             children_size = sum([c['size'] for c in d['children']])
-            assert children_size <= 1, 'Children size is unrealistically big!'
+            #assert children_size <= 1, 'Children size is unrealistically big! ' + str(children_size)
 
             d_internal = {'name': node.name,
                           'filename': node.filename,

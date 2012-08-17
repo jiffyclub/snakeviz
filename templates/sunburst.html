@@ -54,10 +54,12 @@
           .attr("d", arc)
           .attr("fill-rule", "evenodd")
           .style("stroke", "#fff")
-          .style("fill", function(d) { return color(d.name); })
+          .style("fill", function(d) {
+            return color(d.name + d.filename + d.directory + d.line_number); })
           .each(stash)
           .call(d3.helper.tooltip(function(d, i) {
-            return d.filename + ':' + d.line_number + ' (' + d.name + ')';}));
+            return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
+              d.cummulative + 's]';}));
 
           // $('svg path').tipsy({
           //   gravity: $.fn.tipsy.autoWE,

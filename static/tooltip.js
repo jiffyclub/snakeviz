@@ -24,9 +24,14 @@ d3.helper.tooltip = function(accessor){
             // and highlight them by darkening their color
             var thisname = d.name;
             var thisfilename = d.filename;
+            var thisdirectory = d.directory;
+            var thislinenumber = d.line_number;
             var thispath = selection.filter(function(d, i) {
-                return d.name == thisname & d.filename == thisfilename;})
-            var thiscolor = d3.rgb(color(d.name)).darker(1);
+                return d.name == thisname &
+                       d.filename == thisfilename &
+                       d.directory == thisdirectory &
+                       d.line_number == thislinenumber;})
+            var thiscolor = d3.rgb(color(d.name + d.filename + d.directory + d.line_number)).darker(1);
             thispath.style('fill', thiscolor.toString());
         })
         .on('mousemove', function(d, i) {
@@ -44,9 +49,14 @@ d3.helper.tooltip = function(accessor){
             // reset darkened nodes to their original color
             var thisname = d.name;
             var thisfilename = d.filename;
+            var thisdirectory = d.directory;
+            var thislinenumber = d.line_number;
             var thispath = selection.filter(function(d, i) {
-                return d.name == thisname & d.filename == thisfilename;})
-            thispath.style('fill', color(d.name))
+                return d.name == thisname &
+                       d.filename == thisfilename &
+                       d.directory == thisdirectory &
+                       d.line_number == thislinenumber;})
+            thispath.style('fill', color(d.name + d.filename + d.directory + d.line_number))
         });
 
     };

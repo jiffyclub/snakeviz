@@ -7,7 +7,9 @@
     <script src="http://d3js.org/d3.v2.min.js"></script>
     <script src="http://code.jquery.com/jquery.min.js"></script>
     <script src="/static/jquery.tipsy.js"></script>
+    <script src="/static/tooltip.js"></script>
     <link href="/static/tipsy.css" rel="stylesheet">
+    <link href="/static/tooltip.css" rel="stylesheet">
   </head>
   <body>
 
@@ -30,16 +32,18 @@
           .attr("fill-rule", "evenodd")
           .style("stroke", "#fff")
           .style("fill", function(d) { return color((d.children ? d : d.parent).name); })
-          .each(stash);
+          .each(stash)
+          .call(d3.helper.tooltip(function(d, i) {
+            return d.filename + ':' + d.line_number + ' (' + d.name + ')';}));
 
-          $('svg path').tipsy({
-            gravity: $.fn.tipsy.autoWE,
-            html: false,
-            title: function() {
-              var d = this.__data__;
-              return d.filename + ':' + d.line_number + ' (' + d.name + ')';
-            }
-          });
+          // $('svg path').tipsy({
+          //   gravity: $.fn.tipsy.autoWE,
+          //   html: false,
+          //   title: function() {
+          //     var d = this.__data__;
+          //     return d.filename + ':' + d.line_number + ' (' + d.name + ')';
+          //   }
+          // });
 
       d3.select("#size").on("click", function() {
         path

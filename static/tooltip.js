@@ -19,9 +19,14 @@ d3.helper.tooltip = function(accessor){
             // Crop text arbitrarily
             tooltipDiv.style('width', function(d, i){return (tooltipText.length > 80) ? '300px' : null;})
                 .text(tooltipText);
-            var thisi = i;
-            var thispath = selection.filter(function(d, i) {return i == thisi;})
-            var thiscolor = d3.rgb(color((d.children ? d : d.parent).name)).darker(1);
+
+            // select all the nodes that represent this exact function
+            // and highlight them by darkening their color
+            var thisname = d.name;
+            var thisfilename = d.filename;
+            var thispath = selection.filter(function(d, i) {
+                return d.name == thisname & d.filename == thisfilename;})
+            var thiscolor = d3.rgb(color(d.name)).darker(1);
             thispath.style('fill', thiscolor.toString());
         })
         .on('mousemove', function(d, i) {
@@ -35,9 +40,13 @@ d3.helper.tooltip = function(accessor){
         .on("mouseout", function(d, i){
             // Remove tooltip
             tooltipDiv.remove();
-            var thisi = i;
-            var thispath = selection.filter(function(d, i) {return i == thisi;})
-            thispath.style('fill', color((d.children ? d : d.parent).name))
+
+            // reset darkened nodes to their original color
+            var thisname = d.name;
+            var thisfilename = d.filename;
+            var thispath = selection.filter(function(d, i) {
+                return d.name == thisname & d.filename == thisfilename;})
+            thispath.style('fill', color(d.name))
         });
 
     };

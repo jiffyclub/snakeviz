@@ -6,8 +6,10 @@ import os
 import pstatsloader
 import handler
 
+
 def storage_name(filename):
     return os.path.join(tempfile.gettempdir(), filename)
+
 
 class UploadHandler(handler.Handler):
     def get(self):
@@ -78,4 +80,25 @@ class JSONHandler(handler.Handler):
             d['children'] = []
             for child in node.children:
                 d['children'].append(self.stats_to_tree_dict({}, child, node))
+
+            # make a "child" that represents the internal time of this function
+            children_size = sum([c['size'] for c in d['children']])
+            assert children_size <= 1, 'Children size is unrealistically big!'
+
+            d_internal = {'name': node.name,
+                          'filename': node.filename,
+                          'directory': node.directory,
+                          'size': 1. - children_size}
+
+            if isinstance(node, pstatsloader.PStatRow):
+                d_internal['calls'] = node.calls
+                d_internal['recursive'] = node.recursive
+                d_internal['local'] = node.local
+                d_internal['localPer'] = node.localPer
+                d_internal['cummulative'] = node.cummulative
+                d_internal['cummulativePer'] = node.cummulativePer
+                d_internal['line_number'] = node.lineno
+
+            d['children'].append(d_internal)
+
         return d

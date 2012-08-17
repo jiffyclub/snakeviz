@@ -19,6 +19,10 @@ d3.helper.tooltip = function(accessor){
             // Crop text arbitrarily
             tooltipDiv.style('width', function(d, i){return (tooltipText.length > 80) ? '300px' : null;})
                 .text(tooltipText);
+            var thisi = i;
+            var thispath = selection.filter(function(d, i) {return i == thisi;})
+            var thiscolor = d3.rgb(color((d.children ? d : d.parent).name)).darker(1);
+            thispath.style('fill', thiscolor.toString());
         })
         .on('mousemove', function(d, i) {
             // Move tooltip
@@ -31,6 +35,9 @@ d3.helper.tooltip = function(accessor){
         .on("mouseout", function(d, i){
             // Remove tooltip
             tooltipDiv.remove();
+            var thisi = i;
+            var thispath = selection.filter(function(d, i) {return i == thisi;})
+            thispath.style('fill', color((d.children ? d : d.parent).name))
         });
 
     };

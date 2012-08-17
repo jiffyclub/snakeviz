@@ -10,6 +10,29 @@
     <script src="/static/tooltip.js"></script>
     <link href="/static/tipsy.css" rel="stylesheet">
     <link href="/static/tooltip.css" rel="stylesheet">
+
+    <script src='https://www.google.com/jsapi'></script>
+    <script>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      function drawTable() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', 'ncalls');
+        data.addColumn('number', 'tottime');
+        data.addColumn('number', 'percall');
+        data.addColumn('number', 'cumtime');
+        data.addColumn('number', 'percall');
+        data.addColumn('string', 'filename:lineno(function)')
+        data.addRows([
+          {% for row in stats_rows %}
+            [{{', '.join(row[:5])}}, "{{' '.join(row[5:])|safe}}"],
+          {% endfor %}
+        ]);
+
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+        table.draw(data, {});
+      }
+    </script>
   </head>
   <body>
 
@@ -68,6 +91,6 @@
       });
     });
     </script>
-
+    <div id="table_div"></div>
   </body>
 </html>

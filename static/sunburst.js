@@ -12,13 +12,13 @@ var vis = d3.select("#chart").append("svg")
 var partition = d3.layout.partition()
     .sort(null)
     .size([2 * Math.PI, radius * radius])
-    .value(function(d) { return d.size; });
+    .value(function(d) {return d.size;});
 
 var arc = d3.svg.arc()
-    .startAngle(function(d) { return d.x; })
-    .endAngle(function(d) { return d.x + d.dx})
-    .innerRadius(function(d) { return Math.sqrt(d.y); })
-    .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+    .startAngle(function(d) {return d.x;})
+    .endAngle(function(d) {return d.x + d.dx;})
+    .innerRadius(function(d) {return Math.sqrt(d.y);})
+    .outerRadius(function(d) {return Math.sqrt(d.y + d.dy);});
 
 // Stash the old values for transition.
 function stash(d) {

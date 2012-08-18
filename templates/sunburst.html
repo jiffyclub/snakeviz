@@ -59,7 +59,7 @@
           .each(stash)
           .call(d3.helper.tooltip(function(d, i) {
             return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
-              d.cummulative + 's]';}));
+              d.cummulative.toPrecision(3) + 's]';}));
 
           // $('svg path').tipsy({
           //   gravity: $.fn.tipsy.autoWE,

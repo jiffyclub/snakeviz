@@ -51,14 +51,7 @@ class JSONHandler(handler.Handler):
 
         return json.dumps(d, indent=1)
 
-    def stats_to_tree_dict(self, d, node, parent=None, already_done=None):
-        if already_done is None:
-            already_done = {}
-        elif node in already_done:
-            return d
-
-        already_done[node] = True
-
+    def stats_to_tree_dict(self, d, node, parent=None, pdict=None):
         d['name'] = node.name
         d['filename'] = node.filename
         d['directory'] = node.directory
@@ -75,30 +68,28 @@ class JSONHandler(handler.Handler):
         if parent:
             if isinstance(parent, pstatsloader.PStatGroup):
                 if parent.cummulative:
-                    d['size'] = node.cummulative / parent.cummulative
+                    d['size'] = node.cummulative / parent.cummulative * pdict['size']
                 else:
                     d['size'] = 0
             else:
-                d['size'] = parent.child_cumulative_time(node)
+                d['size'] = parent.child_cumulative_time(node) * pdict['size']
         else:
-            d['size'] = 1
+            d['size'] = 1000
 
         if node.children:
             d['children'] = []
             for child in node.children:
-                d_child = self.stats_to_tree_dict({}, child, node, already_done)
-                if d_child:
-                    d['children'].append(d_child)
+                d['children'].append(self.stats_to_tree_dict({}, child, node, d))
 
             # make a "child" that represents the internal time of this function
             #print d['children']
-            children_size = sum([c['size'] for c in d['children']])
+            children_size = sum(c['size'] for c in d['children'])
             #assert children_size <= 1, 'Children size is unrealistically big! ' + str(children_size)
 
             d_internal = {'name': node.name,
                           'filename': node.filename,
                           'directory': node.directory,
-                          'size': 1. - children_size}
+                          'size': d['size'] - children_size}
 
             if isinstance(node, pstatsloader.PStatRow):
                 d_internal['calls'] = node.calls

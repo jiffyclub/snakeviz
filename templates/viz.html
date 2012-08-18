@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>d3.js ~ Sunburst</title>
+    <title>{{profile_name.split('.')[0]}}</title>
     <script src="http://d3js.org/d3.v2.min.js"></script>
     <script src="http://code.jquery.com/jquery.min.js"></script>
     <script src="/static/jquery.tipsy.js"></script>
@@ -37,7 +37,9 @@
   </head>
   <body>
 
-    <h1 id='sunburst'>Sunburst</h1>
+    <h1 id='sunburst'><a href="/">WSV</a>
+      <a href="/json/{{profile_name}}.json">JSON</a>
+    </h1>
     <div class='gallery' id='chart'>
       <button class='first' id='size'>
         Size

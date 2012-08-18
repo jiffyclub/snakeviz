@@ -22,4 +22,4 @@ class SunburstHandler(handler.Handler):
         rows = data[data_index:].split('\n')
         rows = [r.split() for r in rows]
 
-        self.render('sunburst.html', profile_name=profile_name, stats_rows=rows)
+        self.render('viz.html', profile_name=profile_name, stats_rows=rows)

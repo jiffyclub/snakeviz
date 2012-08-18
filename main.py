@@ -12,7 +12,7 @@ settings = {
 
 handlers = [(r'/', 'upload.UploadHandler'),
             (r'/json/(.*)\.json', 'upload.JSONHandler'),
-            (r'/sunburst/(.*)', 'viz.SunburstHandler')]
+            (r'/viz/(.*)', 'viz.SunburstHandler')]
 
 app = tornado.web.Application(handlers, **settings)
 

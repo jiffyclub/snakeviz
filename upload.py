@@ -34,7 +34,7 @@ class UploadHandler(handler.Handler):
             self.render('upload.html', error=error)
 
         else:
-            self.redirect('sunburst/' + filename)
+            self.redirect('viz/' + filename)
 
 
 class JSONHandler(handler.Handler):
@@ -79,7 +79,8 @@ class JSONHandler(handler.Handler):
         if node.children:
             d['children'] = []
             for child in node.children:
-                d['children'].append(self.stats_to_tree_dict({}, child, node, d))
+                if child is not node:
+                    d['children'].append(self.stats_to_tree_dict({}, child, node, d))
 
             # make a "child" that represents the internal time of this function
             #print d['children']

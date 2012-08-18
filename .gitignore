@@ -16,6 +16,9 @@ develop-eggs
 # Generated files
 websnakeviz/version.py
 
+# Editor files
+*.swp
+
 # Installer logs
 pip-log.txt
 

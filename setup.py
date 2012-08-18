@@ -32,5 +32,8 @@ setup(
         'websnakeviz': ['static/*.ico', 'static/*.js', 'static/*.css',
                         'templates/*.css']
     },
-    install_requires=['tornado>=2.0', 'jinja2>=2.0']
+    install_requires=['tornado>=2.0', 'jinja2>=2.0'],
+    entry_points={
+        'console_scripts': ['wsv = websnakeviz.cli:main']
+    }
 )

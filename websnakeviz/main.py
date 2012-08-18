@@ -10,9 +10,9 @@ settings = {
     'debug': True
 }
 
-handlers = [(r'/', 'upload.UploadHandler'),
-            (r'/json/(.*)\.json', 'upload.JSONHandler'),
-            (r'/viz/(.*)', 'viz.SunburstHandler')]
+handlers = [(r'/', 'websnakeviz.upload.UploadHandler'),
+            (r'/json/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
+            (r'/viz/(.*)', 'websnakeviz.viz.SunburstHandler')]
 
 app = tornado.web.Application(handlers, **settings)
 

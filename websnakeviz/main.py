@@ -7,11 +7,13 @@ import tornado.web
 
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), 'static'),
-    'debug': True
+    'debug': True,
+    'single_user_mode': False
 }
 
 handlers = [(r'/', 'websnakeviz.upload.UploadHandler'),
             (r'/json/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
+            (r'/viz/file/(.*)', 'websnakeviz.viz.SunburstHandler'),
             (r'/viz/(.*)', 'websnakeviz.viz.SunburstHandler')]
 
 app = tornado.web.Application(handlers, **settings)

@@ -1,6 +1,8 @@
 import optparse
 import os
 import sys
+import threading
+import webbrowser
 
 
 def main(argv=sys.argv[1:]):
@@ -15,6 +17,12 @@ def main(argv=sys.argv[1:]):
                       help='port to bind to; if this port is already in use a'
                            'free port will be selected automatically '
                            '(default: %default)')
+
+    parser.add_option('-b', '--browser', metavar='PATH',
+                      help="path to the web browser executable to use to open "
+                           "the visualization; uses the same default as "
+                           "Python's webbrowser module, which can also be "
+                           "overridden with the BROWSER environment variable")
 
     options, args = parser.parse_args(argv)
 
@@ -39,6 +47,11 @@ def main(argv=sys.argv[1:]):
         parser.error('invalid port number %d: use a port between 0 and 65535'
                      % port)
 
+    try:
+        browser = webbrowser.get(options.browser)
+    except webbrowser.Error as e:
+        parser.error('no web browser found: %s' % e)
+
     # Go ahead and import the tornado app and start it; we do an inline import
     # here to avoid the extra overhead when just running the cli for --help and
     # the like
@@ -46,9 +59,17 @@ def main(argv=sys.argv[1:]):
     import tornado.ioloop
 
     app.listen(8080, address=hostname)
+    app.settings['single_user_mode'] = True
 
     print ('wsv web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port))
+
+    # Launce the browser in a separate thread to avoid blocking the ioloop from
+    # starting
+    # TODO: Fix filename handling on Windows at some point
+    bt = lambda: browser.open('http://%s:%d/viz/file%s' %
+                              (hostname, port, filename), new=2)
+    threading.Thread(target=bt).start()
 
     try:
         tornado.ioloop.IOLoop.instance().start()

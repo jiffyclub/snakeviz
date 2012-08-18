@@ -29,7 +29,7 @@ class UploadHandler(handler.Handler):
 
         except:
             os.remove(sfilename)
-            error = 'There was an error parsing {} with pstats.'
+            error = 'There was an error parsing {0} with pstats.'
             error = error.format(filename)
             self.render('upload.html', error=error)
 
@@ -51,7 +51,11 @@ class JSONHandler(handler.Handler):
 
         return json.dumps(d, indent=1)
 
-    def stats_to_tree_dict(self, d, node, parent=None, pdict=None):
+    def stats_to_tree_dict(self, d, node, parent=None, pdict=None, seen=None):
+        if seen is None:
+            seen = set()
+        seen.add(node)
+
         d['name'] = node.name
         d['filename'] = node.filename
         d['directory'] = node.directory
@@ -79,28 +83,34 @@ class JSONHandler(handler.Handler):
         if node.children:
             d['children'] = []
             for child in node.children:
-                if child is not node:
-                    d['children'].append(self.stats_to_tree_dict({}, child, node, d))
+                if child not in seen:
+                    d['children'].append(self.stats_to_tree_dict({}, child,
+                        node, d, seen))
 
-            # make a "child" that represents the internal time of this function
-            #print d['children']
-            children_size = sum(c['size'] for c in d['children'])
-            #assert children_size <= 1, 'Children size is unrealistically big! ' + str(children_size)
+            if d['children']:
+                # make a "child" that represents the internal time of this function
+                #print d['children']
+                children_size = sum(c['size'] for c in d['children'])
+                #assert children_size <= d['size'], 'Children size is unrealistically big! ' + str(children_size)
 
-            d_internal = {'name': node.name,
-                          'filename': node.filename,
-                          'directory': node.directory,
-                          'size': d['size'] - children_size}
+                d_internal = {'name': node.name,
+                              'filename': node.filename,
+                              'directory': node.directory,
+                              'size': d['size'] - children_size}
 
-            if isinstance(node, pstatsloader.PStatRow):
-                d_internal['calls'] = node.calls
-                d_internal['recursive'] = node.recursive
-                d_internal['local'] = node.local
-                d_internal['localPer'] = node.localPer
-                d_internal['cummulative'] = node.cummulative
-                d_internal['cummulativePer'] = node.cummulativePer
-                d_internal['line_number'] = node.lineno
+                if isinstance(node, pstatsloader.PStatRow):
+                    d_internal['calls'] = node.calls
+                    d_internal['recursive'] = node.recursive
+                    d_internal['local'] = node.local
+                    d_internal['localPer'] = node.localPer
+                    d_internal['cummulative'] = node.cummulative
+                    d_internal['cummulativePer'] = node.cummulativePer
+                    d_internal['line_number'] = node.lineno
 
-            d['children'].append(d_internal)
+                d['children'].append(d_internal)
+            else:
+                del d['children']
+
+        seen.remove(node)
 
         return d

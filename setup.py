@@ -17,7 +17,7 @@ VERSION = '0.1.dev'
 
 # Create a simple version.py module; less trouble than hard-coding the version
 with open(os.path.join('websnakeviz', 'version.py'), 'w') as f:
-    f.write('__version__ = %s' % VERSION)
+    f.write('__version__ = %r' % VERSION)
 
 
 setup(

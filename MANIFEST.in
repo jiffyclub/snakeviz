@@ -1,0 +1,3 @@
+include *.rst
+recursive-include websnakeviz/static *.ico *.css *.js
+recursive-include websnakeviz/templates *.html

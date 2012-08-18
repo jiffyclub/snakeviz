@@ -13,6 +13,9 @@ sdist
 develop-eggs
 .installed.cfg
 
+# Generated files
+websnakeviz/version.py
+
 # Installer logs
 pip-log.txt
 

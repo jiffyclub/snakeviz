@@ -60,7 +60,7 @@
           .style("fill", function(d) {
             return color(d.name + d.filename + d.directory + d.line_number); })
           .each(stash)
-          .call(d3.helper.tooltip(function(d, i) {
+          .call(d3helpertooltip(function(d, i) {
             return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
               d.cummulative.toPrecision(3) + 's]';}));
 

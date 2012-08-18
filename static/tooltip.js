@@ -1,6 +1,4 @@
-d3.helper = {};
-
-d3.helper.tooltip = function(accessor){
+d3helpertooltip = function(accessor){
     return function(selection){
         var tooltipDiv;
         var bodyNode = d3.select('body').node();

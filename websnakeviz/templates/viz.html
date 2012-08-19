@@ -3,14 +3,12 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{{profile_name.split('.')[0]}}</title>
+    <title>{{profile_name.split('/')[-1].split('.')[0]}}</title>
     <script src="http://d3js.org/d3.v2.min.js"></script>
-    <script src="http://code.jquery.com/jquery.min.js"></script>
-    <script src="/static/jquery.tipsy.js"></script>
+    <!-- Mouse-over tooltip -->
     <script src="/static/tooltip.js"></script>
-    <link href="/static/tipsy.css" rel="stylesheet">
     <link href="/static/tooltip.css" rel="stylesheet">
-
+    <!-- Stats table. -->
     <script src='https://www.google.com/jsapi'></script>
     <script>
       google.load('visualization', '1', {packages:['table']});
@@ -24,19 +22,21 @@
         data.addColumn('number', 'percall');
         data.addColumn('string', 'filename:lineno(function)')
         data.addRows([
-          {% for row in stats_rows %}
+          {% for row in stats_rows -%}
             [{v: {{row[0].split('/')[0]}}, f: "{{row[0]}}"},
-            {{', '.join(row[1:5])}}, "{{' '.join(row[5:])|safe}}"],
-          {% endfor %}
+            {{row[1:5]|join(', ')}}, "{{row[5:]|join(' ')|safe}}"],
+          {%- endfor %}
         ]);
-
         var table = new google.visualization.Table(document.getElementById('table_div'));
         table.draw(data, {});
       }
     </script>
+    <!-- Global variable with the profile name. -->
+    <script>
+      profile_name = '{{profile_name}}';
+    </script>
   </head>
   <body>
-
     <h1 id='sunburst'><a href="/">WSV</a>
       <a href="/json/{{profile_name}}.json">JSON</a>
     </h1>
@@ -48,54 +48,6 @@
       </button><p>
     </div>
     <script src='/static/sunburst.js'> </script>
-    <script>
-    d3.json("/json/{{profile_name}}.json", function(json) {
-      var path = vis.data([json]).selectAll("path")
-          .data(partition.nodes)
-          .enter().append("path")
-          // .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
-          .attr("d", arc)
-          .attr("fill-rule", "evenodd")
-          .style("stroke", "#fff")
-          .style("fill", function(d) {
-            return color(d.name + d.filename + d.directory + d.line_number); })
-          .each(stash)
-          .call(d3helpertooltip(function(d, i) {
-            return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
-              d.cummulative.toPrecision(3) + 's]';}));
-
-          // $('svg path').tipsy({
-          //   gravity: $.fn.tipsy.autoWE,
-          //   html: false,
-          //   title: function() {
-          //     var d = this.__data__;
-          //     return d.filename + ':' + d.line_number + ' (' + d.name + ')';
-          //   }
-          // });
-
-      d3.select("#size").on("click", function() {
-        path
-          .data(partition.value(function(d) { return d.size; }))
-          .transition()
-          .duration(1500)
-          .attrTween("d", arcTween);
-
-        d3.select("#size").classed("active", true);
-        d3.select("#count").classed("active", false);
-      });
-
-      d3.select("#count").on("click", function() {
-        path
-          .data(partition.value(function(d) { return 1; }))
-          .transition()
-          .duration(1500)
-          .attrTween("d", arcTween);
-
-        d3.select("#size").classed("active", false);
-        d3.select("#count").classed("active", true);
-      });
-    });
-    </script>
     <br>
     <div id="table_div"></div>
   </body>

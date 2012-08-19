@@ -20,6 +20,45 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) {return Math.sqrt(d.y);})
     .outerRadius(function(d) {return Math.sqrt(d.y + d.dy);});
 
+
+d3.json('/json/' + profile_name + '.json', function(json) {
+  var path = vis.data([json]).selectAll("path")
+      .data(partition.nodes)
+      .enter().append("path")
+      // .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
+      .attr("d", arc)
+      .attr("fill-rule", "evenodd")
+      .style("stroke", "#fff")
+      .style("fill", function(d) {
+        return color(d.name + d.filename + d.directory + d.line_number); })
+      .each(stash)
+      .call(d3helpertooltip(function(d, i) {
+        return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
+          d.cummulative.toPrecision(3) + 's]';}));
+
+  d3.select("#size").on("click", function() {
+    path
+      .data(partition.value(function(d) { return d.size; }))
+      .transition()
+      .duration(1500)
+      .attrTween("d", arcTween);
+
+    d3.select("#size").classed("active", true);
+    d3.select("#count").classed("active", false);
+  });
+
+  d3.select("#count").on("click", function() {
+    path
+      .data(partition.value(function(d) { return 1; }))
+      .transition()
+      .duration(1500)
+      .attrTween("d", arcTween);
+
+    d3.select("#size").classed("active", false);
+    d3.select("#count").classed("active", true);
+  });
+});
+
 // Stash the old values for transition.
 function stash(d) {
   d.x0 = d.x;

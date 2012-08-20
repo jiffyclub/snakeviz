@@ -29,7 +29,7 @@ d3helpertooltip = function(accessor){
                        d.filename == thisfilename &
                        d.directory == thisdirectory &
                        d.line_number == thislinenumber;})
-            var thiscolor = d3.rgb(color(d.name + d.filename + d.directory + d.line_number)).darker(1);
+            var thiscolor = d3.rgb(color(d)).darker(1);
             thispath.style('fill', thiscolor.toString());
         })
         .on('mousemove', function(d, i) {
@@ -54,7 +54,7 @@ d3helpertooltip = function(accessor){
                        d.filename == thisfilename &
                        d.directory == thisdirectory &
                        d.line_number == thislinenumber;})
-            thispath.style('fill', color(d.name + d.filename + d.directory + d.line_number))
+            thispath.style('fill', color(d))
         });
 
     };

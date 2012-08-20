@@ -1,10 +1,10 @@
 // Copied from http://www.jasondavies.com/coffee-wheel/
-var w = 840,
+var w = 900,
     h = w,
     r = w / 2,
     x = d3.scale.linear().range([0, 2 * Math.PI]),
     y = d3.scale.pow().exponent(1).domain([0, 1]).range([0, r]),
-    p = 5,
+    p = 0,
     scale = d3.scale.category20c(),
     duration = 1000;
 

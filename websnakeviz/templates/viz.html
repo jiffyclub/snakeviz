@@ -4,10 +4,28 @@
   <head>
     <meta charset="utf-8">
     <title>{{profile_name.split('/')[-1].split('.')[0]}}</title>
+
+    <!-- bootstrap stuff -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        padding-bottom: 10px;
+      }
+    </style>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Load d3 -->
     <script src="http://d3js.org/d3.v2.min.js"></script>
+
     <!-- Mouse-over tooltip -->
     <script src="/static/tooltip/tooltip.js"></script>
     <link href="/static/tooltip/tooltip.css" rel="stylesheet">
+
     <!-- Stats table. -->
     <script src='https://www.google.com/jsapi'></script>
     <script>
@@ -31,18 +49,53 @@
         table.draw(data, {});
       }
     </script>
+
     <!-- Global variable with the profile name. -->
     <script>
       profile_name = '{{profile_name}}';
     </script>
   </head>
+
   <body>
-    <h1 id='sunburst'><a href="/">WSV</a>
-      <a href="/json/{{profile_name}}.json">JSON</a>
-    </h1>
-    <div class='gallery' id='chart'></div>
-    <script src='/static/viz/wheel.js'> </script>
-    <br>
-    <div id="table_div"></div>
+    <!-- Navbar -->
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">WebSnakeViz</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="dropdown" id="vizmenu">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#vizmenu">
+                  Viz Type
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Sunburst</a></li>
+                </ul>
+              <li><a href="/json/{{profile_name}}.json">JSON</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Everything else -->
+    <div class="container">
+      <div class='gallery' id='chart'></div>
+      <script src='/static/viz/wheel.js'> </script>
+      <br>
+      <div id="table_div"></div>
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
   </body>
 </html>

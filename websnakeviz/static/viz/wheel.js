@@ -16,10 +16,6 @@ var vis = div.append("svg")
     .append("g")
     .attr("transform", "translate(" + (r + p) + "," + (r + p) + ")");
 
-div.append("p")
-    .attr("id", "intro")
-    .text("Click to zoom!");
-
 var partition = d3.layout.partition()
     .sort(null)
     .value(function(d) { return d.size; });

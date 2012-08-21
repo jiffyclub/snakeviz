@@ -39,78 +39,94 @@ class UploadHandler(handler.Handler):
 
 class JSONHandler(handler.Handler):
     def get(self, prof_name):
-        s = self.prof_to_json(storage_name(prof_name))
+        s = prof_to_json(storage_name(prof_name))
 
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.write(s)
 
-    def prof_to_json(self, prof_name):
-        loader = pstatsloader.PStatsLoader(prof_name)
+def prof_to_json(prof_name):
+    loader = pstatsloader.PStatsLoader(prof_name)
 
-        d = self.stats_to_tree_dict({}, loader.tree.children[0])
+    d = stats_to_tree_dict(loader.tree.children[0])
 
-        return json.dumps(d, indent=1)
+    return json.dumps(d, indent=1)
 
-    def stats_to_tree_dict(self, d, node, parent=None, pdict=None, seen=None):
-        if seen is None:
-            seen = set()
-        seen.add(node)
+def stats_to_tree_dict(node, parent=None, parent_size=None,
+                       recursive_seen=None, visited=None):
+    # recursive_seen prevents us from repeatedly traversing
+    # recursive structures. only want to show the first set.
+    if recursive_seen is None:
+        recursive_seen = set()
 
-        d['name'] = node.name
-        d['filename'] = node.filename
-        d['directory'] = node.directory
+    if visited is None:
+        visited = {}
 
-        if isinstance(node, pstatsloader.PStatRow):
-            d['calls'] = node.calls
-            d['recursive'] = node.recursive
-            d['local'] = node.local
-            d['localPer'] = node.localPer
-            d['cummulative'] = node.cummulative
-            d['cummulativePer'] = node.cummulativePer
-            d['line_number'] = node.lineno
+    d = {}
 
-        if parent:
-            if isinstance(parent, pstatsloader.PStatGroup):
-                if parent.cummulative:
-                    d['size'] = node.cummulative / parent.cummulative * pdict['size']
-                else:
-                    d['size'] = 0
+    d['name'] = node.name
+    d['filename'] = node.filename
+    d['directory'] = node.directory
+
+    if isinstance(node, pstatsloader.PStatRow):
+        d['calls'] = node.calls
+        d['recursive'] = node.recursive
+        d['local'] = node.local
+        d['localPer'] = node.localPer
+        d['cummulative'] = node.cummulative
+        d['cummulativePer'] = node.cummulativePer
+        d['line_number'] = node.lineno
+
+        if node.recursive:
+            recursive_seen.add(node)
+
+    if parent:
+        if isinstance(parent, pstatsloader.PStatGroup):
+            if parent.cummulative:
+                d['size'] = node.cummulative / parent.cummulative * parent_size
             else:
-                d['size'] = parent.child_cumulative_time(node) * pdict['size']
+                d['size'] = 0
         else:
-            d['size'] = 1000
+            d['size'] = parent.child_cumulative_time(node) * parent_size
+    else:
+        d['size'] = 1000
 
-        if node.children:
-            d['children'] = []
-            for child in node.children:
-                if child not in seen:
-                    d['children'].append(self.stats_to_tree_dict({}, child,
-                        node, d, seen))
+    if node.children:
+        d['children'] = []
+        for child in node.children:
+            if child not in recursive_seen:
+                if child.key in visited:
+                    d['children'].append(visited[child.key])
+                else:
+                    child_dict = stats_to_tree_dict(child, node, d['size'],
+                                                    recursive_seen, visited)
+                    d['children'].append(child_dict)
+                    visited[child.key] = child_dict
 
-            if d['children']:
-                # make a "child" that represents the internal time of this function
-                #print d['children']
-                children_size = sum(c['size'] for c in d['children'])
-                #assert children_size <= d['size'], 'Children size is unrealistically big! ' + str(children_size)
+        if d['children']:
+            # make a "child" that represents the internal time of this function
+            #print d['children']
+            children_size = sum(c['size'] for c in d['children'])
+            #assert children_size <= d['size'], 'Children size is unrealistically big! ' + str(children_size)
 
-                d_internal = {'name': node.name,
-                              'filename': node.filename,
-                              'directory': node.directory,
-                              'size': d['size'] - children_size}
+            d_internal = {'name': node.name,
+                          'filename': node.filename,
+                          'directory': node.directory,
+                          'size': d['size'] - children_size}
 
-                if isinstance(node, pstatsloader.PStatRow):
-                    d_internal['calls'] = node.calls
-                    d_internal['recursive'] = node.recursive
-                    d_internal['local'] = node.local
-                    d_internal['localPer'] = node.localPer
-                    d_internal['cummulative'] = node.cummulative
-                    d_internal['cummulativePer'] = node.cummulativePer
-                    d_internal['line_number'] = node.lineno
+            if isinstance(node, pstatsloader.PStatRow):
+                d_internal['calls'] = node.calls
+                d_internal['recursive'] = node.recursive
+                d_internal['local'] = node.local
+                d_internal['localPer'] = node.localPer
+                d_internal['cummulative'] = node.cummulative
+                d_internal['cummulativePer'] = node.cummulativePer
+                d_internal['line_number'] = node.lineno
 
-                d['children'].append(d_internal)
-            else:
-                del d['children']
+            d['children'].append(d_internal)
+        else:
+            del d['children']
 
-        seen.remove(node)
+    if node in recursive_seen:
+        recursive_seen.remove(node)
 
-        return d
+    return d

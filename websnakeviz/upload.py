@@ -76,7 +76,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         d['cummulativePer'] = node.cummulativePer
         d['line_number'] = node.lineno
 
-        if node.recursive:
+        if node.recursive > node.calls:
             recursive_seen.add(node)
 
     if parent:
@@ -104,9 +104,9 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
 
         if d['children']:
             # make a "child" that represents the internal time of this function
-            #print d['children']
             children_size = sum(c['size'] for c in d['children'])
-            #assert children_size <= d['size'], 'Children size is unrealistically big! ' + str(children_size)
+            # if parent:
+            #     assert children_size <= parent_size, 'Children size is unrealistically big! ' + str(children_size)
 
             d_internal = {'name': node.name,
                           'filename': node.filename,

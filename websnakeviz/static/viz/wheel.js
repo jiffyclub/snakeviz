@@ -26,10 +26,9 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.max(0, d.y ? y(d.y) : d.y); })
     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
-d3.json('/json/' + profile_name + '.json', function(json) {
-  var nodes = partition.nodes({children: json});
-
-  var path = vis.data([json]).selectAll("path").data(partition.nodes)
+function draw_sunburst(json) {
+  sunburst_json = json;
+  var path = vis.data([json]).selectAll("path").data(partition.nodes);
   path.enter().append("path")
       .attr("id", function(d, i) { return "path-" + i; })
       .attr("d", arc)
@@ -43,8 +42,25 @@ d3.json('/json/' + profile_name + '.json', function(json) {
     path.transition()
       .duration(duration)
       .attrTween("d", arcTween(d));
+    // Activate the reset button if we aren't already at the root node
+    // And deactivate it if this is the root node
+    if (d.depth != 0) {
+      d3.select('#resetbutton').node().removeAttribute('disabled');
+    } else {
+      d3.select('#resetbutton').property('disabled', 'True');
+    };
   }
-});
+}
+d3.json('/json/' + profile_name + '.json', draw_sunburst);
+
+function reset_viz() {
+  var path = vis.selectAll("path");
+  path.transition()
+      .duration(duration)
+      .attrTween("d", arcTween(sunburst_json));
+  d3.select('#resetbutton').property('disabled', 'True');
+}
+d3.select('#resetbutton').on('click', reset_viz);
 
 function isParentOf(p, c) {
   if (p === c) return true;

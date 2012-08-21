@@ -29,8 +29,14 @@ setup(
 
     packages=['websnakeviz'],
     package_data={
-        'websnakeviz': ['static/*.ico', 'static/*.js', 'static/*.css',
-                        'templates/*.css']
+        'websnakeviz': ['static/*.ico',
+                        'static/bootstrap/js/*.js',
+                        'static/bootstrap/css/*.css',
+                        'static/tooltip/js/*.js',
+                        'static/tooltip/css/*.css',
+                        'static/viz/js/*.js',
+                        'static/viz/css/*.css',
+                        'templates/*.html']
     },
     install_requires=['tornado>=2.0', 'jinja2>=2.0'],
     entry_points={

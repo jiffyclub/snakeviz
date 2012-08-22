@@ -1,16 +1,56 @@
 import os
-import pstats
-import StringIO
+from collections import namedtuple
 
+from . import pstatsloader
 from . import handler
 from . import upload
 
-class SunburstHandler(handler.Handler):
-    def get(self, profile_name):
-        # get the print_stats output from pstats
-        # sorted with most cumulative time at the top
-        stats_stream = StringIO.StringIO()
 
+StatsRow = namedtuple('StatsRow', ['calls_value', 'calls_str',
+                                   'tottime', 'tottime_str',
+                                   'tottime_percall', 'tottime_percall_str',
+                                   'cumtime', 'cumtime_str',
+                                   'cumtime_percall', 'cumtime_percall_str',
+                                   'file_line_func'])
+
+
+def stats_rows(filename):
+    time_fmt = '{0:>12.6g}'
+
+    loader = pstatsloader.PStatsLoader(filename)
+
+    rows = []
+
+    for r in loader.rows.itervalues():
+        if isinstance(r, pstatsloader.PStatRow):
+            calls_value = r.recursive
+            if r.recursive > r.calls:
+                calls_str = '{0}/{1}'.format(r.recursive, r.calls)
+            else:
+                calls_str = str(r.calls)
+            tottime = r.local
+            tottime_str = time_fmt.format(tottime)
+            tottime_percall = r.localPer
+            tottime_percall_str = time_fmt.format(tottime_percall)
+            cumtime = r.cummulative
+            cumtime_str = time_fmt.format(cumtime)
+            cumtime_percall = r.cummulativePer
+            cumtime_percall_str = time_fmt.format(cumtime_percall)
+            file_line_func = '{0}:{1}({2})'.format(r.filename,
+                                                   r.lineno,
+                                                   r.name)
+            rows.append(StatsRow(calls_value, calls_str,
+                                 tottime, tottime_str,
+                                 tottime_percall, tottime_percall_str,
+                                 cumtime, cumtime_str,
+                                 cumtime_percall, cumtime_percall_str,
+                                 file_line_func))
+
+    return rows
+
+
+class VizHandler(handler.Handler):
+    def get(self, profile_name):
         if self.request.path.startswith('/viz/file/'):
             if self.settings['single_user_mode']:
                 # Allow opening arbitrary files by full filesystem path
@@ -25,16 +65,7 @@ class SunburstHandler(handler.Handler):
         else:
             filename = upload.storage_name(profile_name)
 
-        stats = pstats.Stats(filename, stream=stats_stream)
-        stats.strip_dirs()
-        stats.sort_stats('cum').print_stats()
-
-        # get just the table rows, none of the header or footer
-        data = stats_stream.getvalue().strip()
-        key_str = 'filename:lineno(function)\n'
-        data_index = data.find(key_str) + len(key_str)
-
-        rows = data[data_index:].split('\n')
-        rows = [r.split() for r in rows]
+        rows = stats_rows(filename)
+        rows.sort(key=lambda r: r.tottime, reverse=True)
 
         self.render('viz.html', profile_name=profile_name, stats_rows=rows)

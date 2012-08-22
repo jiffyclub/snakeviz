@@ -41,8 +41,12 @@
         data.addColumn('string', 'filename:lineno(function)')
         data.addRows([
           {% for row in stats_rows -%}
-            [{v: {{row[0].split('/')[0]}}, f: "{{row[0]}}"},
-            {{row[1:5]|join(', ')}}, "{{row[5:]|join(' ')|safe}}"],
+            [{v: {{row.calls_value}}, f: "{{row.calls_str}}"},
+             {v: {{row.tottime}}, f: "{{row.tottime_str}}"},
+             {v: {{row.tottime_percall}}, f: "{{row.tottime_percall_str}}"},
+             {v: {{row.cumtime}}, f: "{{row.cumtime_str}}"},
+             {v: {{row.cumtime_percall}}, f: "{{row.cumtime_percall_str}}"},
+             "{{row.file_line_func|safe}}"],
           {%- endfor %}
         ]);
         var table = new google.visualization.Table(document.getElementById('table_div'));

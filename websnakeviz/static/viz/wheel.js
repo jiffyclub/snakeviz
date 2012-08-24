@@ -1,5 +1,5 @@
 // Copied, then modified, from http://www.jasondavies.com/coffee-wheel/
-var w = 900,
+var w = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     h = w,
     r = w / 2,
     x = d3.scale.linear().range([0, 2 * Math.PI]),

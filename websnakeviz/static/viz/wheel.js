@@ -26,8 +26,8 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.max(0, d.y ? y(d.y) : d.y); })
     .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
-function draw_sunburst(json) {
-  sunburst_json = json;
+var drawSunburst = function drawSunburst(json) {
+  sunburstJSON = json;
   var path = vis.data([json]).selectAll("path").data(partition.nodes);
   path.enter().append("path")
       .attr("id", function(d, i) { return "path-" + i; })
@@ -36,7 +36,7 @@ function draw_sunburst(json) {
       .style("fill", color)
       .style("stroke", "#fff")
       .on("click", click)
-      .call(d3helpertooltip(tooltip_text));
+      .call(d3helpertooltip(tooltipText));
 
   function click(d) {
     path.transition()
@@ -51,32 +51,22 @@ function draw_sunburst(json) {
     };
   }
 }
-d3.json('/json/' + profile_name + '.json', draw_sunburst);
+d3.json('/json/' + profile_name + '.json', drawSunburst);
 
-function reset_viz() {
+var resetViz = function resetViz() {
   var path = vis.selectAll("path");
   path.transition()
       .duration(duration)
-      .attrTween("d", arcTween(sunburst_json));
+      .attrTween("d", arcTween(sunburstJSON));
   d3.select('#resetbutton').property('disabled', 'True');
 }
-d3.select('#resetbutton').on('click', reset_viz);
+d3.select('#resetbutton').on('click', resetViz);
 
-function isParentOf(p, c) {
-  if (p === c) return true;
-  if (p.children) {
-    return p.children.some(function(d) {
-      return isParentOf(d, c);
-    });
-  }
-  return false;
-}
-
-function color(d) {
+var color = function color(d) {
   return scale(d.name + d.filename + d.directory + d.line_number);
 }
 
-function tooltip_text(d, i) {
+var tooltipText = function tooltipText(d, i) {
   return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
          d.cummulative.toPrecision(3) + 's]';
 }

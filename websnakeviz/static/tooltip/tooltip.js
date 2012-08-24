@@ -1,3 +1,19 @@
+var tooltipPosition = function tooltipPosition(mousePos, tooltipDiv) {
+    var w = window.innerWidth,
+        mx = mousePos[0],
+        my = mousePos[1];
+
+    tooltipDiv.style('top', (my - 15) + 'px');
+
+    if (mx < w / 2) {
+        tooltipDiv.style('right', null);
+        tooltipDiv.style('left', (mx + 10) + 'px');
+    } else {
+        tooltipDiv.style('left', null);
+        tooltipDiv.style('right', (w - mx - 10) + 'px');
+    };
+}
+
 d3helpertooltip = function(accessor){
     return function(selection){
         var tooltipDiv;
@@ -7,15 +23,15 @@ d3helpertooltip = function(accessor){
             d3.select('body').selectAll('div.tooltip').remove();
             // Append tooltip
             tooltipDiv = d3.select('body').append('div').attr('class', 'viztooltip');
-            var absoluteMousePos = d3.mouse(bodyNode);
-            tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
-                .style('top', (absoluteMousePos[1] - 15)+'px')
-                .style('position', 'absolute')
+            tooltipDiv.style('position', 'absolute')
                 .style('z-index', 1001);
+            var absoluteMousePos = d3.mouse(bodyNode);
+            tooltipPosition(absoluteMousePos, tooltipDiv);
             // Add text using the accessor function
             var tooltipText = accessor(d, i) || '';
             // Crop text arbitrarily
-            tooltipDiv.style('width', function(d, i){return (tooltipText.length > 80) ? '300px' : null;})
+            tooltipDiv.style('width', function(d, i) {
+                return (tooltipText.length > 80) ? '300px' : null;})
                 .text(tooltipText);
 
             // select all the nodes that represent this exact function
@@ -35,8 +51,7 @@ d3helpertooltip = function(accessor){
         .on('mousemove', function(d, i) {
             // Move tooltip
             var absoluteMousePos = d3.mouse(bodyNode);
-            tooltipDiv.style('left', (absoluteMousePos[0] + 10)+'px')
-                .style('top', (absoluteMousePos[1] - 15)+'px');
+            tooltipPosition(absoluteMousePos, tooltipDiv);
             var tooltipText = accessor(d, i) || '';
             tooltipDiv.text(tooltipText);
         })

@@ -1,4 +1,4 @@
-// Copied from http://www.jasondavies.com/coffee-wheel/
+// Copied, then modified, from http://www.jasondavies.com/coffee-wheel/
 var w = 900,
     h = w,
     r = w / 2,

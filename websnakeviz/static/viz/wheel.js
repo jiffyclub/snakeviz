@@ -13,6 +13,9 @@ var div = d3.select("#chart");
 var vis = div.append("svg")
     .attr("width", w + p * 2)
     .attr("height", h + p * 2)
+    .style('display', 'block')
+    .style('margin-left', 'auto')
+    .style('margin-right', 'auto')
     .append("g")
     .attr("transform", "translate(" + (r + p) + "," + (r + p) + ")");
 
@@ -28,6 +31,8 @@ var arc = d3.svg.arc()
 
 var drawSunburst = function drawSunburst(json) {
   sunburstJSON = json;
+  // remove loading bar
+  d3.select('#loadingdiv').remove();
   var path = vis.data([json]).selectAll("path").data(partition.nodes);
   path.enter().append("path")
       .attr("id", function(d, i) { return "path-" + i; })

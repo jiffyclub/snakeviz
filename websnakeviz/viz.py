@@ -59,13 +59,16 @@ class VizHandler(handler.Handler):
                 if profile_name[0] != '/':
                     profile_name = '/' + profile_name
                 filename = os.path.abspath(profile_name)
+                json_path = '/json/file%s.json' % profile_name
             else:
                 # TODO: Raise a 404 error here
                 pass
         else:
             filename = upload.storage_name(profile_name)
+            json_path = '/json/%s.json' % filename
 
         rows = stats_rows(filename)
         rows.sort(key=lambda r: r.tottime, reverse=True)
 
-        self.render('viz.html', profile_name=profile_name, stats_rows=rows)
+        self.render('viz.html', profile_name=profile_name, json_path=json_path,
+                    stats_rows=rows)

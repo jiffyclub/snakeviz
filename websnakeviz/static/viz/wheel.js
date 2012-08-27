@@ -56,7 +56,7 @@ var drawSunburst = function drawSunburst(json) {
     };
   }
 }
-d3.json('/json/' + profile_name + '.json', drawSunburst);
+d3.json(wsv_json_path, drawSunburst);
 
 var resetViz = function resetViz() {
   var path = vis.selectAll("path");

@@ -39,7 +39,18 @@ class UploadHandler(handler.Handler):
 
 class JSONHandler(handler.Handler):
     def get(self, prof_name):
-        s = prof_to_json(storage_name(prof_name))
+        if self.request.path.startswith('/json/file/'):
+            if self.settings['single_user_mode']:
+                if prof_name[0] != '/':
+                    prof_name = '/' + prof_name
+                filename = os.path.abspath(prof_name)
+            else:
+                # TODO: Raise a 404 error here
+                pass
+        else:
+            filename = storage_name(prof_name)
+
+        s = prof_to_json(filename)
 
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.write(s)

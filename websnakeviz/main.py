@@ -12,6 +12,7 @@ settings = {
 }
 
 handlers = [(r'/', 'websnakeviz.upload.UploadHandler'),
+            (r'/json/file/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
             (r'/json/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
             (r'/viz/file/(.*)', 'websnakeviz.viz.VizHandler'),
             (r'/viz/(.*)', 'websnakeviz.viz.VizHandler')]

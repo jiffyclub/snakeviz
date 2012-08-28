@@ -55,6 +55,7 @@ class JSONHandler(handler.Handler):
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.write(s)
 
+
 def prof_to_json(prof_name):
     loader = pstatsloader.PStatsLoader(prof_name)
 
@@ -62,15 +63,13 @@ def prof_to_json(prof_name):
 
     return json.dumps(d, indent=1)
 
+
 def stats_to_tree_dict(node, parent=None, parent_size=None,
-                       recursive_seen=None, visited=None):
+                       recursive_seen=None):
     # recursive_seen prevents us from repeatedly traversing
     # recursive structures. only want to show the first set.
     if recursive_seen is None:
         recursive_seen = set()
-
-    if visited is None:
-        visited = {}
 
     d = {}
 
@@ -105,19 +104,15 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         d['children'] = []
         for child in node.children:
             if child not in recursive_seen:
-                if child.key in visited:
-                    d['children'].append(visited[child.key])
-                else:
-                    child_dict = stats_to_tree_dict(child, node, d['size'],
-                                                    recursive_seen, visited)
-                    d['children'].append(child_dict)
-                    visited[child.key] = child_dict
+                child_dict = stats_to_tree_dict(child, node, d['size'],
+                                                recursive_seen)
+                d['children'].append(child_dict)
 
         if d['children']:
             # make a "child" that represents the internal time of this function
             children_size = sum(c['size'] for c in d['children'])
-            # if parent:
-            #     assert children_size <= parent_size, 'Children size is unrealistically big! ' + str(children_size)
+            if parent:
+                assert children_size <= parent_size, 'Children size is unrealistically big! ' + str(children_size)
 
             d_internal = {'name': node.name,
                           'filename': node.filename,

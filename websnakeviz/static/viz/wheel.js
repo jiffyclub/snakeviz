@@ -11,6 +11,7 @@ var w = 0.8 * Math.min(window.innerHeight, window.innerWidth),
 var div = d3.select("#chart");
 
 var vis = div.append("svg")
+    .attr('id', 'sunburstsvg')
     .attr("width", w + p * 2)
     .attr("height", h + p * 2)
     .style('display', 'block')
@@ -56,7 +57,47 @@ var drawSunburst = function drawSunburst(json) {
     };
   }
 }
-d3.json(wsv_json_path, drawSunburst);
+
+var JSONErrorCallback = function JSONCallback() {
+  //remove reset button and svg
+  d3.select('#resetbutton').remove();
+  d3.select('#sunburstsvg').remove();
+
+  // add error div
+  var errdiv = d3.select('#chart').append('div')
+                 .attr('id', 'jsonerrordiv')
+                 .classed('alert', true)
+                 .classed('alert-error', true)
+                 .classed('alert-block', true);
+
+  // add the close button
+  errdiv.append('button')
+    .attr('type', 'button')
+    .attr('data-dismiss', 'alert')
+    .classed('close', true)
+    .html('<i class="icon-remove"></i>');
+
+  // add a heading to the error
+  errdiv.append('h4')
+    .classed('alert-heading', true)
+    .html('Error Loading Profile');
+
+  // add friendly text to the error message
+  errdiv.append('p')
+    .html('<br>Sorry, we were not able to load this profile! ' +
+          'You can try profiling a smaller portion of your code. ' +
+          'The statistics table below might help you narrow down ' +
+          'which portion of your code to focus on.');
+}
+
+var JSONCallback = function JSONCallback(json) {
+  if (json) {
+    drawSunburst(json);
+  } else {
+    JSONErrorCallback();
+  };
+}
+d3.json(wsv_json_path, JSONCallback);
 
 var resetViz = function resetViz() {
   var path = vis.selectAll("path");

@@ -59,8 +59,9 @@ var drawSunburst = function drawSunburst(json) {
 }
 
 var JSONErrorCallback = function JSONCallback() {
-  //remove reset button and svg
+  //remove reset button, loading bar, and svg
   d3.select('#resetbutton').remove();
+  d3.select('#loadingdiv').remove();
   d3.select('#sunburstsvg').remove();
 
   // add error div

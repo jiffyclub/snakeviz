@@ -6,6 +6,9 @@ from . import handler
 from . import upload
 
 
+# a structure to represent all of the profile data on a particular function
+# the viz.html template is expecting a list of these so it can build its
+# stats table.
 StatsRow = namedtuple('StatsRow', ['calls_value', 'calls_str',
                                    'tottime', 'tottime_str',
                                    'tottime_percall', 'tottime_percall_str',
@@ -68,7 +71,6 @@ class VizHandler(handler.Handler):
             json_path = '/json/%s.json' % filename
 
         rows = stats_rows(filename)
-        rows.sort(key=lambda r: r.tottime, reverse=True)
 
         self.render('viz.html', profile_name=profile_name, json_path=json_path,
                     stats_rows=rows)

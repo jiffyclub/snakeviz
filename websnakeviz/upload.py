@@ -110,25 +110,29 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
 
         if d['children']:
             # make a "child" that represents the internal time of this function
-            children_size = sum(c['size'] for c in d['children'])
-            if parent:
-                assert children_size <= parent_size, 'Children size is unrealistically big! ' + str(children_size)
+            children_sum = sum(c['size'] for c in d['children'])
 
-            d_internal = {'name': node.name,
-                          'filename': node.filename,
-                          'directory': node.directory,
-                          'size': d['size'] - children_size}
+            if children_sum > d['size']:
+                for child in d['children']:
+                    child['size'] = child['size'] / children_sum * d['size']
 
-            if isinstance(node, pstatsloader.PStatRow):
-                d_internal['calls'] = node.calls
-                d_internal['recursive'] = node.recursive
-                d_internal['local'] = node.local
-                d_internal['localPer'] = node.localPer
-                d_internal['cummulative'] = node.cummulative
-                d_internal['cummulativePer'] = node.cummulativePer
-                d_internal['line_number'] = node.lineno
+            elif children_sum < d['size']:
 
-            d['children'].append(d_internal)
+                d_internal = {'name': node.name,
+                              'filename': node.filename,
+                              'directory': node.directory,
+                              'size': d['size'] - children_sum}
+
+                if isinstance(node, pstatsloader.PStatRow):
+                    d_internal['calls'] = node.calls
+                    d_internal['recursive'] = node.recursive
+                    d_internal['local'] = node.local
+                    d_internal['localPer'] = node.localPer
+                    d_internal['cummulative'] = node.cummulative
+                    d_internal['cummulativePer'] = node.cummulativePer
+                    d_internal['line_number'] = node.lineno
+
+                d['children'].append(d_internal)
         else:
             del d['children']
 

@@ -1,12 +1,13 @@
 // Copied, then modified, from http://www.jasondavies.com/coffee-wheel/
+// This is the main code for the sunburst visualization.
 var w = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     h = w,
     r = w / 2,
     x = d3.scale.linear().range([0, 2 * Math.PI]),
     y = d3.scale.pow().exponent(1).domain([0, 1]).range([0, r]),
     p = 0,
-    scale = d3.scale.category20c(),
-    duration = 1000;
+    scale = d3.scale.category20c(),   // colors
+    duration = 1000;                  // length of animations
 
 var div = d3.select("#chart");
 

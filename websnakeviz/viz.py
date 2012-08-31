@@ -1,3 +1,9 @@
+"""
+This module contains the handler and supporting functions for the primary
+visualization page.
+
+"""
+
 import os
 from collections import namedtuple
 
@@ -18,6 +24,16 @@ StatsRow = namedtuple('StatsRow', ['calls_value', 'calls_str',
 
 
 def stats_rows(filename):
+    """
+    Build a list of StatsRow objects that will be used to make the
+    profile stats table beneath the profile visualization.
+
+    Parameters
+    ----------
+    filename : str
+        Name of profiling output as made by Python's built-in profilers.
+
+    """
     time_fmt = '{0:>12.6g}'
 
     loader = pstatsloader.PStatsLoader(filename)
@@ -53,6 +69,10 @@ def stats_rows(filename):
 
 
 class VizHandler(handler.Handler):
+    """
+    Handler for the main visualization page. Renders viz.html.
+
+    """
     def get(self, profile_name):
         if self.request.path.startswith('/viz/file/'):
             if self.settings['single_user_mode']:

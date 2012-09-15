@@ -14,7 +14,10 @@ It is known to fail for some profiles and we're working to make it more robust.
 Install
 -------
 
-You must current install WebSnakeViz from source. Either clone the repository
+WebSnakeViz requires `Tornado <http://www.tornadoweb.org/>`_ and
+`Jinja2 <http://jinja.pocoo.org/>`_.
+
+You must currently install WebSnakeViz from source. Either clone the repository
 or download the zip file and then run `python setup.py install`.
 
 Usage

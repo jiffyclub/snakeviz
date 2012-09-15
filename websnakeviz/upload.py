@@ -11,8 +11,8 @@ import tempfile
 import os
 import multiprocessing as mp
 
-import pstatsloader
-import handler
+from . import pstatsloader
+from . import handler
 
 
 def storage_name(filename):

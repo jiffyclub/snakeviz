@@ -8,14 +8,17 @@ import tornado.web
 settings = {
     'static_path': os.path.join(os.path.dirname(__file__), 'static'),
     'debug': True,
-    'single_user_mode': False
+    'single_user_mode': True
 }
 
-handlers = [(r'/', 'websnakeviz.upload.UploadHandler'),
-            (r'/json/file/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
-            (r'/json/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
-            (r'/viz/file/(.*)', 'websnakeviz.viz.VizHandler'),
-            (r'/viz/(.*)', 'websnakeviz.viz.VizHandler')]
+# set of handlers for online mode
+# handlers = [(r'/', 'websnakeviz.upload.UploadHandler'),
+#             (r'/json/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
+#             (r'/viz/(.*)', 'websnakeviz.viz.VizHandler')]
+
+# set of handlers for offline, single user mode
+handlers = [(r'/json/file/(.*)\.json', 'websnakeviz.upload.JSONHandler'),
+            (r'/viz/file/(.*)', 'websnakeviz.viz.VizHandler')]
 
 app = tornado.web.Application(handlers, **settings)
 

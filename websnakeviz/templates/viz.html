@@ -10,7 +10,6 @@
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet">
     <style>
       body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
         padding-bottom: 10px;
       }
     </style>
@@ -62,7 +61,7 @@
 
   <body>
     <!-- Navbar -->
-    <div class="navbar navbar-fixed-top">
+    <div class="navbar navbar-static-top">
       <div class="navbar-inner">
         <div class="container">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -89,7 +88,7 @@
     </div>
 
     <!-- Everything else -->
-    <div class="container">
+    <div class="container" style="padding-top: 10px">
       <div class='gallery' id='chart'>
         <button class="btn" id="resetbutton" disabled="True"
                 style="position: absolute;">

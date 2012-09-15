@@ -2,6 +2,7 @@ import pstats
 import json
 import tempfile
 import os
+import multiprocessing as mp
 
 import pstatsloader
 import handler
@@ -50,7 +51,16 @@ class JSONHandler(handler.Handler):
         else:
             filename = storage_name(prof_name)
 
-        s = prof_to_json(filename)
+        pool = mp.Pool(1, maxtasksperchild=1)
+        result = pool.apply_async(prof_to_json, (filename,))
+        pool.close()
+
+        try:
+            s = result.get(10)
+
+        except mp.TimeoutError:
+            pool.terminate()
+            return None
 
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
         self.write(s)
@@ -86,8 +96,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         d['cummulativePer'] = node.cummulativePer
         d['line_number'] = node.lineno
 
-        if node.recursive > node.calls:
-            recursive_seen.add(node)
+        recursive_seen.add(node)
 
     if parent:
         if isinstance(parent, pstatsloader.PStatGroup):

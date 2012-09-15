@@ -1,3 +1,8 @@
+"""
+This module contains the command line interface for websnakeviz.
+
+"""
+
 import optparse
 import os
 import sys
@@ -12,7 +17,7 @@ def main(argv=sys.argv[1:]):
     parser.add_option('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
                       help='hostname to bind to (default: 127.0.0.1')
 
-    # TODO: Make this help text actually true (maybe tornado does this already?)
+    # TODO: Make this help text actually true
     parser.add_option('-p', '--port', type='int', metavar='PORT', default=8080,
                       help='port to bind to; if this port is already in use a'
                            'free port will be selected automatically '

@@ -1,5 +1,8 @@
+// This contains the code that renders and controls
+// the sunburst visualization.
+
 // Copied, then modified, from http://www.jasondavies.com/coffee-wheel/
-// This is the main code for the sunburst visualization.
+
 var w = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     h = w,
     r = w / 2,

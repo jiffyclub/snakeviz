@@ -1,5 +1,5 @@
 """
-This module contains the command line interface for websnakeviz.
+This module contains the command line interface for snakeviz.
 
 """
 
@@ -66,7 +66,7 @@ def main(argv=sys.argv[1:]):
     app.listen(8080, address=hostname)
     app.settings['single_user_mode'] = True
 
-    print ('wsv web server started on %s:%d; enter Ctrl-C to exit' %
+    print ('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port))
 
     # Launce the browser in a separate thread to avoid blocking the ioloop from

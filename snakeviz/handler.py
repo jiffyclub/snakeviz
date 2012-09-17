@@ -17,7 +17,7 @@ jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
 
 class Handler(tornado.web.RequestHandler):
     """
-    This is the base class for other handlers throughout websnakeviz.
+    This is the base class for other handlers throughout snakeviz.
     It overrides tornado's `render` method with one that uses Jinja2.
 
     """

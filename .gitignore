@@ -14,7 +14,7 @@ develop-eggs
 .installed.cfg
 
 # Generated files
-websnakeviz/version.py
+snakeviz/version.py
 
 # Editor files
 *.swp

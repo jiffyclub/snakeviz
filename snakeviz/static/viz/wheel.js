@@ -102,7 +102,7 @@ var JSONCallback = function JSONCallback(json) {
     JSONErrorCallback();
   };
 }
-d3.json(wsv_json_path, JSONCallback);
+d3.json(profile_json_path, JSONCallback);
 
 var resetViz = function resetViz() {
   var path = vis.selectAll("path");

@@ -1,4 +1,4 @@
 include *.rst
-recursive-include websnakeviz/static *.ico *.css *.js
-recursive-include websnakeviz/templates *.html
+recursive-include snakeviz/static *.ico *.css *.js
+recursive-include snakeviz/templates *.html
 recursive-include licenses *.txt

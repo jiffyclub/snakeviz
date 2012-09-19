@@ -119,7 +119,7 @@ var color = function color(d) {
 
 var tooltipText = function tooltipText(d, i) {
   return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
-         d.cummulative.toPrecision(3) + 's]';
+         d.cumulative.toPrecision(3) + 's]';
 }
 
 // Interpolate the scales!

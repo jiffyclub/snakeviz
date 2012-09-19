@@ -168,8 +168,8 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
         d['recursive'] = node.recursive
         d['local'] = node.local
         d['localPer'] = node.localPer
-        d['cummulative'] = node.cummulative
-        d['cummulativePer'] = node.cummulativePer
+        d['cumulative'] = node.cummulative
+        d['cumulativePer'] = node.cummulativePer
         d['line_number'] = node.lineno
 
         recursive_seen.add(node)
@@ -220,8 +220,8 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
                     d_internal['recursive'] = node.recursive
                     d_internal['local'] = node.local
                     d_internal['localPer'] = node.localPer
-                    d_internal['cummulative'] = node.cummulative
-                    d_internal['cummulativePer'] = node.cummulativePer
+                    d_internal['cumulative'] = node.cummulative
+                    d_internal['cumulativePer'] = node.cummulativePer
                     d_internal['line_number'] = node.lineno
 
                 d['children'].append(d_internal)

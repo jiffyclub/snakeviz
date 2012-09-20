@@ -34,8 +34,7 @@ setup(
                      'static/bootstrap/css/*.css',
                      'static/tooltip/js/*.js',
                      'static/tooltip/css/*.css',
-                     'static/viz/js/*.js',
-                     'static/viz/css/*.css',
+                     'static/viz/*.js',
                      'templates/*.html']
     },
     install_requires=['tornado>=2.0', 'jinja2>=2.0'],

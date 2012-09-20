@@ -93,7 +93,7 @@ class JSONHandler(handler.Handler):
             filename = storage_name(prof_name)
 
         self._pool = mp.Pool(1, maxtasksperchild=1)
-        result = self._pool.apply_async(prof_to_json, (filename,))
+        self._result = self._pool.apply_async(prof_to_json, (filename,))
 
         # TODO: Make the timeout parameters configurable
         self._timeout = 10  # in seconds

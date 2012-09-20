@@ -11,6 +11,9 @@ import tempfile
 import os
 import multiprocessing as mp
 
+from tornado import ioloop
+from tornado.web import asynchronous
+
 from . import pstatsloader
 from . import handler
 
@@ -70,8 +73,14 @@ class UploadHandler(handler.Handler):
 class JSONHandler(handler.Handler):
     """
     Handler for requesting the JSON representation of a profile.
-
     """
+
+    _timer = None
+    _pool = None
+    _timeout = None
+    _result = None
+
+    @asynchronous
     def get(self, prof_name):
         if self.request.path.startswith('/json/file/'):
             if self.settings['single_user_mode']:
@@ -83,23 +92,34 @@ class JSONHandler(handler.Handler):
         else:
             filename = storage_name(prof_name)
 
-        # Use multiprocessing.Pool here so that there can be a timeout
-        # on the call to prof_to_json.
-        # This will give prof_to_json 10 seconds to return and if it doesn't
-        # it will shut down the process and return None
-        pool = mp.Pool(1, maxtasksperchild=1)
-        result = pool.apply_async(prof_to_json, (filename,))
-        pool.close()
+        self._pool = mp.Pool(1, maxtasksperchild=1)
+        result = self._pool.apply_async(prof_to_json, (filename,))
 
+        # TODO: Make the timeout parameters configurable
+        self._timeout = 10  # in seconds
+        self._period = 0.1  # in seconds
+        self._timer = ioloop.PeriodicCallback(self._result_callback,
+                                              self._period * 1000,
+                                              ioloop.IOLoop.instance())
+        self._timer.start()
+
+    def _result_callback(self):
         try:
-            s = result.get(10)
-
+            content = self._result.get(0)
+            self._finish_request(content)
         except mp.TimeoutError:
-            pool.terminate()
-            return None
+            self._timeout -= self._period
+            if self._timeout < 0:
+                self._finish_request('')
 
-        self.set_header('Content-Type', 'application/json; charset=UTF-8')
-        self.write(s)
+    def _finish_request(self, content):
+        self._timer.stop()
+        self._pool.terminate()
+        self._pool.close()
+        if content:
+            self.set_header('Content-Type', 'application/json; charset=UTF-8')
+        self.write(content)
+        self.finish()
 
 
 def prof_to_json(prof_name):

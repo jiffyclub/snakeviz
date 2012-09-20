@@ -11,7 +11,8 @@
     <link href="./bootstrap/css/bootstrap.css" rel="stylesheet">
     <style>
       body {
-        padding-top: 40px; /* 60px to make the container go all the way to the bottom of the topbar */
+        padding-top: 40px; /* padding for the topbar */
+        padding-bottom: 10px;
       }
     </style>
 
@@ -77,6 +78,8 @@
             <ul class="nav">
               <li><a href="#home">Home</a></li>
               <li><a href="#usage">Using SnakeViz</a></li>
+              <li><a href="#install">Install</a></li>
+              <li><a href="#contact">Contact</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -126,6 +129,16 @@
         <div class="row">
           <div class="span8 offset2">
             <h4>Using SnakeViz</h4>
+            <h5>Start</h5>
+            <p>
+              At the command line type <code>snakeviz name_of_profile</code>
+              to start SnakeViz in your default browser.
+              Type <code>control-C</code> to stop the server.
+              The <a href="http://docs.python.org/library/profile.html">
+              Python documentation</a> has information on how to save
+              a profile to disk.
+            </p>
+            <br>
             <div style="text-align: center">
               <img src="./images/norm_fit_profile.png" height=30% width=30%>
             </div>
@@ -182,6 +195,68 @@
               sort it! Click on the column names to sort in either descending
               or ascending order. By default it will be sorted in descending
               order by cumulative time.
+            </p>
+            <br>
+            <div class="alert alert-block">
+              <h5>Important Note!</h5>
+              <p>
+                SnakeViz is still under active development and currently
+                does not work well for profiles with especially large
+                numbers of function calls. If it takes
+                longer than 10 seconds to process your profile SnakeViz
+                will shut down the visualization.
+              </p>
+              <p>
+                However, the table will still be operational and complete
+                so it's not a total loss. You can try to profile a smaller
+                subset of your code and visualize that. We hope to address
+                this limitation in a future release.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="install">
+        <div class="row">
+          <div class="span8 offset2">
+            <h4>Install SnakeViz</h4>
+            <p>
+              Until we put together an official release you can use one
+              of these links to download the latest development version
+              from GitHub:
+            </p>
+            <div class="row">
+              <div class="span4" style="text-align: right">
+                <a class="btn" href="https://github.com/jiffyclub/snakeviz/tarball/master">
+                  Download as tar.gz</a>
+              </div>
+              <div class="span4" style="text-align: left">
+                <a class="btn" href="https://github.com/jiffyclub/snakeviz/zipball/master">
+                  Download as zip</a>
+              </div>
+            </div>
+            <br>
+            <p>
+              Then unpack the source and run
+              <code>python setup.py install</code>.
+              If <a href="http://www.tornadoweb.org/">Tornado</a> and
+              <a href="http://jinja.pocoo.org/">Jinja2</a> cannot be found
+              they should be automatically installed.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section id="contact">
+        <div class="row">
+          <div class="span8 offset2">
+            <h4>Contact</h4>
+            <p>
+              Report issues on the
+              <a href="https://github.com/jiffyclub/snakeviz/issues">
+                GitHub issue tracker</a>. The SnakeViz developers are
+                on Twitter:
+                <a href="https://twitter.com/jiffyclub">@jiffyclub</a> and
+                <a href="https://twitter.com/iguananaut">@iguananaut</a>.
             </p>
           </div>
         </div>

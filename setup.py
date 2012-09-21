@@ -32,6 +32,15 @@ setup(
     url='https://github.com/jiffyclub/snakeviz',
     summary='A web-based viewer for Python profiler output',
     description=DESCRIPTION,
+    classifiers=[
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: JavaScript',
+        'Topic :: Software Development'
+    ],
     packages=['snakeviz'],
     package_data={
         'snakeviz': ['static/*.ico',

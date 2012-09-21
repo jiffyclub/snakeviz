@@ -58,9 +58,9 @@ var drawSunburst = function drawSunburst(json) {
       d3.select('#resetbutton').node().removeAttribute('disabled');
     } else {
       d3.select('#resetbutton').property('disabled', 'True');
-    };
+    }
   }
-}
+};
 
 var JSONErrorCallback = function JSONCallback() {
   //remove reset button, loading bar, and svg
@@ -73,7 +73,8 @@ var JSONErrorCallback = function JSONCallback() {
                  .attr('id', 'jsonerrordiv')
                  .classed('alert', true)
                  .classed('alert-error', true)
-                 .classed('alert-block', true);
+                 .classed('alert-block', true)
+                 .style('margin-top', '20px');
 
   // add the close button
   errdiv.append('button')
@@ -93,15 +94,15 @@ var JSONErrorCallback = function JSONCallback() {
           'You can try profiling a smaller portion of your code. ' +
           'The statistics table below might help you narrow down ' +
           'which portion of your code to focus on.');
-}
+};
 
 var JSONCallback = function JSONCallback(json) {
   if (json) {
     drawSunburst(json);
   } else {
     JSONErrorCallback();
-  };
-}
+  }
+};
 d3.json(profile_json_path, JSONCallback);
 
 var resetViz = function resetViz() {
@@ -110,17 +111,17 @@ var resetViz = function resetViz() {
       .duration(duration)
       .attrTween("d", arcTween(sunburstJSON));
   d3.select('#resetbutton').property('disabled', 'True');
-}
+};
 d3.select('#resetbutton').on('click', resetViz);
 
 var color = function color(d) {
   return scale(d.name + d.filename + d.directory + d.line_number);
-}
+};
 
 var tooltipText = function tooltipText(d, i) {
   return d.name + '@' + d.filename + ':' + d.line_number + ' [' +
          d.cumulative.toPrecision(3) + 's]';
-}
+};
 
 // Interpolate the scales!
 function arcTween(d) {

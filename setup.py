@@ -12,7 +12,7 @@ import os
 
 
 NAME = 'snakeviz'
-VERSION = '0.2.dev'
+VERSION = '0.1'
 
 
 # Create a simple version.py module; less trouble than hard-coding the version
@@ -30,8 +30,8 @@ setup(
     author='Matt Davis',
     author_email='jiffyclub@gmail.com',
     url='https://github.com/jiffyclub/snakeviz',
-    summary='A web-based viewer for Python profiler output',
-    description=DESCRIPTION,
+    description='A web-based viewer for Python profiler output',
+    long_description=DESCRIPTION,
     classifiers=[
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

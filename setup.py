@@ -19,6 +19,10 @@ VERSION = '0.1.dev'
 with open(os.path.join('snakeviz', 'version.py'), 'w') as f:
     f.write('__version__ = %r' % VERSION)
 
+# Load up the description from README.rst
+with open('README.rst') as f:
+    DESCRIPTION = f.read()
+
 
 setup(
     name=NAME,
@@ -26,7 +30,8 @@ setup(
     author='Matt Davis',
     author_email='jiffyclub@gmail.com',
     url='https://github.com/jiffyclub/snakeviz',
-
+    summary='A web-based viewer for Python profiler output',
+    description=DESCRIPTION,
     packages=['snakeviz'],
     package_data={
         'snakeviz': ['static/*.ico',

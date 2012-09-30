@@ -46,9 +46,11 @@ setup(
         'snakeviz': ['static/*.ico',
                      'static/bootstrap/js/*.js',
                      'static/bootstrap/css/*.css',
-                     'static/tooltip/js/*.js',
-                     'static/tooltip/css/*.css',
+                     'static/bootstrap/img/*.png',
+                     'static/tooltip/*.js',
+                     'static/tooltip/*.css',
                      'static/viz/*.js',
+                     'static/*.js',
                      'templates/*.html']
     },
     install_requires=['tornado>=2.0', 'jinja2>=2.0'],

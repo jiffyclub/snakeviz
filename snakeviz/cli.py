@@ -63,7 +63,7 @@ def main(argv=sys.argv[1:]):
     from .main import app
     import tornado.ioloop
 
-    app.listen(8080, address=hostname)
+    app.listen(port, address=hostname)
     app.settings['single_user_mode'] = True
 
     print ('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %

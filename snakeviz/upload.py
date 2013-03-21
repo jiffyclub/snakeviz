@@ -10,6 +10,7 @@ import json
 import tempfile
 import os
 import multiprocessing as mp
+import platform
 
 from tornado import ioloop
 from tornado.web import asynchronous
@@ -84,7 +85,7 @@ class JSONHandler(handler.Handler):
     def get(self, prof_name):
         if self.request.path.startswith('/json/file/'):
             if self.settings['single_user_mode']:
-                if prof_name[0] != '/':
+                if prof_name[0] != '/' and platform.system() != 'Windows':
                     prof_name = '/' + prof_name
                 filename = os.path.abspath(prof_name)
             else:

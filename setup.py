@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distribute_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup
+from distribute_setup import use_setuptools
+use_setuptools()
+from setuptools import setup
 
 
 import os

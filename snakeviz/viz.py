@@ -5,6 +5,7 @@ visualization page.
 """
 
 import os
+import platform
 from collections import namedtuple
 
 from . import pstatsloader
@@ -79,10 +80,12 @@ class VizHandler(handler.Handler):
                 # Allow opening arbitrary files by full filesystem path
                 # WARNING!!! Obviously this must be disabled by default
                 # TODO: Some modicum of error handling here as well...
-                if profile_name[0] != '/':
+
+                json_path = '/json/file/%s.json' % profile_name
+
+                if profile_name[0] != '/' and platform.system() != 'Windows':
                     profile_name = '/' + profile_name
                 filename = os.path.abspath(profile_name)
-                json_path = '/json/file%s.json' % profile_name
             else:
                 # TODO: Raise a 404 error here
                 pass

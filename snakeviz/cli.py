@@ -71,7 +71,11 @@ def main(argv=sys.argv[1:]):
 
     # Launce the browser in a separate thread to avoid blocking the ioloop from
     # starting
-    # TODO: Fix filename handling on Windows at some point
+
+    import platform
+    if platform.system() == 'Windows':
+        filename = '/' + filename
+
     bt = lambda: browser.open('http://%s:%d/viz/file%s' %
                               (hostname, port, filename), new=2)
     threading.Thread(target=bt).start()

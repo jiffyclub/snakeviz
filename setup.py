@@ -46,7 +46,6 @@ setup(
         'snakeviz': ['static/*.ico',
                      'static/bootstrap/js/*.js',
                      'static/bootstrap/css/*.css',
-                     'static/bootstrap/img/*.png',
                      'static/tooltip/*.js',
                      'static/tooltip/*.css',
                      'static/viz/*.js',

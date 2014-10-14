@@ -2,6 +2,7 @@
 This module contains the command line interface for snakeviz.
 
 """
+from __future__ import print_function
 
 import optparse
 import os
@@ -41,7 +42,7 @@ def main(argv=sys.argv[1:]):
 
     try:
         open(filename)
-    except IOError, e:
+    except IOError as e:
         parser.error('the file %s could not be opened: %s'
                      % (filename, str(e)))
 
@@ -66,8 +67,8 @@ def main(argv=sys.argv[1:]):
     app.listen(port, address=hostname)
     app.settings['single_user_mode'] = True
 
-    print ('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
-           (hostname, port))
+    print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
+           (hostname, port)))
 
     # Launce the browser in a separate thread to avoid blocking the ioloop from
     # starting
@@ -86,6 +87,6 @@ def main(argv=sys.argv[1:]):
         # TODO: Cheap KeyboardInterrupt handler for now; iPython has some nicer
         # stuff for handling SIGINT and SIGTERM that might be worth borrowing
         tornado.ioloop.IOLoop.instance().stop()
-        print ('\nBye!')
+        print('\nBye!')
 
     return 0

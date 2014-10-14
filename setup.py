@@ -17,7 +17,7 @@ VERSION = '0.2.dev'
 
 # Create a simple version.py module; less trouble than hard-coding the version
 with open(os.path.join('snakeviz', 'version.py'), 'w') as f:
-    f.write('__version__ = %r' % VERSION)
+    f.write('__version__ = version = %r' % VERSION)
 
 # Load up the description from README.rst
 with open('README.rst') as f:

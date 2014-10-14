@@ -19,7 +19,7 @@ var tooltipPosition = function tooltipPosition(mousePos, tooltipDiv) {
     } else {
         // tooltip on the left
         tooltipDiv.style('left', null);
-        tooltipDiv.style('right', (w - mx - 10) + 'px');
+        tooltipDiv.style('right', (w - mx + 10) + 'px');
     };
 }
 

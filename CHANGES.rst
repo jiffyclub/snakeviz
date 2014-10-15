@@ -1,3 +1,9 @@
+v0.1.4
+======
+
+* Fix display of functions in pstats table
+* Sort pstats table on total time column be default
+
 v0.1.3
 ======
 

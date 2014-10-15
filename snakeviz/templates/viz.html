@@ -18,39 +18,25 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
+    <!-- DataTables CSS -->
+    <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet" />
+
     <!-- Load d3 -->
-    <script src="http://d3js.org/d3.v2.min.js"></script>
+    <script src="/static/vendor/d3.v2.min.js"></script>
 
     <!-- Mouse-over tooltip -->
     <script src="/static/tooltip/tooltip.js"></script>
     <link href="/static/tooltip/tooltip.css" rel="stylesheet" />
 
     <!-- Stats table. -->
-    <script src='https://www.google.com/jsapi'></script>
     <script>
-      google.load('visualization', '1', {packages:['table']});
-      google.setOnLoadCallback(drawTable);
-      function drawTable() {
-        var data = new google.visualization.DataTable();
-        data.addColumn('number', 'ncalls');
-        data.addColumn('number', 'tottime');
-        data.addColumn('number', 'percall');
-        data.addColumn('number', 'cumtime');
-        data.addColumn('number', 'percall');
-        data.addColumn('string', 'filename:lineno(function)')
-        data.addRows([
-          {% for row in stats_rows -%}
-            [{v: {{row.calls_value}}, f: "{{row.calls_str}}"},
-             {v: {{row.tottime}}, f: "{{row.tottime_str}}"},
-             {v: {{row.tottime_percall}}, f: "{{row.tottime_percall_str}}"},
-             {v: {{row.cumtime}}, f: "{{row.cumtime_str}}"},
-             {v: {{row.cumtime_percall}}, f: "{{row.cumtime_percall_str}}"},
-             "{{row.file_line_func|safe}}"],
-          {%- endfor %}
-        ]);
-        var table = new google.visualization.Table(document.getElementById('table_div'));
-        table.draw(data, {sortColumn: 3, sortAscending: false});
-      }
+    var tableData = [
+      {% for row in stats_rows %}
+        ["{{row.calls_str}}", "{{row.tottime_str}}", "{{row.tottime_percall_str}}",
+         "{{row.cumtime_str}}", "{{row.cumtime_percall_str}}",
+         "{{row.file_line_func | safe}}"],
+      {%- endfor %}
+    ];
     </script>
 
     <!-- Global variable with the profile name. -->
@@ -98,13 +84,34 @@
       <script src='/static/viz/sunburst.js'> </script>
       <script src='/static/loading.js'> </script>
       <br>
-      <div id="table_div"></div>
+      <div id="table_div">
+        <table cellpadding="0" cellspacing="0" border="0" class="display" id="pstats-table">
+        </table>
+      </div>
     </div>
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+    <script src="/static/vendor/jquery-1.8.0.min.js"></script>
+    <script src="/static/vendor/jquery.dataTables.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+
+    <script>
+      $(document).ready(function() {
+        $('#pstats-table').dataTable({
+          'data': tableData,
+          'columns': [
+            {'title': 'ncalls', 'type': 'num', 'searchable': 'false'},
+            {'title': 'tottime', 'type': 'num', 'searchable': 'false'},
+            {'title': 'percall', 'type': 'num', 'searchable': 'false'},
+            {'title': 'cumtime', 'type': 'num', 'searchable': 'false'},
+            {'title': 'percall', 'type': 'num', 'searchable': 'false'},
+            {'title': 'filename:lineno(function)'}
+          ],
+          'paging': false
+        });
+      });
+    </script>
   </body>
 </html>

@@ -53,6 +53,9 @@ setup(
                      'static/tooltip/*.css',
                      'static/viz/*.js',
                      'static/*.js',
+                     'static/vendor/*.js',
+                     'static/vendor/*.css',
+                     'static/images/*.png',
                      'templates/*.html']
     },
     install_requires=['tornado>=2.0', 'jinja2>=2.0'],

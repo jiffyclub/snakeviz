@@ -1,5 +1,11 @@
-Version 0.1.2
-=============
+v0.1.3
+======
+
+* Switch to DataTables for table display
+* Store all client assets in distribution for offline use
+
+v0.1.2
+======
 
 * ``%snakeviz`` and ``%%snakeviz`` magics for IPython
 * Python 3 support

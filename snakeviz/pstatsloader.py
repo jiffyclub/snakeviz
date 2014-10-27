@@ -43,30 +43,30 @@ class PStatsLoader(object):
     def __init__(self, *filenames):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
-        self.rows = {}
+        self.nodes = {}
         self.tree = self.load(self.stats.stats)
-        self.location_rows = {}
+        self.location_nodes = {}
         self.location_tree = self.load_location()
 
     def load(self, stats):
         """Build a squaremap-compatible model from a pstats class"""
         for func, raw_timing in stats.items():
             try:
-                self.rows[func] = row = PStatRow(func, raw_timing)
+                self.nodes[func] = row = PStatRow(func, raw_timing)
             except ValueError:
                 log.info('Null row: %s', func)
 
-        for row in self.rows.values():
-            row.weave(self.rows)
+        for row in self.nodes.values():
+            row.weave(self.nodes)
 
-        return self.find_root(self.rows)
+        return self.find_root(self.nodes)
 
-    def find_root(self, rows):
-        """Attempt to find/create a reasonable root node from list/set of rows
+    def find_root(self, nodes):
+        """Attempt to find/create a reasonable root node from list/set of nodes
 
         Parameters
         ----------
-        rows: dict
+        nodes: dict
             Mapping of ((module-path, line-number, function-name), PStatRow).
 
         TODO: still need more robustness here, particularly in the case of
@@ -75,14 +75,14 @@ class PStatsLoader(object):
         roots (or, if they are all on the same root, use that).
 
         """
-        maxes = sorted(rows.values(), key=lambda x: x.cumulative)
+        maxes = sorted(nodes.values(), key=lambda x: x.cumulative)
         if not maxes:
             raise RuntimeError("""Null results!""")
 
         root = maxes[-1]
         roots = [root]
 
-        for key, value in rows.items():
+        for key, value in nodes.items():
             if not value.parents:
                 log.debug('Found node root: %s', value)
                 if value not in roots:
@@ -96,7 +96,7 @@ class PStatsLoader(object):
                 children=roots,
             )
             root.finalize()
-            self.rows[root.caller] = root
+            self.nodes[root.caller] = root
         return root
 
     def load_location(self):
@@ -104,9 +104,9 @@ class PStatsLoader(object):
         directories = {}
         files = {}
         root = PStatLocation('/', 'PYTHONPATH')
-        self.location_rows = self.rows.copy()
+        self.location_nodes = self.nodes.copy()
 
-        for child in self.rows.values():
+        for child in self.nodes.values():
             current = directories.get(child.directory)
             directory, filename = child.directory, child.filename
 
@@ -115,7 +115,7 @@ class PStatsLoader(object):
                     current = root
                 else:
                     current = PStatLocation(directory, '')
-                    self.location_rows[current.caller] = current
+                    self.location_nodes[current.caller] = current
                 directories[directory] = current
 
             if filename == '~':
@@ -125,7 +125,7 @@ class PStatsLoader(object):
 
             if file_current is None:
                 file_current = PStatLocation(directory, filename)
-                self.location_rows[file_current.caller] = file_current
+                self.location_nodes[file_current.caller] = file_current
                 files[(directory, filename)] = file_current
                 current.children.append(file_current)
 
@@ -220,10 +220,10 @@ class PStatRow(BaseStat):
     def add_child(self, child):
         self.children.append(child)
 
-    def weave(self, rows):
+    def weave(self, nodes):
         for caller, data in self.callers.items():
             # data is (cc, nc, tt, ct)
-            parent = rows.get(caller)
+            parent = nodes.get(caller)
             if parent:
                 self.parents.append(parent)
                 parent.children.append(self)

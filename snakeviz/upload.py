@@ -189,8 +189,8 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
         d['recursive'] = node.recursive
         d['local'] = node.local
         d['localPer'] = node.localPer
-        d['cumulative'] = node.cummulative
-        d['cumulativePer'] = node.cummulativePer
+        d['cumulative'] = node.cumulative
+        d['cumulativePer'] = node.cumulativePer
         d['line_number'] = node.lineno
 
         recursive_seen.add(node)
@@ -200,8 +200,8 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
         # but it's important that the child size is no larger
         # than the parent size.
         if isinstance(parent, pstatsloader.PStatGroup):
-            if parent.cummulative:
-                d['size'] = node.cummulative / parent.cummulative * parent_size
+            if parent.cumulative:
+                d['size'] = node.cumulative / parent.cumulative * parent_size
             else:
                 # this is a catch-all when it's not possible
                 # to calculate a size. hopefully this doesn't come
@@ -241,8 +241,8 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
                     d_internal['recursive'] = node.recursive
                     d_internal['local'] = node.local
                     d_internal['localPer'] = node.localPer
-                    d_internal['cumulative'] = node.cummulative
-                    d_internal['cumulativePer'] = node.cummulativePer
+                    d_internal['cumulative'] = node.cumulative
+                    d_internal['cumulativePer'] = node.cumulativePer
                     d_internal['line_number'] = node.lineno
 
                 d['children'].append(d_internal)

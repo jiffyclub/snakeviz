@@ -52,9 +52,9 @@ def stats_rows(filename):
             tottime_str = time_fmt.format(tottime)
             tottime_percall = r.localPer
             tottime_percall_str = time_fmt.format(tottime_percall)
-            cumtime = r.cummulative
+            cumtime = r.cumulative
             cumtime_str = time_fmt.format(cumtime)
-            cumtime_percall = r.cummulativePer
+            cumtime_percall = r.cumulativePer
             cumtime_percall_str = time_fmt.format(cumtime_percall)
             file_line_func = '{0}:{1}({2})'.format(r.filename,
                                                    r.lineno,

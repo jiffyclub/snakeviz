@@ -12,9 +12,9 @@ The nodes (dict-values) of the PStats tree are timing tuples with:
     4. A dictionary indicating the number of times each parent called us, with
        keys and values:
 
-         {(module, line-number, method) : (tuple elements 0-to-3)}
+         {(module-path, line-number, function-name) : (tuple elements 0-to-3)}
 
-The keys of the PStats tree are simply (module, line-number, method)-tuples,
+Keys of the PStats tree are (module-path, line-number, function-name)-tuples,
 just like the keys of node-value[4].
 
 """
@@ -42,17 +42,17 @@ class PStatsLoader(object):
 
     def __init__(self, *filenames):
         self.filename = filenames
-        self.rows = {}
         self.stats = pstats.Stats(*filenames)
+        self.rows = {}
         self.tree = self.load(self.stats.stats)
         self.location_rows = {}
         self.location_tree = self.load_location()
 
     def load(self, stats):
         """Build a squaremap-compatible model from a pstats class"""
-        for func, raw in stats.items():
+        for func, raw_timing in stats.items():
             try:
-                self.rows[func] = row = PStatRow(func, raw)
+                self.rows[func] = row = PStatRow(func, raw_timing)
             except ValueError:
                 log.info('Null row: %s', func)
 
@@ -67,7 +67,7 @@ class PStatsLoader(object):
         Parameters
         ----------
         rows: dict
-            Mapping of (key??, PStatRow).
+            Mapping of ((module-path, line-number, function-name), PStatRow).
 
         TODO: still need more robustness here, particularly in the case of
         threaded programs.  Should be tracing back each row to root, breaking
@@ -96,7 +96,7 @@ class PStatsLoader(object):
                 children=roots,
             )
             root.finalize()
-            self.rows[root.key] = root
+            self.rows[root.caller] = root
         return root
 
     def load_location(self):
@@ -115,7 +115,7 @@ class PStatsLoader(object):
                     current = root
                 else:
                     current = PStatLocation(directory, '')
-                    self.location_rows[current.key] = current
+                    self.location_rows[current.caller] = current
                 directories[directory] = current
 
             if filename == '~':
@@ -125,7 +125,7 @@ class PStatsLoader(object):
 
             if file_current is None:
                 file_current = PStatLocation(directory, filename)
-                self.location_rows[file_current.key] = file_current
+                self.location_rows[file_current.caller] = file_current
                 files[(directory, filename)] = file_current
                 current.children.append(file_current)
 
@@ -185,17 +185,17 @@ class BaseStat(object):
 class PStatRow(BaseStat):
     """Simulates a HotShot profiler record using PStats module."""
 
-    def __init__(self, key, raw):
+    def __init__(self, caller, raw_timing):
         self.children = []
         self.parents = []
 
-        fname, line, func = self.key = key
+        fname, line, func = self.caller = caller
         try:
             dirname, fname = os.path.dirname(fname), os.path.basename(fname)
         except ValueError:
             dirname = ''
 
-        nc, cc, tt, ct, callers = raw
+        nc, cc, tt, ct, callers = raw_timing
 
         if nc == cc == tt == ct == 0:
             raise ValueError('Null stats row')
@@ -232,9 +232,9 @@ class PStatRow(BaseStat):
         total = self.cumulative
         if total:
             try:
-                (cc, nc, tt, ct) = child.callers[self.key]
+                (cc, nc, tt, ct) = child.callers[self.caller]
             except TypeError:
-                ct = child.callers[self.key]
+                ct = child.callers[self.caller]
             return float(ct)/total
         return 0
 
@@ -253,7 +253,7 @@ class PStatGroup(BaseStat):
         self.directory = directory
         self.filename = filename
         self.name = ''
-        self.key = (directory, filename, name)
+        self.caller = (directory, filename, name)
         self.children = children or []
         self.parents = []
         self.local_children = local_children or []

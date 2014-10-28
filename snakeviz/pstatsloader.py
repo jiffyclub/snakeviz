@@ -75,7 +75,7 @@ class PStatsLoader(object):
         roots (or, if they are all on the same root, use that).
 
         """
-        maxes = sorted(nodes.values(), key=lambda x: x.cumulative)
+        maxes = sorted(nodes.values(), key=lambda x: x.t_cumulative)
         if not maxes:
             raise RuntimeError("""Null results!""")
 
@@ -200,12 +200,12 @@ class PStatRow(BaseStat):
         if nc == cc == tt == ct == 0:
             raise ValueError('Null stats row')
 
-        self.calls = nc
-        self.recursive = cc
-        self.local = tt
-        self.localPer = tt/max(cc, EPS)
-        self.cumulative = ct
-        self.cumulativePer = ct/max(nc, EPS)
+        self.n_calls = nc
+        self.n_calls_recursive = cc
+        self.t_local = tt
+        self.t_local_per_call = tt/max(cc, EPS)
+        self.t_cumulative = ct
+        self.t_cumulative_per_call = ct/max(nc, EPS)
         self.directory = dirname
         self.filename = fname
         self.name = func
@@ -229,7 +229,7 @@ class PStatRow(BaseStat):
                 parent.children.append(self)
 
     def child_cumulative_time(self, child):
-        total = self.cumulative
+        total = self.t_cumulative
         if total:
             try:
                 (cc, nc, tt, ct) = child.callers[self.caller]
@@ -296,7 +296,7 @@ class PStatGroup(BaseStat):
 
     def calculate_totals(self, children, local_children=None):
         """Calculate cumulative totals from children and/or local children"""
-        pairs = (('recursive', 'calls'), ('cumulative', 'local'))
+        pairs = (('n_calls_recursive', 'n_calls'), ('t_cumulative', 't_local'))
 
         for field, local_field in pairs:
             values = []
@@ -310,22 +310,23 @@ class PStatGroup(BaseStat):
             value = sum(values)
             setattr(self, field, value)
 
-        if self.recursive:
-            self.cumulativePer = self.cumulative/float(self.recursive)
+        if self.n_calls_recursive:
+            time = self.t_cumulative / float(self.n_calls_recursive)
+            self.t_cumulative_per_call = time
         else:
-            self.recursive = 0
+            self.n_calls_recursive = 0
 
         if local_children:
-            for field in ('local', 'calls'):
+            for field in ('t_local', 'n_calls'):
                 value = sum([getattr(child, field, 0) for child in children])
                 setattr(self, field, value)
 
-            if self.calls:
-                self.localPer = self.local / self.calls
+            if self.n_calls:
+                self.t_local_per_call = self.t_local / self.n_calls
         else:
-            self.local = 0
-            self.calls = 0
-            self.localPer = 0
+            self.t_local = 0
+            self.n_calls = 0
+            self.t_local_per_call = 0
 
 
 class PStatLocation(PStatGroup):

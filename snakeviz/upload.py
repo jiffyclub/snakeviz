@@ -184,12 +184,12 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
     d['directory'] = node.directory
 
     if isinstance(node, pstatsloader.PStatRow):
-        d['calls'] = node.calls
-        d['recursive'] = node.recursive
-        d['local'] = node.local
-        d['localPer'] = node.localPer
-        d['cumulative'] = node.cumulative
-        d['cumulativePer'] = node.cumulativePer
+        d['calls'] = node.n_calls
+        d['recursive'] = node.n_calls_recursive
+        d['local'] = node.t_local
+        d['localPer'] = node.t_local_per_call
+        d['cumulative'] = node.t_cumulative
+        d['cumulativePer'] = node.t_cumulative_per_call
         d['line_number'] = node.lineno
 
         recursive_seen.add(node)
@@ -236,12 +236,12 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
                               'size': d['size'] - children_sum}
 
                 if isinstance(node, pstatsloader.PStatRow):
-                    d_internal['calls'] = node.calls
-                    d_internal['recursive'] = node.recursive
-                    d_internal['local'] = node.local
-                    d_internal['localPer'] = node.localPer
-                    d_internal['cumulative'] = node.cumulative
-                    d_internal['cumulativePer'] = node.cumulativePer
+                    d_internal['calls'] = node.n_calls
+                    d_internal['recursive'] = node.n_calls_recursive
+                    d_internal['local'] = node.t_local
+                    d_internal['localPer'] = node.t_local_per_call
+                    d_internal['cumulative'] = node.t_cumulative
+                    d_internal['cumulativePer'] = node.t_cumulative_per_call
                     d_internal['line_number'] = node.lineno
 
                 d['children'].append(d_internal)

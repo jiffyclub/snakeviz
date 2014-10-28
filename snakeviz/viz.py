@@ -43,18 +43,18 @@ def stats_rows(filename):
 
     for r in loader.nodes.values():
         if isinstance(r, pstatsloader.PStatRow):
-            calls_value = r.recursive
-            if r.recursive > r.calls:
-                calls_str = '{0}/{1}'.format(r.recursive, r.calls)
+            calls_value = r.n_calls_recursive
+            if r.n_calls_recursive > r.n_calls:
+                calls_str = '{0}/{1}'.format(r.n_calls_recursive, r.n_calls)
             else:
-                calls_str = str(r.calls)
-            tottime = r.local
+                calls_str = str(r.n_calls)
+            tottime = r.t_local
             tottime_str = time_fmt.format(tottime)
-            tottime_percall = r.localPer
+            tottime_percall = r.t_local_per_call
             tottime_percall_str = time_fmt.format(tottime_percall)
-            cumtime = r.cumulative
+            cumtime = r.t_cumulative
             cumtime_str = time_fmt.format(cumtime)
-            cumtime_percall = r.cumulativePer
+            cumtime_percall = r.t_cumulative_per_call
             cumtime_percall_str = time_fmt.format(cumtime_percall)
             file_line_func = '{0}:{1}({2})'.format(r.filename,
                                                    r.lineno,

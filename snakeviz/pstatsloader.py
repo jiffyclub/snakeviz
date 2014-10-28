@@ -52,7 +52,7 @@ class PStatsLoader(object):
         """Build a squaremap-compatible model from a pstats class"""
         for func, raw_timing in stats.items():
             try:
-                self.nodes[func] = row = PStatRow(func, raw_timing)
+                self.nodes[func] = PStatRow(func, raw_timing)
             except ValueError:
                 log.info('Null row: %s', func)
 
@@ -242,10 +242,19 @@ class PStatRow(BaseStat):
 class PStatGroup(BaseStat):
     """A node/record that holds a group of children but isn't a raw-record
     based group
-    """
-    # if LOCAL_ONLY then only take the raw-record's local values, not
-    # cumulative values
 
+    Parameters
+    ----------
+    directory : str
+        Directory (package) containing the executed module.
+    filename : str
+        File (module) containing the executed function.
+    name : str
+        Name of the executed function.
+
+    """
+    # If LOCAL_ONLY then only take the raw-record's local values, not
+    # cumulative values
     LOCAL_ONLY = False
 
     def __init__(self, directory='', filename='', name='', children=None,
@@ -327,6 +336,7 @@ class PStatLocation(PStatGroup):
     Children with the name <module> are our "empty" space,
     our totals are otherwise just the sum of our children.
     """
+
     LOCAL_ONLY = True
 
     def __init__(self, directory, filename, tree=TREE_FILES):

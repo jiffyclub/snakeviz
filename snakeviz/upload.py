@@ -20,8 +20,7 @@ from . import handler
 
 
 def storage_name(filename):
-    """
-    Prepend the temporary file directory to the input `filename`.
+    """ Prepend the temporary file directory to the input `filename`.
 
     Parameters
     ----------

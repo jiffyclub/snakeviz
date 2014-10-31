@@ -36,6 +36,11 @@ def cname(obj):
     return obj.__class__.__name__
 
 
+def simple_repr(obj, attrs):
+    kwargs = ', '.join(['{}={!r}'.format(k, getattr(obj, k)) for k in attrs])
+    return '{}({})'.format(cname(obj), kwargs)
+
+
 class PStatsLoader(object):
     """Load profiler statistic from files."""
 
@@ -189,17 +194,19 @@ class PStatRow(object):
         self.lineno = line
         self.callers = callers
 
+    @property
+    def n_children(self):
+        return len(self.children)
+
     def __repr__(self):
-        template = '{}({!r}, {!r}, {!r}, {!r}, {})'
-        return template.format(cname(self), self.directory, self.filename,
-                               self.lineno, self.name, len(self.children))
+        attrs = ['directory', 'filename', 'lineno', 'name', 'n_children']
+        return simple_repr(self, attrs)
 
     def add_child(self, child):
         self.children.append(child)
 
     def weave(self, nodes):
-        for caller, data in self.callers.items():
-            # data is (cc, nc, tt, ct)
+        for caller in self.callers.keys():
             parent = nodes.get(caller)
             if parent:
                 self.parents.append(parent)
@@ -245,9 +252,7 @@ class PStatGroup(object):
         self.local_children = local_children or []
 
     def __repr__(self):
-        template = '{}({!r}, {!r}, {!r})'
-        return template.format(cname(self), self.directory,
-                               self.filename, self.name)
+        return simple_repr(self, ['directory', 'filename', 'name'])
 
     def finalize(self, already_done=None):
         """Finalize our values (recursively) taken from our children"""
@@ -308,11 +313,3 @@ class PStatGroup(object):
             self.t_local = 0
             self.n_calls = 0
             self.t_local_per_call = 0
-
-
-if __name__ == "__main__":
-    import sys
-
-    p = PStatsLoader(sys.argv[1])
-    assert p.tree
-    print(p.tree)

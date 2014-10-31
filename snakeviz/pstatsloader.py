@@ -29,7 +29,6 @@ from gettext import gettext
 
 log = logging.getLogger(__name__)
 
-TREE_CALLS, TREE_FILES = list(range(2))
 EPS = 1e-14
 
 
@@ -261,7 +260,7 @@ class PStatGroup(BaseStat):
     LOCAL_ONLY = False
 
     def __init__(self, directory='', filename='', name='package',
-                 children=None, local_children=None, tree=TREE_FILES):
+                 children=None, local_children=None):
         self.directory = directory
         self.filename = filename
         self.name = ''
@@ -269,7 +268,6 @@ class PStatGroup(BaseStat):
         self.children = children or []
         self.parents = []
         self.local_children = local_children or []
-        self.tree = tree
 
     def __repr__(self):
         template = '{}({!r}, {!r}, {!r})'

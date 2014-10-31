@@ -158,29 +158,7 @@ class PStatsLoader(object):
         return nodes, root
 
 
-class BaseStat(object):
-
-    def recursive_distinct(self, already_done=None, attribute='children'):
-        if already_done is None:
-            already_done = {}
-
-        for child in getattr(self, attribute, ()):
-            if child not in already_done:
-                already_done[child] = True
-                yield child
-                gchildren = child.recursive_distinct(already_done=already_done,
-                                                     attribute=attribute)
-                for descendent in gchildren:
-                    yield descendent
-
-    def descendants(self):
-        return list(self.recursive_distinct(attribute='children'))
-
-    def ancestors(self):
-        return list(self.recursive_distinct(attribute='parents'))
-
-
-class PStatRow(BaseStat):
+class PStatRow(object):
     """Simulates a HotShot profiler record using PStats module."""
 
     def __init__(self, caller, raw_timing):
@@ -238,7 +216,7 @@ class PStatRow(BaseStat):
         return 0
 
 
-class PStatGroup(BaseStat):
+class PStatGroup(object):
     """A node/record that holds a group of children but isn't a raw-record
     based group
 
@@ -255,9 +233,6 @@ class PStatGroup(BaseStat):
         Name of the executed function.
 
     """
-    # If LOCAL_ONLY then only take the raw-record's local values, not
-    # cumulative values
-    LOCAL_ONLY = False
 
     def __init__(self, directory='', filename='', name='package',
                  children=None, local_children=None):
@@ -310,10 +285,8 @@ class PStatGroup(BaseStat):
             values = []
 
             for child in children:
-                if isinstance(child, PStatGroup) or not self.LOCAL_ONLY:
+                if isinstance(child, PStatGroup):
                     values.append(getattr(child, field, 0))
-                elif isinstance(child, PStatRow) and self.LOCAL_ONLY:
-                    values.append(getattr(child, local_field, 0))
 
             value = sum(values)
             setattr(self, field, value)

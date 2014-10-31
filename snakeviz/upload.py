@@ -139,15 +139,15 @@ def prof_to_json(prof_name):
     """
     loader = pstatsloader.PStatsLoader(prof_name)
 
-    d = _stats_to_tree_dict(loader.tree.children[0])
+    d = stats_to_tree_dict(loader.tree.children[0])
 
     return json.dumps(d, indent=1)
 
 
-def _stats_to_tree_dict(node, parent=None, parent_size=None,
+def stats_to_tree_dict(node, parent=None, parent_size=None,
                         recursive_seen=None):
     """
-    `_stats_to_tree_dict` is a specialized function for converting
+    `stats_to_tree_dict` is a specialized function for converting
     a `pstatsloader.PStatsLoader` profile representation into a tree
     of nested dictionaries by recursively calling itself.
     It is primarily meant to be called from `prof_to_json`.
@@ -162,7 +162,7 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
         Calculated size of `parent`. Optional for the root node.
     recursive_seen : set
         Set of nodes that are direct ancestors of `node`.
-        This is used to prevent `_stats_to_tree_dict` from ending up in
+        This is used to prevent `stats_to_tree_dict` from ending up in
         infinite loops when it encounters recursion.
         Optional for the root node.
 
@@ -216,7 +216,7 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
         d['children'] = []
         for child in node.children:
             if child not in recursive_seen:
-                child_dict = _stats_to_tree_dict(child, node, d['size'],
+                child_dict = stats_to_tree_dict(child, node, d['size'],
                                                  recursive_seen)
                 d['children'].append(child_dict)
 

@@ -24,7 +24,7 @@ import logging
 import os
 import pstats
 
-from gettext import gettext as _
+from gettext import gettext
 
 
 log = logging.getLogger(__name__)
@@ -43,25 +43,24 @@ class PStatsLoader(object):
     def __init__(self, *filenames):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
-        self.nodes = {}
-        self.tree = self.load(self.stats.stats)
-        self.location_nodes = {}
-        self.location_tree = self.load_location()
+        self.nodes, self.tree = self._load_tree(self.stats.stats)
+        self.location_nodes, self.location_tree = self._load_location_tree()
 
-    def load(self, stats):
+    def _load_tree(self, stats):
         """Build a squaremap-compatible model from a pstats class"""
+        nodes = {}
         for func, raw_timing in stats.items():
             try:
-                self.nodes[func] = PStatRow(func, raw_timing)
+                nodes[func] = PStatRow(func, raw_timing)
             except ValueError:
                 log.info('Null row: %s', func)
 
-        for row in self.nodes.values():
-            row.weave(self.nodes)
+        for row in nodes.values():
+            row.weave(nodes)
 
-        return self.find_root(self.nodes)
+        return nodes, self._find_root(nodes)
 
-    def find_root(self, nodes):
+    def _find_root(self, nodes):
         """Attempt to find/create a reasonable root node from list/set of nodes
 
         Parameters
@@ -92,19 +91,19 @@ class PStatsLoader(object):
             root = PStatGroup(
                 directory='*',
                 filename='*',
-                name=_("<profiling run>"),
+                name=gettext("<profiling run>"),
                 children=roots,
             )
             root.finalize()
-            self.nodes[root.caller] = root
+            nodes[root.caller] = root
         return root
 
-    def load_location(self):
+    def _load_location_tree(self):
         """Build a squaremap-compatible model for location-based hierarchy."""
         directories = {}
         files = {}
-        root = PStatLocation('/', 'PYTHONPATH')
-        self.location_nodes = self.nodes.copy()
+        root = PStatGroup('/', 'PYTHONPATH')
+        nodes = self.nodes.copy()
 
         for child in self.nodes.values():
             current = directories.get(child.directory)
@@ -114,8 +113,8 @@ class PStatsLoader(object):
                 if directory == '':
                     current = root
                 else:
-                    current = PStatLocation(directory, '')
-                    self.location_nodes[current.caller] = current
+                    current = PStatGroup(directory, '')
+                    nodes[current.caller] = current
                 directories[directory] = current
 
             if filename == '~':
@@ -124,8 +123,8 @@ class PStatsLoader(object):
             file_current = files.get((directory, filename))
 
             if file_current is None:
-                file_current = PStatLocation(directory, filename)
-                self.location_nodes[file_current.caller] = file_current
+                file_current = PStatGroup(directory, filename)
+                nodes[file_current.caller] = file_current
                 files[(directory, filename)] = file_current
                 current.children.append(file_current)
 
@@ -157,7 +156,7 @@ class PStatsLoader(object):
 
         # lastly, finalize all of the directory records...
         root.finalize()
-        return root
+        return nodes, root
 
 
 class BaseStat(object):
@@ -191,7 +190,8 @@ class PStatRow(BaseStat):
 
         fname, line, func = self.caller = caller
         try:
-            dirname, fname = os.path.dirname(fname), os.path.basename(fname)
+            dirname = os.path.dirname(fname)
+            fname = os.path.basename(fname)
         except ValueError:
             dirname = ''
 
@@ -243,6 +243,9 @@ class PStatGroup(BaseStat):
     """A node/record that holds a group of children but isn't a raw-record
     based group
 
+    Children with the name <module> are our "empty" space,
+    our totals are otherwise just the sum of our children.
+
     Parameters
     ----------
     directory : str
@@ -257,8 +260,8 @@ class PStatGroup(BaseStat):
     # cumulative values
     LOCAL_ONLY = False
 
-    def __init__(self, directory='', filename='', name='', children=None,
-                 local_children=None, tree=TREE_CALLS):
+    def __init__(self, directory='', filename='', name='package',
+                 children=None, local_children=None, tree=TREE_FILES):
         self.directory = directory
         self.filename = filename
         self.name = ''
@@ -292,7 +295,14 @@ class PStatGroup(BaseStat):
         self.calculate_totals(self.children, self.local_children)
 
     def filter_children(self):
-        """Filter our children into regular and local children sets."""
+        """Filter our children into regular and local children sets"""
+        real_children = []
+        for child in self.children:
+            if child.name == '<module>':
+                self.local_children.append(child)
+            else:
+                real_children.append(child)
+        self.children = real_children
 
     def calculate_totals(self, children, local_children=None):
         """Calculate cumulative totals from children and/or local children"""
@@ -327,34 +337,6 @@ class PStatGroup(BaseStat):
             self.t_local = 0
             self.n_calls = 0
             self.t_local_per_call = 0
-
-
-class PStatLocation(PStatGroup):
-    """A row that represents a hierarchical structure other than call-patterns.
-
-    This is used to create a file-based hierarchy for the views
-
-    Children with the name <module> are our "empty" space,
-    our totals are otherwise just the sum of our children.
-    """
-
-    LOCAL_ONLY = True
-
-    def __init__(self, directory, filename, tree=TREE_FILES):
-        super(PStatLocation, self).__init__(directory=directory,
-                                            filename=filename,
-                                            name='package',
-                                            tree=tree)
-
-    def filter_children(self):
-        """Filter our children into regular and local children sets"""
-        real_children = []
-        for child in self.children:
-            if child.name == '<module>':
-                self.local_children.append(child)
-            else:
-                real_children.append(child)
-        self.children = real_children
 
 
 if __name__ == "__main__":

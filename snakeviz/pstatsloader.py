@@ -48,7 +48,6 @@ class PStatsLoader(object):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
         self.nodes, self.tree = self._load_tree(self.stats.stats)
-        self.location_nodes, self.location_tree = self._load_location_tree()
 
     def _load_tree(self, stats):
         """Build a squaremap-compatible model from a pstats class"""
@@ -102,66 +101,6 @@ class PStatsLoader(object):
             nodes[root.caller] = root
         return root
 
-    def _load_location_tree(self):
-        """Build a squaremap-compatible model for location-based hierarchy."""
-        directories = {}
-        files = {}
-        root = PStatGroup('/', 'PYTHONPATH')
-        nodes = self.nodes.copy()
-
-        for child in self.nodes.values():
-            current = directories.get(child.directory)
-            directory, filename = child.directory, child.filename
-
-            if current is None:
-                if directory == '':
-                    current = root
-                else:
-                    current = PStatGroup(directory, '')
-                    nodes[current.caller] = current
-                directories[directory] = current
-
-            if filename == '~':
-                filename = '<built-in>'
-
-            file_current = files.get((directory, filename))
-
-            if file_current is None:
-                file_current = PStatGroup(directory, filename)
-                nodes[file_current.caller] = file_current
-                files[(directory, filename)] = file_current
-                current.children.append(file_current)
-
-            file_current.children.append(child)
-
-        # now link the directories...
-        for key, value in directories.items():
-            if value is root:
-                continue
-            found = False
-
-            while key:
-                new_key, rest = os.path.split(key)
-
-                if new_key == key:
-                    break
-
-                key = new_key
-                parent = directories.get(key)
-
-                if parent:
-                    if value is not parent:
-                        parent.children.append(value)
-                        found = True
-                        break
-
-            if not found:
-                root.children.append(value)
-
-        # lastly, finalize all of the directory records...
-        root.finalize()
-        return nodes, root
-
 
 class PStatRow(object):
     """Simulates a HotShot profiler record using PStats module."""
@@ -201,9 +140,6 @@ class PStatRow(object):
     def __repr__(self):
         attrs = ['directory', 'filename', 'lineno', 'name', 'n_children']
         return simple_repr(self, attrs)
-
-    def add_child(self, child):
-        self.children.append(child)
 
     def weave(self, nodes):
         for caller in self.callers.keys():

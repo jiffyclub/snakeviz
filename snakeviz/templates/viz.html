@@ -32,9 +32,14 @@
     <script>
     var tableData = [
       {% for row in stats_rows %}
-        ["{{row.calls_str}}", "{{row.tottime_str}}", "{{row.tottime_percall_str}}",
-         "{{row.cumtime_str}}", "{{row.cumtime_percall_str}}",
-         "{{row.file_line_func | escape}}"],
+        [
+          "{{row.calls_str}}",
+          "{{row.tottime_str}}",
+          "{{row.tottime_percall_str}}",
+          "{{row.cumtime_str}}",
+          "{{row.cumtime_percall_str}}",
+          "{{row.file_line_func | escape}}"
+        ],
       {%- endfor %}
     ];
     </script>

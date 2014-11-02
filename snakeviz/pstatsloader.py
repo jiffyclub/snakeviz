@@ -41,28 +41,35 @@ def simple_repr(obj, attrs):
     return '{}({})'.format(cname(obj), kwargs)
 
 
+def raw_stats_to_nodes(stats):
+    """ Convert a dictionary of timing stats to dictionary of PStatsNodes.
+
+    Parameters
+    ----------
+    stats : dict
+        Dictionary mapping functions (file, line, name) to profile timings.
+        Typically, this will just be `pstats.Stats.stats`.
+    """
+    nodes = {}
+    for func, raw_timing in stats.items():
+        try:
+            nodes[func] = PStatsNode(func, raw_timing)
+        except ValueError:
+            log.info('Null row: %s', func)
+
+    for row in nodes.values():
+        row.weave(nodes)
+    return nodes
+
+
 class PStatsLoader(object):
     """Load profiler statistic from files."""
 
     def __init__(self, *filenames):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
-        self.nodes = self._load_tree(self.stats.stats)
+        self.nodes = raw_stats_to_nodes(self.stats.stats)
         self.tree = self._find_root(self.nodes)
-
-    def _load_tree(self, stats):
-        """Build a squaremap-compatible model from a pstats class"""
-        nodes = {}
-        for func, raw_timing in stats.items():
-            try:
-                nodes[func] = PStatsNode(func, raw_timing)
-            except ValueError:
-                log.info('Null row: %s', func)
-
-        for row in nodes.values():
-            row.weave(nodes)
-
-        return nodes
 
     def _find_root(self, nodes):
         """Attempt to find/create a reasonable root node from list/set of nodes

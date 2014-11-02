@@ -1,34 +1,21 @@
 import yaml
 
-from snakeviz.pstatsloader import PStatsNode
 from snakeviz.testing import assert_call_graphs_match, temp_pstats_tree
+from snakeviz.upload import stats_to_tree_dict
 
 
-def ptree_to_call_graph(tree):
+def ptree_dict_to_call_graph(tree):
     """Return dictionary representing the call graph of a PStats tree.
 
     Each node is either a single element dictionary or a string (leaf). Timing
     statistics are dropped from this graph---only function names are kept.
     """
-    if tree.children:
-        return {tree.name: [ptree_to_call_graph(c) for c in tree.children]}
+    children = tree.get('children')
+    if children:
+        return {tree['name']: [ptree_dict_to_call_graph(c) for c in children]}
     else:
-        return tree.name
+        return tree['name']
 
-
-def ptree_to_yaml(tree):
-    return yaml.dump(ptree_to_call_graph(tree))
-
-
-def ensure_call_graph(graph):
-    """Ensure that we have a simple call graph dictionary.
-
-    `PStatsNode` instances are converted to dictionary mapping node names to
-    children.
-    """
-    if isinstance(graph, PStatsNode):
-        graph = ptree_to_call_graph(graph)
-    return graph
 
 def test_call_graph():
 
@@ -50,5 +37,6 @@ def test_call_graph():
     """)
 
     with temp_pstats_tree('simple_func()', locals()) as root:
-        graph = ensure_call_graph(root)
+        tree_dict = stats_to_tree_dict(root)
+        graph = ptree_dict_to_call_graph(tree_dict)
         assert_call_graphs_match(graph, expected_graph)

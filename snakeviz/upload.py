@@ -144,6 +144,23 @@ def prof_to_json(prof_name):
     return json.dumps(d, indent=1)
 
 
+def node_attrs(node):
+    """Return dictionary of attributes from a `PStatsNode`."""
+    stats = {
+        'name': node.name,
+        'filename': node.filename,
+        'directory': node.directory,
+        'calls': node.n_calls,
+        'recursive': node.n_calls_recursive,
+        'local': node.t_local,
+        'localPer': node.t_local_per_call,
+        'cumulative': node.t_cumulative,
+        'cumulativePer': node.t_cumulative_per_call,
+        'line_number': node.lineno,
+    }
+    return stats
+
+
 def stats_to_tree_dict(node, parent=None, parent_size=None,
                        recursive_seen=None):
     """
@@ -177,22 +194,8 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
     if recursive_seen is None:
         recursive_seen = set()
 
-    d = {}
-
-    d['name'] = node.name
-    d['filename'] = node.filename
-    d['directory'] = node.directory
-
-    if isinstance(node, pstatsloader.PStatsNode):
-        d['calls'] = node.n_calls
-        d['recursive'] = node.n_calls_recursive
-        d['local'] = node.t_local
-        d['localPer'] = node.t_local_per_call
-        d['cumulative'] = node.t_cumulative
-        d['cumulativePer'] = node.t_cumulative_per_call
-        d['line_number'] = node.lineno
-
-        recursive_seen.add(node)
+    d = node_attrs(node)
+    recursive_seen.add(node)
 
     if parent:
         # figure out the size of this node. This is an arbitrary value
@@ -220,21 +223,8 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
                     child['size'] = child['size'] / children_sum * d['size']
 
             elif children_sum < d['size']:
-
-                d_internal = {'name': node.name,
-                              'filename': node.filename,
-                              'directory': node.directory,
-                              'size': d['size'] - children_sum}
-
-                if isinstance(node, pstatsloader.PStatsNode):
-                    d_internal['calls'] = node.n_calls
-                    d_internal['recursive'] = node.n_calls_recursive
-                    d_internal['local'] = node.t_local
-                    d_internal['localPer'] = node.t_local_per_call
-                    d_internal['cumulative'] = node.t_cumulative
-                    d_internal['cumulativePer'] = node.t_cumulative_per_call
-                    d_internal['line_number'] = node.lineno
-
+                d_internal = node_attrs(node)
+                d_internal['size'] =  d['size'] - children_sum
                 d['children'].append(d_internal)
         else:
             # there were no non-recursive children so get rid of the

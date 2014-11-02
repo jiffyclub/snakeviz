@@ -45,13 +45,13 @@ def temp_pstats_tree(command_str, locals_dict=None):
         yield full_tree.children[1]
 
 
-def tree_to_call_graph(tree):
+def ptree_to_call_graph(tree):
     """Return dictionary representing the call graph of a PStats tree.
 
     Each node is either a single element dictionary or a string (leaf).
     """
     if tree.children:
-        return {tree.name: [tree_to_call_graph(c) for c in tree.children]}
+        return {tree.name: [ptree_to_call_graph(c) for c in tree.children]}
     else:
         return tree.name
 
@@ -63,7 +63,7 @@ def ensure_call_graph(graph):
     children.
     """
     if isinstance(graph, PStatRow):
-        graph = tree_to_call_graph(graph)
+        graph = ptree_to_call_graph(graph)
     return graph
 
 
@@ -85,18 +85,18 @@ def has_children(node):
     return not is_leaf(node)
 
 
-def get_leaf_children(graph):
+def get_barren_children(graph):
     """Return sorted list of children that have no offspring."""
     return sorted(c for c in get_children(graph) if is_leaf(c))
 
 
-def get_children_with_offspring(graph):
+def get_fertile_children(graph):
     """Return sorted list of children that have offspring."""
     return sorted(c for c in get_children(graph) if has_children(c))
 
 
-def assert_leaf_children_match(*nodes):
-    assert_equal(*[get_leaf_children(n) for n in nodes])
+def assert_barren_children_match(*nodes):
+    assert_equal(*[get_barren_children(n) for n in nodes])
 
 
 def assert_graph_nodes_match(node, expected_node):
@@ -104,10 +104,10 @@ def assert_graph_nodes_match(node, expected_node):
         assert_equal(node, expected_node)
     else:
         assert_equal(node_name(node), node_name(expected_node))
-        assert_leaf_children_match(node, expected_node)
+        assert_barren_children_match(node, expected_node)
 
-        children = get_children_with_offspring(node)
-        expected_children = get_children_with_offspring(expected_node)
+        children = get_fertile_children(node)
+        expected_children = get_fertile_children(expected_node)
         assert_equal(len(children), len(expected_children))
 
         for subgraph, expected_subgraph in zip(children, expected_children):

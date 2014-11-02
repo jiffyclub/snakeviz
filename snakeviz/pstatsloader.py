@@ -69,7 +69,7 @@ class PStatsLoader(object):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
         self.nodes = raw_stats_to_nodes(self.stats.stats)
-        self.tree = self._find_root(self.nodes)
+        self.tree, self.forest = self._find_root(self.nodes)
 
     def _find_root(self, nodes):
         """Attempt to find/create a reasonable root node from list/set of nodes
@@ -98,16 +98,16 @@ class PStatsLoader(object):
                 if value not in roots:
                     roots.append(value)
 
-        if len(roots) > 1:
-            root = PStatsForest(
-                directory='*',
-                filename='*',
-                name=gettext("<profiling run>"),
-                children=roots,
-            )
-            root.finalize()
-            nodes[root.caller] = root
-        return root
+        forest = PStatsForest(
+            directory='*',
+            filename='*',
+            name=gettext("<profiling run>"),
+            children=roots,
+        )
+        forest.finalize()
+        nodes[forest.caller] = forest
+
+        return root, forest
 
 
 class PStatsNode(object):

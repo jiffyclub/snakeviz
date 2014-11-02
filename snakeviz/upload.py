@@ -139,13 +139,13 @@ def prof_to_json(prof_name):
     """
     loader = pstatsloader.PStatsLoader(prof_name)
 
-    d = stats_to_tree_dict(loader.tree.children[0])
+    d = stats_to_tree_dict(loader.tree)
 
     return json.dumps(d, indent=1)
 
 
 def stats_to_tree_dict(node, parent=None, parent_size=None,
-                        recursive_seen=None):
+                       recursive_seen=None):
     """
     `stats_to_tree_dict` is a specialized function for converting
     a `pstatsloader.PStatsLoader` profile representation into a tree
@@ -217,7 +217,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         for child in node.children:
             if child not in recursive_seen:
                 child_dict = stats_to_tree_dict(child, node, d['size'],
-                                                 recursive_seen)
+                                                recursive_seen)
                 d['children'].append(child_dict)
 
         if d['children']:

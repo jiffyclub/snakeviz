@@ -36,24 +36,29 @@ def temp_pstats_tree(command_str, locals_dict=None):
     with temp_file() as filename:
         profiler.dump_stats(filename)
 
-        full_tree = PStatsLoader(filename).tree
-        # The first child is always from the profiler,... I think.
-        profiler_tree = full_tree.children[0]
+        tree = PStatsLoader(filename).tree
+        # XXX: For some reason, the first child is always to sys.setprofile.
+        profiler_tree = tree.children[0]
         assert profiler_tree.name == 'setprofile'
 
         # The second child is what actually runs the command string.
-        yield full_tree.children[1]
+        yield tree.children[1]
 
 
 def ptree_to_call_graph(tree):
     """Return dictionary representing the call graph of a PStats tree.
 
-    Each node is either a single element dictionary or a string (leaf).
+    Each node is either a single element dictionary or a string (leaf). Timing
+    statistics are dropped from this graph---only function names are kept.
     """
     if tree.children:
         return {tree.name: [ptree_to_call_graph(c) for c in tree.children]}
     else:
         return tree.name
+
+
+def ptree_to_yaml(tree):
+    return yaml.dump(ptree_to_call_graph(tree))
 
 
 def ensure_call_graph(graph):
@@ -135,7 +140,6 @@ def test_call_graph():
         a = range(3)
         len(a)
         sub_func()
-
 
     expected_graph = yaml.load("""
         <module>:

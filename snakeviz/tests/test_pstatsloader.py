@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import yaml
 from nose.tools import assert_equal
 
-from snakeviz.pstatsloader import PStatsLoader, PStatRow
+from snakeviz.pstatsloader import PStatsLoader, PStatsNode
 
 
 @contextmanager
@@ -21,7 +21,7 @@ def temp_file(suffix='', prefix='tmp', dir=None):
 
 @contextmanager
 def temp_pstats_tree(command_str, locals_dict=None):
-    """Yield temporary `PStatRow` with representing the root of the call graph.
+    """Yield temporary `PStatsNode` with representing the root of the call graph.
 
     Parameters
     ----------
@@ -59,10 +59,10 @@ def ptree_to_call_graph(tree):
 def ensure_call_graph(graph):
     """Ensure that we have a simple call graph dictionary.
 
-    `PStatRow` instances are converted to dictionary mapping node names to
+    `PStatsNode` instances are converted to dictionary mapping node names to
     children.
     """
-    if isinstance(graph, PStatRow):
+    if isinstance(graph, PStatsNode):
         graph = ptree_to_call_graph(graph)
     return graph
 

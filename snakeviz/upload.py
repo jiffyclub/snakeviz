@@ -154,9 +154,9 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
 
     Parameters
     ----------
-    node : `pstatsloader.PStatsRow` or `pstatsloader.PStatGroup`
+    node : `pstatsloader.PStatsNode` or `pstatsloader.PStatsForest`
         One node of the call tree.
-    parent : `pstatsloader.PStatsRow` or `pstatsloader.PStatGroup`
+    parent : `pstatsloader.PStatsNode` or `pstatsloader.PStatsForest`
         Parent of `node`. Optional for the root node.
     parent_size : float
         Calculated size of `parent`. Optional for the root node.
@@ -183,7 +183,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
     d['filename'] = node.filename
     d['directory'] = node.directory
 
-    if isinstance(node, pstatsloader.PStatRow):
+    if isinstance(node, pstatsloader.PStatsNode):
         d['calls'] = node.n_calls
         d['recursive'] = node.n_calls_recursive
         d['local'] = node.t_local
@@ -198,7 +198,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         # figure out the size of this node. This is an arbitrary value
         # but it's important that the child size is no larger
         # than the parent size.
-        if isinstance(parent, pstatsloader.PStatGroup):
+        if isinstance(parent, pstatsloader.PStatsForest):
             if parent.cumulative:
                 d['size'] = node.cumulative / parent.cumulative * parent_size
             else:
@@ -235,7 +235,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
                               'directory': node.directory,
                               'size': d['size'] - children_sum}
 
-                if isinstance(node, pstatsloader.PStatRow):
+                if isinstance(node, pstatsloader.PStatsNode):
                     d_internal['calls'] = node.n_calls
                     d_internal['recursive'] = node.n_calls_recursive
                     d_internal['local'] = node.t_local

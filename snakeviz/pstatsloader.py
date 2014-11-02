@@ -47,21 +47,22 @@ class PStatsLoader(object):
     def __init__(self, *filenames):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
-        self.nodes, self.tree = self._load_tree(self.stats.stats)
+        self.nodes = self._load_tree(self.stats.stats)
+        self.tree = self._find_root(self.nodes)
 
     def _load_tree(self, stats):
         """Build a squaremap-compatible model from a pstats class"""
         nodes = {}
         for func, raw_timing in stats.items():
             try:
-                nodes[func] = PStatRow(func, raw_timing)
+                nodes[func] = PStatsNode(func, raw_timing)
             except ValueError:
                 log.info('Null row: %s', func)
 
         for row in nodes.values():
             row.weave(nodes)
 
-        return nodes, self._find_root(nodes)
+        return nodes
 
     def _find_root(self, nodes):
         """Attempt to find/create a reasonable root node from list/set of nodes
@@ -69,7 +70,7 @@ class PStatsLoader(object):
         Parameters
         ----------
         nodes: dict
-            Mapping of ((module-path, line-number, function-name), PStatRow).
+            Mapping of ((module-path, line-number, function-name), PStatsNode).
 
         TODO: still need more robustness here, particularly in the case of
         threaded programs.  Should be tracing back each row to root, breaking
@@ -91,7 +92,7 @@ class PStatsLoader(object):
                     roots.append(value)
 
         if len(roots) > 1:
-            root = PStatGroup(
+            root = PStatsForest(
                 directory='*',
                 filename='*',
                 name=gettext("<profiling run>"),
@@ -102,7 +103,7 @@ class PStatsLoader(object):
         return root
 
 
-class PStatRow(object):
+class PStatsNode(object):
     """Simulates a HotShot profiler record using PStats module."""
 
     def __init__(self, caller, raw_timing):
@@ -159,7 +160,7 @@ class PStatRow(object):
         return 0
 
 
-class PStatGroup(object):
+class PStatsForest(object):
     """A node/record that holds a group of children but isn't a raw-record
     based group
 
@@ -226,7 +227,7 @@ class PStatGroup(object):
             values = []
 
             for child in children:
-                if isinstance(child, PStatGroup):
+                if isinstance(child, PStatsForest):
                     values.append(getattr(child, field, 0))
 
             value = sum(values)

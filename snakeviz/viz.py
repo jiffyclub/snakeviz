@@ -42,7 +42,7 @@ def stats_rows(filename):
     rows = []
 
     for r in loader.nodes.values():
-        if isinstance(r, pstatsloader.PStatRow):
+        if isinstance(r, pstatsloader.PStatsNode):
             calls_value = r.n_calls_recursive
             if r.n_calls_recursive > r.n_calls:
                 calls_str = '{0}/{1}'.format(r.n_calls_recursive, r.n_calls)

@@ -24,8 +24,6 @@ import logging
 import os
 import pstats
 
-from gettext import gettext
-
 
 log = logging.getLogger(__name__)
 
@@ -63,21 +61,34 @@ def raw_stats_to_nodes(stats):
 
 
 class PStatsLoader(object):
-    """Load profiler statistic from files."""
+    """Load profiler statistic from files.
+
+    This class uses function descriptors from `pstats` as keys for
+    dictionaries, where a function is described by:
+
+        (module-path, line-number, function-name)
+
+    Attributes
+    ----------
+    nodes : dict
+        Mapping from function descriptor to `PStatsNode`.
+    tree : PStatsNode
+        The root node of the profiler statistics tree. If there are multiple
+        trees, only the slowest tree is stored here. See `forest` for more.
+    forest : list
+        The list of all profiler statistics trees.
+    """
 
     def __init__(self, *filenames):
         self.filename = filenames
         self.stats = pstats.Stats(*filenames)
         self.nodes = raw_stats_to_nodes(self.stats.stats)
-        self.tree, self.forest = self._find_root(self.nodes)
+        self.tree = self._find_root(self.nodes)
+        self.forest = self._find_forest(self.nodes, self.tree)
 
-    def _find_root(self, nodes):
+    @staticmethod
+    def _find_root(nodes):
         """Attempt to find/create a reasonable root node from list/set of nodes
-
-        Parameters
-        ----------
-        nodes: dict
-            Mapping of ((module-path, line-number, function-name), PStatsNode).
 
         TODO: still need more robustness here, particularly in the case of
         threaded programs.  Should be tracing back each row to root, breaking
@@ -85,29 +96,21 @@ class PStatsLoader(object):
         roots (or, if they are all on the same root, use that).
 
         """
-        maxes = sorted(nodes.values(), key=lambda x: x.t_cumulative)
-        if not maxes:
+        cumulative_times = sorted(nodes.values(), key=lambda x: x.t_cumulative)
+        if not cumulative_times:
             raise RuntimeError("""Null results!""")
+        return cumulative_times[-1]
 
-        root = maxes[-1]
-        roots = [root]
+    @staticmethod
+    def _find_forest(nodes, root):
+        forest = [root]
 
         for key, value in nodes.items():
             if not value.parents:
                 log.debug('Found node root: %s', value)
-                if value not in roots:
-                    roots.append(value)
-
-        forest = PStatsForest(
-            directory='*',
-            filename='*',
-            name=gettext("<profiling run>"),
-            children=roots,
-        )
-        forest.finalize()
-        nodes[forest.caller] = forest
-
-        return root, forest
+                if value not in forest:
+                    forest.append(value)
+        return forest
 
 
 class PStatsNode(object):
@@ -165,95 +168,3 @@ class PStatsNode(object):
                 ct = child._callers[self.caller]
             return float(ct)/total
         return 0
-
-
-class PStatsForest(object):
-    """A node/record that holds a group of children but isn't a raw-record
-    based group
-
-    Children with the name <module> are our "empty" space,
-    our totals are otherwise just the sum of our children.
-
-    Parameters
-    ----------
-    directory : str
-        Directory (package) containing the executed module.
-    filename : str
-        File (module) containing the executed function.
-    name : str
-        Name of the executed function.
-
-    """
-
-    def __init__(self, directory='', filename='', name='package',
-                 children=None, local_children=None):
-        self.directory = directory
-        self.filename = filename
-        self.name = ''
-        self.caller = (directory, filename, name)
-        self.children = children or []
-        self.parents = []
-        self.local_children = local_children or []
-
-    def __repr__(self):
-        return simple_repr(self, ['directory', 'filename', 'name'])
-
-    def finalize(self, already_done=None):
-        """Finalize our values (recursively) taken from our children"""
-        if already_done is None:
-            already_done = {}
-        if self in already_done:
-            return True
-
-        already_done[self] = True
-        self.filter_children()
-        children = self.children
-
-        for child in children:
-            if hasattr(child, 'finalize'):
-                child.finalize(already_done)
-            child.parents.append(self)
-
-        self.calculate_totals(self.children, self.local_children)
-
-    def filter_children(self):
-        """Filter our children into regular and local children sets"""
-        real_children = []
-        for child in self.children:
-            if child.name == '<module>':
-                self.local_children.append(child)
-            else:
-                real_children.append(child)
-        self.children = real_children
-
-    def calculate_totals(self, children, local_children=None):
-        """Calculate cumulative totals from children and/or local children"""
-        pairs = (('n_calls_recursive', 'n_calls'), ('t_cumulative', 't_local'))
-
-        for field, local_field in pairs:
-            values = []
-
-            for child in children:
-                if isinstance(child, PStatsForest):
-                    values.append(getattr(child, field, 0))
-
-            value = sum(values)
-            setattr(self, field, value)
-
-        if self.n_calls_recursive:
-            time = self.t_cumulative / float(self.n_calls_recursive)
-            self.t_cumulative_per_call = time
-        else:
-            self.n_calls_recursive = 0
-
-        if local_children:
-            for field in ('t_local', 'n_calls'):
-                value = sum([getattr(child, field, 0) for child in children])
-                setattr(self, field, value)
-
-            if self.n_calls:
-                self.t_local_per_call = self.t_local / self.n_calls
-        else:
-            self.t_local = 0
-            self.n_calls = 0
-            self.t_local_per_call = 0

@@ -154,9 +154,9 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
 
     Parameters
     ----------
-    node : `pstatsloader.PStatsNode` or `pstatsloader.PStatsForest`
+    node : `pstatsloader.PStatsNode`
         One node of the call tree.
-    parent : `pstatsloader.PStatsNode` or `pstatsloader.PStatsForest`
+    parent : `pstatsloader.PStatsNode`
         Parent of `node`. Optional for the root node.
     parent_size : float
         Calculated size of `parent`. Optional for the root node.
@@ -198,16 +198,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         # figure out the size of this node. This is an arbitrary value
         # but it's important that the child size is no larger
         # than the parent size.
-        if isinstance(parent, pstatsloader.PStatsForest):
-            if parent.cumulative:
-                d['size'] = node.cumulative / parent.cumulative * parent_size
-            else:
-                # this is a catch-all when it's not possible
-                # to calculate a size. hopefully this doesn't come
-                # up too often.
-                d['size'] = 0
-        else:
-            d['size'] = parent.child_cumulative_time(node) * parent_size
+        d['size'] = parent.child_cumulative_time(node) * parent_size
     else:
         # default size for the root node
         d['size'] = 1000

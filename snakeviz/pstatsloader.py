@@ -139,7 +139,7 @@ class PStatsNode(object):
         self.filename = fname
         self.name = func
         self.lineno = line
-        self.callers = callers
+        self._callers = callers
 
     @property
     def n_children(self):
@@ -150,7 +150,7 @@ class PStatsNode(object):
         return simple_repr(self, attrs)
 
     def weave(self, nodes):
-        for caller in self.callers.keys():
+        for caller in self._callers.keys():
             parent = nodes.get(caller)
             if parent:
                 self.parents.append(parent)
@@ -160,9 +160,9 @@ class PStatsNode(object):
         total = self.t_cumulative
         if total:
             try:
-                (cc, nc, tt, ct) = child.callers[self.caller]
+                (cc, nc, tt, ct) = child._callers[self.caller]
             except TypeError:
-                ct = child.callers[self.caller]
+                ct = child._callers[self.caller]
             return float(ct)/total
         return 0
 

@@ -162,7 +162,7 @@ def node_attrs(node):
 
 
 def stats_to_tree_dict(node, parent=None, parent_size=None,
-                       recursive_seen=None):
+                       recursive_seen=None, max_depth=10, _i_depth=0):
     """
     `stats_to_tree_dict` is a specialized function for converting
     a `pstatsloader.PStatsLoader` profile representation into a tree
@@ -207,11 +207,14 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
         d['size'] = 1000
 
     if node.children:
+        depth = _i_depth + 1
         d['children'] = []
         for child in node.children:
-            if child not in recursive_seen:
+            if child not in recursive_seen and depth < max_depth:
                 child_dict = stats_to_tree_dict(child, node, d['size'],
-                                                recursive_seen)
+                                                recursive_seen,
+                                                max_depth=max_depth,
+                                                _i_depth=depth)
                 d['children'].append(child_dict)
 
         if d['children']:
@@ -224,7 +227,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
 
             elif children_sum < d['size']:
                 d_internal = node_attrs(node)
-                d_internal['size'] =  d['size'] - children_sum
+                d_internal['size'] = d['size'] - children_sum
                 d['children'].append(d_internal)
         else:
             # there were no non-recursive children so get rid of the

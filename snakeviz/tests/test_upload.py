@@ -17,7 +17,16 @@ def ptree_dict_to_call_graph(tree):
         return tree['name']
 
 
-def test_call_graph():
+def ptree_to_call_graph(tree, **kwargs):
+    """Return a call graph from a PStatsLoader tree.
+
+    This uses `stats_to_tree_dict` for testing.
+    """
+    tree_dict = stats_to_tree_dict(tree, **kwargs)
+    return ptree_dict_to_call_graph(tree_dict)
+
+
+def test_stats_to_tree_dict():
 
     def sub_func():
         len([])
@@ -37,6 +46,8 @@ def test_call_graph():
     """)
 
     with temp_pstats_tree('simple_func()', locals()) as root:
-        tree_dict = stats_to_tree_dict(root)
-        graph = ptree_dict_to_call_graph(tree_dict)
+        graph = ptree_to_call_graph(root)
         assert_call_graphs_match(graph, expected_graph)
+
+        graph = ptree_to_call_graph(root, max_depth=2)
+        assert_call_graphs_match(graph, {'<module>': ['simple_func']})

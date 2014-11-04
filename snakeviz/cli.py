@@ -33,6 +33,11 @@ def main():
                              "Python's webbrowser module, which can also be "
                              "overridden with BROWSER environment variable")
 
+    parser.add_argument('-d', '--tree-depth', type=int, default=10,
+                        help="Maximum depth of profile tree. Setting this "
+                             "to a low number can fix upload issues with "
+                             "large profile runs.")
+
     args = parser.parse_args()
 
     filename = os.path.abspath(args.filename)
@@ -60,11 +65,12 @@ def main():
     # Go ahead and import the tornado app and start it; we do an inline import
     # here to avoid the extra overhead when just running the cli for --help and
     # the like
-    from .main import app
+    from .main import create_app
     import tornado.ioloop
 
+    json_kwargs = {'tree_depth': args.tree_depth}
+    app = create_app(single_user_mode=True, json_kwargs=json_kwargs)
     app.listen(port, address=hostname)
-    app.settings['single_user_mode'] = True
 
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))

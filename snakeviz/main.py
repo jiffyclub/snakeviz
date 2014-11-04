@@ -6,7 +6,7 @@ import tornado.ioloop
 import tornado.web
 
 
-def create_app(single_user_mode=True):
+def create_app(single_user_mode=True, json_kwargs=None):
     """Create snakeviz Tornado app.
 
     Parameters
@@ -14,12 +14,16 @@ def create_app(single_user_mode=True):
     single_user_mode : bool
         If True, run in single-user mode, i.e. offline.
     """
+    json_kwargs = {} if json_kwargs is None else json_kwargs
+
     if single_user_mode:
-        handlers = [(r'/json/file/(.*)\.json', 'snakeviz.upload.JSONHandler'),
+        handlers = [(r'/json/file/(.*)\.json',
+                     'snakeviz.upload.JSONHandler', json_kwargs),
                     (r'/viz/file/(.*)', 'snakeviz.viz.VizHandler')]
     else:
         handlers = [(r'/', 'snakeviz.upload.UploadHandler'),
-                    (r'/json/(.*)\.json', 'snakeviz.upload.JSONHandler'),
+                    (r'/json/(.*)\.json',
+                     'snakeviz.upload.JSONHandler', json_kwargs),
                     (r'/viz/(.*)', 'snakeviz.viz.VizHandler')]
 
     settings = {
@@ -29,9 +33,8 @@ def create_app(single_user_mode=True):
     }
     return tornado.web.Application(handlers, **settings)
 
-app = create_app()
-
 
 if __name__ == '__main__':
+    app = create_app()
     app.listen(8080)
     tornado.ioloop.IOLoop.instance().start()

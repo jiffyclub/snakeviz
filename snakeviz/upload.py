@@ -80,6 +80,9 @@ class JSONHandler(handler.Handler):
     _timeout = None
     _result = None
 
+    def initialize(self, tree_depth):
+        self._max_tree_depth = tree_depth
+
     @asynchronous
     def get(self, prof_name):
         if self.request.path.startswith('/json/file/'):
@@ -93,7 +96,8 @@ class JSONHandler(handler.Handler):
             filename = storage_name(prof_name)
 
         self._pool = mp.Pool(1, maxtasksperchild=1)
-        self._result = self._pool.apply_async(prof_to_json, (filename,))
+        args = (filename, self._max_tree_depth)
+        self._result = self._pool.apply_async(prof_to_json, args)
 
         # TODO: Make the timeout parameters configurable
         self._timeout = 10  # in seconds
@@ -122,7 +126,7 @@ class JSONHandler(handler.Handler):
         self.finish()
 
 
-def prof_to_json(prof_name):
+def prof_to_json(prof_name, max_tree_depth):
     """
     Convert profiles stats in a `pstats` compatible file to a JSON string.
 
@@ -139,7 +143,7 @@ def prof_to_json(prof_name):
     """
     loader = pstatsloader.PStatsLoader(prof_name)
 
-    d = stats_to_tree_dict(loader.tree)
+    d = stats_to_tree_dict(loader.tree, max_depth=max_tree_depth)
 
     return json.dumps(d, indent=1)
 

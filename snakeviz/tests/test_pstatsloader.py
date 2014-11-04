@@ -30,6 +30,7 @@ def ensure_call_graph(graph):
         graph = ptree_to_call_graph(graph)
     return graph
 
+
 def test_call_graph():
 
     def sub_func():

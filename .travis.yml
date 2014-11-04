@@ -7,7 +7,7 @@ python:
 install:
   - pip install tornado
   - pip install jinja2
-  - pip install .
+  - python setup.py install
 # command to run tests
 script:
   - nosetests

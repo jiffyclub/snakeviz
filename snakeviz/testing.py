@@ -85,9 +85,11 @@ def has_children(node):
 
 def get_barren_children(graph):
     """Return sorted list of children that have no offspring."""
-    # XXX: Add node-name check to debug Travis issue.
+    # XXX: Add node-name check to node doesn't point itself.
+    # `stats_to_tree_dict` links a function to itself when the total size of
+    # the children doesn't add up to the size of the parent function.
     return sorted(c for c in get_children(graph)
-                  if is_leaf(c))
+                  if is_leaf(c) and node_name(graph) != c)
 
 
 def get_fertile_children(graph):

@@ -229,10 +229,10 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
             if children_sum > d['size']:
                 for child in d['children']:
                     child['size'] = child['size'] / children_sum * d['size']
-
             elif children_sum < d['size']:
                 d_internal = node_attrs(node)
                 d_internal['size'] = d['size'] - children_sum
+                # XXX: This cyclic link causes unexpected cycles in testing.
                 d['children'].append(d_internal)
         else:
             # there were no non-recursive children so get rid of the

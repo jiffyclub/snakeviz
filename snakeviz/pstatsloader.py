@@ -39,7 +39,7 @@ def simple_repr(obj, attrs):
     return '{}({})'.format(cname(obj), kwargs)
 
 
-def raw_stats_to_nodes(stats):
+def raw_stats_to_nodes(stats, filter_names=None):
     """ Convert a dictionary of timing stats to dictionary of PStatsNodes.
 
     Parameters
@@ -48,12 +48,16 @@ def raw_stats_to_nodes(stats):
         Dictionary mapping functions (file, line, name) to profile timings.
         Typically, this will just be `pstats.Stats.stats`.
     """
+    filter_names = [] if filter_names is None else filter_names
+
     nodes = {}
     for func, raw_timing in stats.items():
         try:
-            nodes[func] = PStatsNode(func, raw_timing)
+            if func[-1] not in filter_names:
+                nodes[func] = PStatsNode(func, raw_timing)
         except ValueError:
             log.info('Null row: %s', func)
+            log.info('Timing: {}'.format(raw_timing))
 
     for row in nodes.values():
         row.weave(nodes)
@@ -68,6 +72,13 @@ class PStatsLoader(object):
 
         (module-path, line-number, function-name)
 
+    Parameters
+    ----------
+    filename : str
+        Profile output from `Profiler.dump_stats(filename)`.
+    filter_names : list of str
+        Names of functions to filter out of profile output.
+
     Attributes
     ----------
     nodes : dict
@@ -79,10 +90,11 @@ class PStatsLoader(object):
         The list of all profiler statistics trees.
     """
 
-    def __init__(self, *filenames):
-        self.filename = filenames
-        self.stats = pstats.Stats(*filenames)
-        self.nodes = raw_stats_to_nodes(self.stats.stats)
+    def __init__(self, filename, filter_names=None):
+        self.filename = filename
+        self.stats = pstats.Stats(filename)
+        self.nodes = raw_stats_to_nodes(self.stats.stats,
+                                        filter_names=filter_names)
         self.tree = self._find_root(self.nodes)
         self.forest = self._find_forest(self.nodes, self.tree)
 
@@ -105,11 +117,10 @@ class PStatsLoader(object):
     def _find_forest(nodes, root):
         forest = [root]
 
-        for key, value in nodes.items():
-            if not value.parents:
-                log.debug('Found node root: %s', value)
-                if value not in forest:
-                    forest.append(value)
+        for stats_node in nodes.values():
+            if not stats_node.parents and stats_node not in forest:
+                log.debug('Found node root: %s', stats_node.name)
+                forest.append(stats_node)
         return forest
 
 
@@ -120,10 +131,10 @@ class PStatsNode(object):
         self.children = []
         self.parents = []
 
-        fname, line, func = self.caller = caller
+        filename, line, func = self._func_key = caller
         try:
-            dirname = os.path.dirname(fname)
-            fname = os.path.basename(fname)
+            dirname = os.path.dirname(filename)
+            filename = os.path.basename(filename)
         except ValueError:
             dirname = ''
 
@@ -139,7 +150,7 @@ class PStatsNode(object):
         self.t_cumulative = ct
         self.t_cumulative_per_call = ct/max(nc, EPS)
         self.directory = dirname
-        self.filename = fname
+        self.filename = filename
         self.name = func
         self.lineno = line
         self._callers = callers
@@ -163,8 +174,8 @@ class PStatsNode(object):
         total = self.t_cumulative
         if total:
             try:
-                (cc, nc, tt, ct) = child._callers[self.caller]
+                (cc, nc, tt, ct) = child._callers[self._func_key]
             except TypeError:
-                ct = child._callers[self.caller]
+                ct = child._callers[self._func_key]
             return float(ct)/total
         return 0

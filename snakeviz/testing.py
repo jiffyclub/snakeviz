@@ -2,6 +2,10 @@ import os
 import profile
 import tempfile
 from contextlib import contextmanager
+try:
+    import Queue as queue
+except ImportError:
+    import queue
 
 from nose.tools import assert_equal
 
@@ -15,12 +19,28 @@ def temp_file(suffix='', prefix='tmp', dir=None):
         yield filename
     finally:
         os.close(fd)
-        os.unlink(filename)
+        os.remove(filename)
+
+
+def find_node(root, name, _nodes=None):
+    """Return node with given name based on breadth-first search."""
+    _nodes = _nodes if _nodes is not None else queue.Queue()
+
+    if root.name == name:
+        return root
+    else:
+        for child in root.children:
+            _nodes.put(child)
+        if _nodes.qsize() == 0:
+            return None
+
+        return find_node(_nodes.get(), name, _nodes=_nodes)
 
 
 @contextmanager
-def temp_pstats_tree(command_str, locals_dict=None):
-    """Yield temporary `PStatsNode` with representing the root of the call graph.
+def temp_pstats_tree(command_str, locals_dict=None, root_name=None,
+                     filter_names='default'):
+    """Yield temporary `PStatsNode` representing the root of the call graph.
 
     Parameters
     ----------
@@ -29,42 +49,45 @@ def temp_pstats_tree(command_str, locals_dict=None):
     locals_dict : dict
         Dictionary of local variables for command execution.
     """
+    if filter_names == 'default':
+        filter_names = ['setprofile']
+
     profiler = profile.Profile()
     profiler.runctx(command_str, globals(), locals_dict)
 
     with temp_file() as filename:
         profiler.dump_stats(filename)
 
-        tree = PStatsLoader(filename).tree
-        # XXX: For some reason, the first child is always to sys.setprofile.
-        profiler_tree = tree.children[0]
-        assert profiler_tree.name == 'setprofile'
-
-        # The second child is what actually runs the command string.
-        yield tree.children[1]
+        tree = PStatsLoader(filename, filter_names=filter_names).tree
+        if root_name is None:
+            yield tree
+        else:
+            yield find_node(tree, root_name)
 
 
 def node_name(graph):
     assert len(graph) == 1
-    return graph.keys()[0]
+    return list(graph.keys())[0]
 
 
 def get_children(graph):
     assert len(graph) == 1
-    return graph.values()[0]
+    return list(graph.values())[0]
 
 
 def is_leaf(node):
-    return isinstance(node, basestring)
+    return not has_children(node)
 
 
 def has_children(node):
-    return not is_leaf(node)
+    return hasattr(node, 'keys')
 
 
 def get_barren_children(graph):
     """Return sorted list of children that have no offspring."""
-    return sorted(c for c in get_children(graph) if is_leaf(c))
+    # XXX: Add node-name check to debug Travis issue.
+    return sorted(c for c in get_children(graph)
+                  if is_leaf(c))
 
 
 def get_fertile_children(graph):

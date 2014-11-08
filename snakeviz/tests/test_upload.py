@@ -32,22 +32,19 @@ def test_stats_to_tree_dict():
         len([])
 
     def simple_func():
-        a = range(3)
-        len(a)
+        len([])
         sub_func()
 
     expected_graph = yaml.load("""
-        <module>:
-            - simple_func:
-                - range
+        simple_func:
+            - len
+            - sub_func:
                 - len
-                - sub_func:
-                    - len
     """)
 
-    with temp_pstats_tree('simple_func()', locals()) as root:
+    with temp_pstats_tree('simple_func()', locals(), 'simple_func') as root:
         graph = ptree_to_call_graph(root)
         assert_call_graphs_match(graph, expected_graph)
 
         graph = ptree_to_call_graph(root, max_depth=2)
-        assert_call_graphs_match(graph, {'<module>': ['simple_func']})
+        assert_call_graphs_match(graph, {'simple_func': ['len', 'sub_func']})

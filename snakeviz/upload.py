@@ -213,6 +213,7 @@ def stats_to_tree_dict(node, parent=None, parent_size=None,
     if node.children:
         depth = _i_depth + 1
         d['children'] = []
+
         for child in node.children:
             if child not in recursive_seen and depth < max_depth:
                 child_dict = stats_to_tree_dict(child, node, d['size'],

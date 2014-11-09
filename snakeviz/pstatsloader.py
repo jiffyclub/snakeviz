@@ -1,265 +1,181 @@
-"""Module to load cProfile/profile records as a tree of records"""
+"""Module to load cProfile/profile records as a tree of records
+
+The nodes (dict-values) of the PStats tree are timing tuples with:
+    0. The number of times this function was called, not counting direct or
+       indirect recursion.
+    1. The number of times this function appears on the stack, minus one.
+    2. Total time spent internal to this function.
+    3. Cumulative time that this function was present on the stack.  In
+       non-recursive functions, this is the total execution time from start to
+       finish of each invocation of a function, including time spent in all
+       sub-functions.
+    4. A dictionary indicating the number of times each parent called us, with
+       keys and values:
+
+         {(module-path, line-number, function-name) : (tuple elements 0-to-3)}
+
+Keys of the PStats tree are (module-path, line-number, function-name)-tuples,
+just like the keys of node-value[4].
+
+"""
 from __future__ import print_function
 
-import pstats, os, logging
+import logging
+import os
+import pstats
+
+
 log = logging.getLogger(__name__)
-#log.setLevel( logging.DEBUG )
-from gettext import gettext as _
 
-TREE_CALLS, TREE_FILES = list(range( 2))
+EPS = 1e-14
 
-class PStatsLoader( object ):
-    """Load profiler statistic from """
-    def __init__( self, *filenames ):
-        self.filename = filenames
-        self.rows = {}
-        self.stats = pstats.Stats( *filenames )
-        self.tree = self.load( self.stats.stats )
-        self.location_rows = {}
-        self.location_tree = l = self.load_location( )
-    def load( self, stats ):
-        """Build a squaremap-compatible model from a pstats class"""
-        rows = self.rows
-        for func, raw in stats.items():
-            try:
-                rows[func] = row = PStatRow( func,raw )
-            except ValueError as err:
-                log.info( 'Null row: %s', func )
-        for row in rows.values():
-            row.weave( rows )
-        return self.find_root( rows )
 
-    def find_root( self, rows ):
-        """Attempt to find/create a reasonable root node from list/set of rows
+def cname(obj):
+    return obj.__class__.__name__
 
-        rows -- key: PStatRow mapping
+
+def simple_repr(obj, attrs):
+    kwargs = ', '.join(['{}={!r}'.format(k, getattr(obj, k)) for k in attrs])
+    return '{}({})'.format(cname(obj), kwargs)
+
+
+def raw_stats_to_nodes(stats, filter_names=None):
+    """ Convert a dictionary of timing stats to dictionary of PStatsNodes.
+
+    Parameters
+    ----------
+    stats : dict
+        Dictionary mapping functions (file, line, name) to profile timings.
+        Typically, this will just be `pstats.Stats.stats`.
+    """
+    filter_names = [] if filter_names is None else filter_names
+
+    nodes = {}
+    for func, raw_timing in stats.items():
+        try:
+            if func[-1] not in filter_names:
+                nodes[func] = PStatsNode(func, raw_timing)
+        except ValueError:
+            log.info('Null row: %s', func)
+            log.info('Timing: {}'.format(raw_timing))
+
+    for row in nodes.values():
+        row.weave(nodes)
+    return nodes
+
+
+class PStatsLoader(object):
+    """Load profiler statistic from files.
+
+    This class uses function descriptors from `pstats` as keys for
+    dictionaries, where a function is described by:
+
+        (module-path, line-number, function-name)
+
+    Parameters
+    ----------
+    filename : str
+        Profile output from `Profiler.dump_stats(filename)`.
+    filter_names : list of str
+        Names of functions to filter out of profile output.
+
+    Attributes
+    ----------
+    nodes : dict
+        Mapping from function descriptor to `PStatsNode`.
+    tree : PStatsNode
+        The root node of the profiler statistics tree. If there are multiple
+        trees, only the slowest tree is stored here. See `forest` for more.
+    forest : list
+        The list of all profiler statistics trees.
+    """
+
+    def __init__(self, filename, filter_names=None):
+        self.filename = filename
+        self.stats = pstats.Stats(filename)
+        self.nodes = raw_stats_to_nodes(self.stats.stats,
+                                        filter_names=filter_names)
+        self.tree = self._find_root(self.nodes)
+        self.forest = self._find_forest(self.nodes, self.tree)
+
+    @staticmethod
+    def _find_root(nodes):
+        """Attempt to find/create a reasonable root node from list/set of nodes
 
         TODO: still need more robustness here, particularly in the case of
         threaded programs.  Should be tracing back each row to root, breaking
-        cycles by sorting on cummulative time, and then collecting the traced
+        cycles by sorting on cumulative time, and then collecting the traced
         roots (or, if they are all on the same root, use that).
+
         """
-        maxes = sorted( rows.values(), key = lambda x: x.cummulative )
-        if not maxes:
-            raise RuntimeError( """Null results!""" )
-        root = maxes[-1]
-        roots = [root]
-        for key,value in rows.items():
-            if not value.parents:
-                log.debug( 'Found node root: %s', value )
-                if value not in roots:
-                    roots.append( value )
-        if len(roots) > 1:
-            root = PStatGroup(
-                directory='*',
-                filename='*',
-                name=_("<profiling run>"),
-                children= roots,
-            )
-            root.finalize()
-            self.rows[ root.key ] = root
-        return root
-    def load_location( self ):
-        """Build a squaremap-compatible model for location-based hierarchy"""
-        directories = {}
-        files = {}
-        root = PStatLocation( '/', 'PYTHONPATH' )
-        self.location_rows = self.rows.copy()
-        for child in self.rows.values():
-            current = directories.get( child.directory )
-            directory, filename = child.directory, child.filename
-            if current is None:
-                if directory == '':
-                    current = root
-                else:
-                    current = PStatLocation( directory, '' )
-                    self.location_rows[ current.key ] = current
-                directories[ directory ] = current
-            if filename == '~':
-                filename = '<built-in>'
-            file_current = files.get( (directory,filename) )
-            if file_current is None:
-                file_current = PStatLocation( directory, filename )
-                self.location_rows[ file_current.key ] = file_current
-                files[ (directory,filename) ] = file_current
-                current.children.append( file_current )
-            file_current.children.append( child )
-        # now link the directories...
-        for key,value in directories.items():
-            if value is root:
-                continue
-            found = False
-            while key:
-                new_key,rest = os.path.split( key )
-                if new_key == key:
-                    break
-                key = new_key
-                parent = directories.get( key )
-                if parent:
-                    if value is not parent:
-                        parent.children.append( value )
-                        found = True
-                        break
-            if not found:
-                root.children.append( value )
-        # lastly, finalize all of the directory records...
-        root.finalize()
-        return root
+        cumulative_times = sorted(nodes.values(), key=lambda x: x.t_cumulative)
+        if not cumulative_times:
+            raise RuntimeError("""Null results!""")
+        return cumulative_times[-1]
 
-class BaseStat( object ):
-    def recursive_distinct( self, already_done=None, attribute='children' ):
-        if already_done is None:
-            already_done = {}
-        for child in getattr(self,attribute,()):
-            if child not in already_done:
-                already_done[child] = True
-                yield child
-                for descendent in child.recursive_distinct( already_done=already_done, attribute=attribute ):
-                    yield descendent
+    @staticmethod
+    def _find_forest(nodes, root):
+        forest = [root]
 
-    def descendants( self ):
-        return list( self.recursive_distinct( attribute='children' ))
-    def ancestors( self ):
-        return list( self.recursive_distinct( attribute='parents' ))
+        for stats_node in nodes.values():
+            if not stats_node.parents and stats_node not in forest:
+                log.debug('Found node root: %s', stats_node.name)
+                forest.append(stats_node)
+        return forest
 
-class PStatRow( BaseStat ):
-    """Simulates a HotShot profiler record using PStats module"""
-    def __init__( self, key, raw ):
+
+class PStatsNode(object):
+    """Simulates a HotShot profiler record using PStats module."""
+
+    def __init__(self, caller, raw_timing):
         self.children = []
         self.parents = []
-        file,line,func = self.key = key
-        try:
-            dirname,basename = os.path.dirname(file),os.path.basename(file)
-        except ValueError as err:
-            dirname = ''
-            basename = file
-        nc, cc, tt, ct, callers = raw
-        if nc == cc == tt == ct == 0:
-            raise ValueError( 'Null stats row' )
-        (
-            self.calls, self.recursive, self.local, self.localPer,
-            self.cummulative, self.cummulativePer, self.directory,
-            self.filename, self.name, self.lineno
-        ) = (
-            nc,
-            cc,
-            tt,
-            tt/(cc or 0.00000000000001),
-            ct,
-            ct/(nc or 0.00000000000001),
-            dirname,
-            basename,
-            func,
-            line,
-        )
-        self.callers = callers
-    def __repr__( self ):
-        return 'PStatRow( %r,%r,%r,%r, %s )'%(self.directory, self.filename, self.lineno, self.name, len(self.children))
-    def add_child( self, child ):
-        self.children.append( child )
 
-    def weave( self, rows ):
-        for caller,data in self.callers.items():
-            # data is (cc,nc,tt,ct)
-            parent = rows.get( caller )
+        filename, line, func = self._func_key = caller
+        try:
+            dirname = os.path.dirname(filename)
+            filename = os.path.basename(filename)
+        except ValueError:
+            dirname = ''
+
+        nc, cc, tt, ct, callers = raw_timing
+
+        if nc == cc == tt == ct == 0:
+            raise ValueError('Null stats row')
+
+        self.n_calls = nc
+        self.n_calls_recursive = cc
+        self.t_local = tt
+        self.t_local_per_call = tt/max(cc, EPS)
+        self.t_cumulative = ct
+        self.t_cumulative_per_call = ct/max(nc, EPS)
+        self.directory = dirname
+        self.filename = filename
+        self.name = func
+        self.lineno = line
+        self._callers = callers
+
+    @property
+    def n_children(self):
+        return len(self.children)
+
+    def __repr__(self):
+        attrs = ['directory', 'filename', 'lineno', 'name', 'n_children']
+        return simple_repr(self, attrs)
+
+    def weave(self, nodes):
+        for caller in self._callers.keys():
+            parent = nodes.get(caller)
             if parent:
-                self.parents.append( parent )
-                parent.children.append( self )
-    def child_cumulative_time( self, child ):
-        total = self.cummulative
+                self.parents.append(parent)
+                parent.children.append(self)
+
+    def child_cumulative_time(self, child):
+        total = self.t_cumulative
         if total:
             try:
-                (cc,nc,tt,ct) = child.callers[ self.key ]
-            except TypeError as err:
-                ct = child.callers[ self.key ]
+                (cc, nc, tt, ct) = child._callers[self._func_key]
+            except TypeError:
+                ct = child._callers[self._func_key]
             return float(ct)/total
         return 0
-
-
-
-class PStatGroup( BaseStat ):
-    """A node/record that holds a group of children but isn't a raw-record based group"""
-    # if LOCAL_ONLY then only take the raw-record's local values, not cummulative values
-    LOCAL_ONLY = False
-    def __init__( self, directory='', filename='', name='', children=None, local_children=None, tree=TREE_CALLS ):
-        self.directory = directory
-        self.filename = filename
-        self.name = ''
-        self.key = (directory,filename,name)
-        self.children = children or []
-        self.parents = []
-        self.local_children = local_children or []
-        self.tree = tree
-    def __repr__( self ):
-        return '%s( %r,%r,%s )'%(self.__class__.__name__,self.directory, self.filename, self.name)
-    def finalize( self, already_done=None ):
-        """Finalize our values (recursively) taken from our children"""
-        if already_done is None:
-            already_done = {}
-        if self in already_done:
-            return True
-        already_done[self] = True
-        self.filter_children()
-        children = self.children
-        for child in children:
-            if hasattr( child, 'finalize' ):
-                child.finalize( already_done)
-            child.parents.append( self )
-        self.calculate_totals( self.children, self.local_children )
-    def filter_children( self ):
-        """Filter our children into regular and local children sets (if appropriate)"""
-    def calculate_totals( self, children, local_children=None ):
-        """Calculate our cummulative totals from children and/or local children"""
-        for field,local_field in (('recursive','calls'),('cummulative','local')):
-            values = []
-            for child in children:
-                if isinstance( child, PStatGroup ) or not self.LOCAL_ONLY:
-                    values.append( getattr( child, field, 0 ) )
-                elif isinstance( child, PStatRow ) and self.LOCAL_ONLY:
-                    values.append( getattr( child, local_field, 0 ) )
-            value = sum( values )
-            setattr( self, field, value )
-        if self.recursive:
-            self.cummulativePer = self.cummulative/float(self.recursive)
-        else:
-            self.recursive = 0
-        if local_children:
-            for field in ('local','calls'):
-                value = sum([ getattr( child, field, 0 ) for child in children] )
-                setattr( self, field, value )
-            if self.calls:
-                self.localPer = self.local / self.calls
-        else:
-            self.local = 0
-            self.calls = 0
-            self.localPer = 0
-
-
-class PStatLocation( PStatGroup ):
-    """A row that represents a hierarchic structure other than call-patterns
-
-    This is used to create a file-based hierarchy for the views
-
-    Children with the name <module> are our "empty" space,
-    our totals are otherwise just the sum of our children.
-    """
-    LOCAL_ONLY = True
-    def __init__( self, directory, filename, tree=TREE_FILES):
-        super( PStatLocation, self ).__init__( directory=directory, filename=filename, name='package', tree=tree )
-    def filter_children( self ):
-        """Filter our children into regular and local children sets"""
-        real_children = []
-        for child in self.children:
-            if child.name == '<module>':
-                self.local_children.append( child )
-            else:
-                real_children.append( child )
-        self.children = real_children
-
-
-
-if __name__ == "__main__":
-    import sys
-    p = PStatsLoader( sys.argv[1] )
-    assert p.tree
-    print(p.tree)

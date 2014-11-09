@@ -20,8 +20,7 @@ from . import handler
 
 
 def storage_name(filename):
-    """
-    Prepend the temporary file directory to the input `filename`.
+    """ Prepend the temporary file directory to the input `filename`.
 
     Parameters
     ----------
@@ -81,6 +80,9 @@ class JSONHandler(handler.Handler):
     _timeout = None
     _result = None
 
+    def initialize(self, tree_depth):
+        self._max_tree_depth = tree_depth
+
     @asynchronous
     def get(self, prof_name):
         if self.request.path.startswith('/json/file/'):
@@ -94,7 +96,8 @@ class JSONHandler(handler.Handler):
             filename = storage_name(prof_name)
 
         self._pool = mp.Pool(1, maxtasksperchild=1)
-        self._result = self._pool.apply_async(prof_to_json, (filename,))
+        args = (filename, self._max_tree_depth)
+        self._result = self._pool.apply_async(prof_to_json, args)
 
         # TODO: Make the timeout parameters configurable
         self._timeout = 10  # in seconds
@@ -123,7 +126,7 @@ class JSONHandler(handler.Handler):
         self.finish()
 
 
-def prof_to_json(prof_name):
+def prof_to_json(prof_name, max_tree_depth):
     """
     Convert profiles stats in a `pstats` compatible file to a JSON string.
 
@@ -140,30 +143,47 @@ def prof_to_json(prof_name):
     """
     loader = pstatsloader.PStatsLoader(prof_name)
 
-    d = _stats_to_tree_dict(loader.tree.children[0])
+    d = stats_to_tree_dict(loader.tree, max_depth=max_tree_depth)
 
     return json.dumps(d, indent=1)
 
 
-def _stats_to_tree_dict(node, parent=None, parent_size=None,
-                        recursive_seen=None):
+def node_attrs(node):
+    """Return dictionary of attributes from a `PStatsNode`."""
+    stats = {
+        'name': node.name,
+        'filename': node.filename,
+        'directory': node.directory,
+        'calls': node.n_calls,
+        'recursive': node.n_calls_recursive,
+        'local': node.t_local,
+        'localPer': node.t_local_per_call,
+        'cumulative': node.t_cumulative,
+        'cumulativePer': node.t_cumulative_per_call,
+        'line_number': node.lineno,
+    }
+    return stats
+
+
+def stats_to_tree_dict(node, parent=None, parent_size=None,
+                       recursive_seen=None, max_depth=10, _i_depth=0):
     """
-    `_stats_to_tree_dict` is a specialized function for converting
+    `stats_to_tree_dict` is a specialized function for converting
     a `pstatsloader.PStatsLoader` profile representation into a tree
     of nested dictionaries by recursively calling itself.
     It is primarily meant to be called from `prof_to_json`.
 
     Parameters
     ----------
-    node : `pstatsloader.PStatsRow` or `pstatsloader.PStatGroup`
+    node : `pstatsloader.PStatsNode`
         One node of the call tree.
-    parent : `pstatsloader.PStatsRow` or `pstatsloader.PStatGroup`
+    parent : `pstatsloader.PStatsNode`
         Parent of `node`. Optional for the root node.
     parent_size : float
         Calculated size of `parent`. Optional for the root node.
     recursive_seen : set
         Set of nodes that are direct ancestors of `node`.
-        This is used to prevent `_stats_to_tree_dict` from ending up in
+        This is used to prevent `stats_to_tree_dict` from ending up in
         infinite loops when it encounters recursion.
         Optional for the root node.
 
@@ -178,47 +198,28 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
     if recursive_seen is None:
         recursive_seen = set()
 
-    d = {}
-
-    d['name'] = node.name
-    d['filename'] = node.filename
-    d['directory'] = node.directory
-
-    if isinstance(node, pstatsloader.PStatRow):
-        d['calls'] = node.calls
-        d['recursive'] = node.recursive
-        d['local'] = node.local
-        d['localPer'] = node.localPer
-        d['cumulative'] = node.cummulative
-        d['cumulativePer'] = node.cummulativePer
-        d['line_number'] = node.lineno
-
-        recursive_seen.add(node)
+    d = node_attrs(node)
+    recursive_seen.add(node)
 
     if parent:
         # figure out the size of this node. This is an arbitrary value
         # but it's important that the child size is no larger
         # than the parent size.
-        if isinstance(parent, pstatsloader.PStatGroup):
-            if parent.cummulative:
-                d['size'] = node.cummulative / parent.cummulative * parent_size
-            else:
-                # this is a catch-all when it's not possible
-                # to calculate a size. hopefully this doesn't come
-                # up too often.
-                d['size'] = 0
-        else:
-            d['size'] = parent.child_cumulative_time(node) * parent_size
+        d['size'] = parent.child_cumulative_time(node) * parent_size
     else:
         # default size for the root node
         d['size'] = 1000
 
     if node.children:
+        depth = _i_depth + 1
         d['children'] = []
+
         for child in node.children:
-            if child not in recursive_seen:
-                child_dict = _stats_to_tree_dict(child, node, d['size'],
-                                                 recursive_seen)
+            if child not in recursive_seen and depth < max_depth:
+                child_dict = stats_to_tree_dict(child, node, d['size'],
+                                                recursive_seen,
+                                                max_depth=max_depth,
+                                                _i_depth=depth)
                 d['children'].append(child_dict)
 
         if d['children']:
@@ -228,23 +229,10 @@ def _stats_to_tree_dict(node, parent=None, parent_size=None,
             if children_sum > d['size']:
                 for child in d['children']:
                     child['size'] = child['size'] / children_sum * d['size']
-
             elif children_sum < d['size']:
-
-                d_internal = {'name': node.name,
-                              'filename': node.filename,
-                              'directory': node.directory,
-                              'size': d['size'] - children_sum}
-
-                if isinstance(node, pstatsloader.PStatRow):
-                    d_internal['calls'] = node.calls
-                    d_internal['recursive'] = node.recursive
-                    d_internal['local'] = node.local
-                    d_internal['localPer'] = node.localPer
-                    d_internal['cumulative'] = node.cummulative
-                    d_internal['cumulativePer'] = node.cummulativePer
-                    d_internal['line_number'] = node.lineno
-
+                d_internal = node_attrs(node)
+                d_internal['size'] = d['size'] - children_sum
+                # XXX: This cyclic link causes unexpected cycles in testing.
                 d['children'].append(d_internal)
         else:
             # there were no non-recursive children so get rid of the

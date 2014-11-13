@@ -65,7 +65,6 @@ def main(argv=sys.argv[1:]):
     import tornado.ioloop
 
     app.listen(port, address=hostname)
-    app.settings['single_user_mode'] = True
 
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))
@@ -77,7 +76,7 @@ def main(argv=sys.argv[1:]):
     if platform.system() == 'Windows':
         filename = '/' + filename
 
-    bt = lambda: browser.open('http://%s:%d/viz/file%s' %
+    bt = lambda: browser.open('http://%s:%d/viz/%s' %
                               (hostname, port, filename), new=2)
     threading.Thread(target=bt).start()
 

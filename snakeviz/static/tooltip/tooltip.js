@@ -15,7 +15,7 @@ var tooltipPosition = function tooltipPosition(mousePos, tooltipDiv) {
     if (mx < w / 2) {
         // tooltip on the right
         tooltipDiv.style('right', null);
-        tooltipDiv.style('left', (mx + 10) + 'px');
+        tooltipDiv.style('left', (mx + 20) + 'px');
     } else {
         // tooltip on the left
         tooltipDiv.style('left', null);

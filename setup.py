@@ -58,7 +58,7 @@ setup(
                      'static/images/*.png',
                      'templates/*.html']
     },
-    install_requires=['tornado>=2.0', 'jinja2>=2.0'],
+    install_requires=['tornado>=2.0'],
     entry_points={
         'console_scripts': ['snakeviz = snakeviz.cli:main']
     }

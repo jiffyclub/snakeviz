@@ -52,14 +52,8 @@ d3helpertooltip = function d3helpertooltip(accessor) {
             // select all the nodes that represent this exact function
             // and highlight them by darkening their color
             var thisname = d.name;
-            var thisfilename = d.filename;
-            var thisdirectory = d.directory;
-            var thislinenumber = d.line_number;
             var thispath = selection.filter(function(d, i) {
-                return d.name == thisname &
-                       d.filename == thisfilename &
-                       d.directory == thisdirectory &
-                       d.line_number == thislinenumber;})
+                return d.name == thisname;})
             var thiscolor = d3.rgb('#ff00ff');
             thispath.style('fill', thiscolor.toString());
         })
@@ -76,14 +70,8 @@ d3helpertooltip = function d3helpertooltip(accessor) {
 
             // reset nodes to their original color
             var thisname = d.name;
-            var thisfilename = d.filename;
-            var thisdirectory = d.directory;
-            var thislinenumber = d.line_number;
             var thispath = selection.filter(function(d, i) {
-                return d.name == thisname &
-                       d.filename == thisfilename &
-                       d.directory == thisdirectory &
-                       d.line_number == thislinenumber;})
+                return d.name == thisname;})
             thispath.style('fill', color(d))
         });
 

@@ -19,7 +19,11 @@ function sv_build_heirarchy(stats, root_name, depth, node_size, parent_name) {
     var data = {};
     data['name'] = root_name;
     data['size'] = node_size;
-    data['parent'] = parent_name;
+    if (parent_name == null) {
+        data['parent_name'] = root_name;
+    } else {
+        data['parent_name'] = parent_name;
+    }
     data['cumulative'] = stats[root_name]['stats'][3];
 
     if (depth !== 0 && stats[root_name]['children'].length !== 0) {
@@ -44,7 +48,7 @@ function sv_build_heirarchy(stats, root_name, depth, node_size, parent_name) {
         );
         data['children'].push({
             name: root_name,
-            parent: root_name,
+            parent_name: root_name,
             cumulative: stats[root_name]['stats'][3],
             size: ((stats[root_name]['stats'][3] - child_time) /
                    stats[root_name]['stats'][3] * node_size)

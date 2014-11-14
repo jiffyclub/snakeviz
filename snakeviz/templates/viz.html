@@ -63,10 +63,12 @@
       });
       $(document).ready(function () {
         sv_root_func_name = sv_find_root(profile_data);
-        sv_heirarchy_depth = 10;
+        sv_call_stack = [sv_root_func_name];
+        sv_heirarchy_depth = 5;
+        sv_base_size = 1000;
         sv_root_heirarchy =
           sv_build_heirarchy(
-            profile_data, sv_root_func_name, sv_heirarchy_depth, 1000);
+            profile_data, sv_root_func_name, sv_heirarchy_depth, sv_base_size);
         drawSunburst(sv_root_heirarchy);
       });
     </script>

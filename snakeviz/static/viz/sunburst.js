@@ -6,8 +6,6 @@
 var width = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     height = width,
     radius = width / 2,
-    x = d3.scale.linear().range([0, 2 * Math.PI]),
-    y = d3.scale.pow().exponent(1).domain([0, 1]).range([0, radius]),
     scale = d3.scale.category20c()   // colors
 
 var color = function color(d) {

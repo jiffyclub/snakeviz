@@ -39,3 +39,15 @@ button:disabled:hover {
   position: absolute;
   top: -10px;
 }
+
+select {
+  font-family: monospace;
+  font-size: 20px;
+  background: white;
+  padding: 10px 20px 10px 20px;
+}
+
+#sv-depth-select {
+  position: absolute;
+  top: 120px;
+}

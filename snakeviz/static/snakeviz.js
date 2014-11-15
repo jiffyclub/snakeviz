@@ -86,3 +86,7 @@ function sv_build_heirarchy(
 
     return data;
 }
+
+var sv_heirarchy_depth = function sv_heirarchy_depth() {
+    return parseInt($('#sv-depth-select').val());
+}

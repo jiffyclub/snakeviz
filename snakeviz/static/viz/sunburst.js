@@ -49,7 +49,7 @@ var tooltipText = function tooltipText(d, i) {
   return d.name + ' [' + d.cumulative.toPrecision(3) + 's]';
 };
 
-function click(d) {
+var click = function click(d) {
   // check whether we need to do anything
   // (e.g. that the user hasn't clicked on the original root node)
   if (d.name === sv_root_func_name) {
@@ -81,8 +81,6 @@ function click(d) {
     }
   }
 
-  sv_current_root = new_root;
-
   //figure out the new parent name
   if (sv_call_stack.length === 1) {
     var new_parent_name = null;
@@ -92,7 +90,7 @@ function click(d) {
 
   // Create new JSON for drawing a vis from a new root
   var heirarchy = sv_build_heirarchy(
-    profile_data, new_root, sv_heirarchy_depth, sv_base_size, new_parent_name);
+    profile_data, new_root, sv_heirarchy_depth(), sv_base_size, new_parent_name);
 
   reset_vis();
   drawSunburst(heirarchy);
@@ -128,13 +126,9 @@ var drawSunburst = function drawSunburst(json) {
 var resetVis = function resetViz() {
   // Create new JSON for drawing a vis from a new root
   var heirarchy = sv_build_heirarchy(
-    profile_data, sv_root_func_name, sv_heirarchy_depth, sv_base_size);
+    profile_data, sv_root_func_name, sv_heirarchy_depth(), sv_base_size);
 
-  // Remove the current figure
-  d3.select('svg').remove();
-
-  // Make and draw the new figure
-  vis = make_vis_obj();
+  reset_vis();
   drawSunburst(heirarchy);
 
   // Reset the call stack
@@ -143,3 +137,14 @@ var resetVis = function resetViz() {
   d3.select('#resetbutton').property('disabled', 'True');
 };
 d3.select('#resetbutton').on('click', resetVis);
+
+
+var sv_depth_changed = function sv_depth_changed() {
+  // Create new JSON for drawing a vis from a new root
+  var heirarchy = sv_build_heirarchy(
+    profile_data, _.last(sv_call_stack), sv_heirarchy_depth(), sv_base_size);
+
+  reset_vis();
+  drawSunburst(heirarchy);
+}
+d3.select('#sv-depth-select').on('change', sv_depth_changed);

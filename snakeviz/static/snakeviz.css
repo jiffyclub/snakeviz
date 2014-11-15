@@ -47,7 +47,8 @@ select {
   padding: 10px 20px 10px 20px;
 }
 
-#sv-depth-select {
+#sv-depth-label {
+  font-family: monospace;
   position: absolute;
   top: 120px;
 }

@@ -13,9 +13,16 @@ var sv_find_root = function sv_find_root (stats) {
 }
 
 var sv_build_heirarchy =
-function sv_build_heirarchy(stats, root_name, depth, node_size, parent_name) {
+function sv_build_heirarchy(
+        stats, root_name, depth, node_size, parent_name, call_stack) {
     // build a JSON heirarchy from stats data suitable for use with
     // a D3 partition.
+    if (call_stack == null) {
+        var call_stack = Immutable.Set([root_name]);
+    } else {
+        var call_stack = call_stack.add(root_name);
+    }
+
     var data = {};
     data['name'] = root_name;
     data['size'] = node_size;
@@ -32,11 +39,17 @@ function sv_build_heirarchy(stats, root_name, depth, node_size, parent_name) {
         data['children'] = [];
 
         for (var child_name in stats[root_name]['children']) {
+            // make sure we're not recursing into a function
+            // that's already on the stack
+            if (call_stack.contains(child_name)) {
+                continue;
+            }
+
             var child_time = stats[child_name]['callers'][root_name][3];
             var child_size = child_time / parent_time * node_size;
             data['children'].push(
                 sv_build_heirarchy(
-                    stats, child_name, depth - 1, child_size, root_name));
+                    stats, child_name, depth - 1, child_size, root_name, call_stack));
         }
 
         // do all the children add up to be larger than the parent?

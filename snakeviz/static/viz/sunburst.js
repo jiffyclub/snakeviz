@@ -99,7 +99,7 @@ function click(d) {
 
   // Activate the reset button if we aren't already at the root node
   // And deactivate it if this is the root node
-  if (d.name !== sv_root_func_name) {
+  if (new_root !== sv_root_func_name) {
     d3.select('#resetbutton').node().removeAttribute('disabled');
   } else {
     d3.select('#resetbutton').property('disabled', 'True');

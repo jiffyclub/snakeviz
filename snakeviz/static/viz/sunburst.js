@@ -83,9 +83,16 @@ function click(d) {
 
   sv_current_root = new_root;
 
+  //figure out the new parent name
+  if (sv_call_stack.length === 1) {
+    var new_parent_name = null;
+  } else {
+    var new_parent_name = _.first(_.last(sv_call_stack, 2));
+  }
+
   // Create new JSON for drawing a vis from a new root
   var heirarchy = sv_build_heirarchy(
-    profile_data, new_root, sv_heirarchy_depth, sv_base_size);
+    profile_data, new_root, sv_heirarchy_depth, sv_base_size, new_parent_name);
 
   reset_vis();
   drawSunburst(heirarchy);

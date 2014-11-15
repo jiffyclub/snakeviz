@@ -37,11 +37,12 @@ var partition = d3.layout.partition()
   .size([2 * Math.PI, radius * radius])
   .value(function(d) { return d.size; });
 
+var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
 var arc = d3.svg.arc()
   .startAngle(function(d) { return d.x; })
   .endAngle(function(d) { return d.x + d.dx; })
-  .innerRadius(function(d) { return Math.sqrt(d.y); })
-  .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+  .innerRadius(function(d) { return y(d.y); })
+  .outerRadius(function(d) { return y(d.y + d.dy); });
 
 var tooltipText = function tooltipText(d, i) {
   return d.name + ' [' + d.cumulative.toPrecision(3) + 's]';

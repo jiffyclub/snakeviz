@@ -1,17 +1,18 @@
 <!doctype html>
-
 <html>
   <head>
     <meta charset="utf-8" .>
     <title>{{profile_name.split('/')[-1].split('.')[0]}}</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/static/snakeviz.css" rel="stylesheet">
 
     <!-- DataTables CSS -->
-    <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet">
 
     <!-- Mouse-over tooltip -->
-    <link href="/static/tooltip/tooltip.css" rel="stylesheet" />
+    <link href="/static/tooltip/tooltip.css" rel="stylesheet">
 
     <script>
       var table_data = {% raw table_rows %};
@@ -20,8 +21,8 @@
   </head>
 
   <body>
-    <button id="resetbutton" disabled="True"
-            style="position: absolute; top: 60px;">
+    <h1 id="snakeviz-text">SnakeViz</h1>
+    <button id="resetbutton" disabled="True">
             Reset
     </button>
     <div style="text-align: center;">
@@ -46,6 +47,7 @@
     <script src='/static/viz/sunburst.js'></script>
 
     <script>
+      // Make the stats table
       $(document).ready(function() {
         $('#pstats-table').dataTable({
           'data': table_data,
@@ -61,6 +63,7 @@
           'paging': false
         });
       });
+      // Make the visualization
       $(document).ready(function () {
         sv_root_func_name = sv_find_root(profile_data);
         sv_call_stack = [sv_root_func_name];

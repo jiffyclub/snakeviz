@@ -1,0 +1,41 @@
+body {
+  padding: 20px;
+}
+
+button {
+  font-family: monospace;
+  font-size: 20px;
+  background: white;
+  padding: 10px 20px 10px 20px;
+  border: 2px solid;
+  -webkit-border-radius: 28;
+  -moz-border-radius: 28;
+  border-radius: 28px;
+  color: #444444;
+  border-color: #444444;
+}
+
+button:hover {
+  background: #C9F0F2;
+}
+
+button:disabled {
+  color: #cccccc;
+  border-color: #cccccc;
+}
+
+button:disabled:hover {
+  background: white;
+}
+
+#resetbutton {
+  position: absolute;
+  top: 60px;
+}
+
+#snakeviz-text {
+  color: #cccccc;
+  font-family: monospace;
+  position: absolute;
+  top: -10px;
+}

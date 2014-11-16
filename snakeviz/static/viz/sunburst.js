@@ -45,7 +45,7 @@ var arc = d3.svg.arc()
   .outerRadius(function(d) { return y(d.y + d.dy); });
 
 var tooltipText = function tooltipText(d, i) {
-  return d.name + ' [' + d.cumulative.toPrecision(3) + 's]';
+  return d.display_name + ' [' + d.cumulative.toPrecision(3) + 's]';
 };
 
 var click = function click(d) {

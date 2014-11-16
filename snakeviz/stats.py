@@ -1,5 +1,6 @@
 from __future__ import division
 
+import os.path
 from itertools import chain
 
 from tornado.escape import xhtml_escape
@@ -17,7 +18,8 @@ def table_rows(stats):
     rows = []
 
     for k, v in stats.stats.items():
-        flf = xhtml_escape('{0}:{1}({2})'.format(*k))
+        flf = xhtml_escape('{0}:{1}({2})'.format(
+            os.path.basename(k[0]), k[1], k[2]))
 
         if v[0] == v[1]:
             calls = str(v[0])
@@ -60,6 +62,7 @@ def json_stats(stats):
         nstats[nk]['stats'] = list(stats.stats[k][:4])
         nstats[nk]['callers'] = {
             keyfmt(*ck): list(cv) for ck, cv in stats.stats[k][-1].items()}
+        nstats[nk]['display_name'] = keyfmt(os.path.basename(k[0]), k[1], k[2])
 
     # remove anything that both never called anything was never called
     # by anything.

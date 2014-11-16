@@ -7,12 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="/static/snakeviz.css" rel="stylesheet">
+    <!-- Mouse-over tooltip -->
+    <link href="/static/tooltip.css" rel="stylesheet">
 
     <!-- DataTables CSS -->
     <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet">
 
-    <!-- Mouse-over tooltip -->
-    <link href="/static/tooltip/tooltip.css" rel="stylesheet">
 
     <script>
       var table_data = {% raw table_rows %};
@@ -50,8 +50,8 @@
     <script src="/static/vendor/lodash.compat.min.js"></script>
     <script src="/static/vendor/immutable.min.js"></script>
     <script src='/static/snakeviz.js'></script>
-    <script src="/static/tooltip/tooltip.js"></script>
-    <script src='/static/viz/sunburst.js'></script>
+    <script src="/static/tooltip.js"></script>
+    <script src='/static/sunburst.js'></script>
 
     <script>
       // Make the stats table

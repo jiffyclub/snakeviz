@@ -42,12 +42,7 @@ d3helpertooltip = function d3helpertooltip(accessor) {
 
             // Add text using the accessor function
             var tooltipText = accessor(d, i) || '';
-
-            // Crop text arbitrarily
-            tooltipDiv.style('width', function(d, i) {
-                return (tooltipText.length > 80) ? '300px' : null;
-            })
-                .text(tooltipText);
+            tooltipDiv.text(tooltipText);
 
             // select all the nodes that represent this exact function
             // and highlight them by darkening their color

@@ -39,8 +39,8 @@ var partition = d3.layout.partition()
 
 var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
 var arc = d3.svg.arc()
-  .startAngle(function(d) { return d.x; })
-  .endAngle(function(d) { return d.x + d.dx; })
+    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x)); })
+    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx)); })
   .innerRadius(function(d) { return y(d.y); })
   .outerRadius(function(d) { return y(d.y + d.dy); });
 

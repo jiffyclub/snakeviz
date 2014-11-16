@@ -79,7 +79,7 @@ function sv_build_heirarchy(
                 name: root_name,
                 parent_name: root_name,
                 cumulative: stats[root_name]['stats'][3],
-                size: (parent_time - time_in_children) / parent_time * node_size
+                size: Math.max(0, (parent_time - time_in_children) / parent_time * node_size)
             });
         }
     }

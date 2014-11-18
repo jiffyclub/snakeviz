@@ -22,9 +22,11 @@
 
   <body>
     <h1 id="snakeviz-text">SnakeViz</h1>
-    <button id="resetbutton" disabled="True">
-            Reset
-    </button>
+
+    <!-- reset button -->
+    <button id="resetbutton" disabled="True">Reset</button>
+
+    <!-- depth select -->
     <label id='sv-depth-label'>Depth:
       <select name="sv-depth" id="sv-depth-select">
         {% for i in range(5, 21, 5) %}
@@ -32,10 +34,22 @@
         {% end %}
       </select>
     </label>
+
+    <!-- call stack -->
+    <div id="sv-call-stack">
+      <div style="text-align: right;">
+        <button id="sv-call-stack-btn">Call Stack</button>
+      </div>
+      <div id="sv-call-stack-list"></div>
+    </div>
+
+    <!-- vis -->
     <div style="text-align: center;">
       <div id="chart"></div>
     </div>
     <br>
+
+    <!-- stats table -->
     <div id="table_div">
       <table cellpadding="0" cellspacing="0" border="0" class="display" id="pstats-table">
       </table>
@@ -78,6 +92,10 @@
         sv_root_heirarchy = sv_build_heirarchy(
           profile_data, sv_root_func_name, sv_heirarchy_depth(), sv_base_size);
         drawSunburst(sv_root_heirarchy);
+      });
+      // Initialize the call stack button
+      $(document).ready(function () {
+        sv_call_stack_btn_for_show();
       });
     </script>
   </body>

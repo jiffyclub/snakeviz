@@ -92,3 +92,49 @@ function sv_build_heirarchy(
 var sv_heirarchy_depth = function sv_heirarchy_depth() {
     return parseInt($('#sv-depth-select').val());
 }
+
+var sv_call_stack_btn_for_show = function sv_call_stack_btn_for_show() {
+    var btn = $('#sv-call-stack-btn');
+    btn.on('click', sv_show_call_stack);
+    btn.removeClass('btn-active');
+}
+
+var sv_call_stack_btn_for_hide = function sv_call_stack_btn_for_hide() {
+    var btn = $('#sv-call-stack-btn');
+    btn.on('click', sv_hide_call_stack);
+    btn.addClass('btn-active');
+}
+
+var sv_item_name = function sv_item_name (name) {
+    var slash = name.lastIndexOf('/');
+    var rename = name;
+    if (slash !== -1) {
+        rename = name.slice(slash + 1);
+    }
+    return rename;
+}
+
+var sv_call_stack_list = function sv_call_stack_list(call_stack) {
+    var call_tpl = _.template('<div><%= i %>. <%- name %></div>');
+    var calls = _.map(call_stack, function (name, i) {
+        return call_tpl({'name': sv_item_name(name), 'i': call_stack.length - i});
+    });
+    return calls;
+}
+
+var sv_show_call_stack = function sv_show_call_stack() {
+    sv_call_stack_btn_for_hide();
+    var calls = sv_call_stack_list(Immutable.List(sv_call_stack).reverse().toJS());
+    var div = $('#sv-call-stack-list');
+    div.children().remove();
+    div.append(calls);
+    div.css('max-height', radius * 1.5);
+    div.show();
+}
+
+var sv_hide_call_stack = function sv_hide_call_stack () {
+    var div = $('#sv-call-stack-list');
+    div.hide();
+    div.children().remove();
+    sv_call_stack_btn_for_show();
+}

@@ -28,6 +28,10 @@ button:disabled:hover {
   background: white;
 }
 
+.btn-active {
+  background: #5CBDED;
+}
+
 #resetbutton {
   position: absolute;
   top: 60px;
@@ -51,4 +55,22 @@ select {
   font-family: monospace;
   position: absolute;
   top: 120px;
+}
+
+#sv-call-stack {
+  position: absolute;
+  right: 0;
+  padding-right: 10px;
+  font-family: monospace;
+}
+
+#sv-call-stack-list {
+  overflow: scroll;
+  display: none;
+  border: 2px solid gray;
+  margin-top: 5px;
+}
+
+#sv-call-stack-list div {
+  padding: 0 10px 0 10px;
 }

@@ -116,14 +116,20 @@ var sv_item_name = function sv_item_name (name) {
 
 var sv_call_stack_list = function sv_call_stack_list(call_stack) {
     var call_tpl = _.template('<div><%= i %>. <%- name %></div>');
-    var calls = _.map(call_stack, function (name, i) {
-        return call_tpl({'name': sv_item_name(name), 'i': call_stack.length - i});
-    });
+    var calls = [];
+    // the call stack list comes in ordered from root -> leaf,
+    // but we want to display it leaf -> root, so we iterate over call_stack
+    // in reverse here.
+    for (var i = call_stack.length - 1; i >= 0; i--) {
+        calls.push(
+            call_tpl(
+                {'name': sv_item_name(call_stack[i]), 'i': i}));
+    };
     return calls;
 }
 
 var sv_update_call_stack_list = function sv_update_call_stack_list() {
-    var calls = sv_call_stack_list(Immutable.List(sv_call_stack).reverse().toArray());
+    var calls = sv_call_stack_list(sv_call_stack);
     var div = $('#sv-call-stack-list');
     div.children().remove();
     div.append(calls);

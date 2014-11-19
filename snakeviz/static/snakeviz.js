@@ -122,12 +122,17 @@ var sv_call_stack_list = function sv_call_stack_list(call_stack) {
     return calls;
 }
 
-var sv_show_call_stack = function sv_show_call_stack() {
-    sv_call_stack_btn_for_hide();
-    var calls = sv_call_stack_list(Immutable.List(sv_call_stack).reverse().toJS());
+var sv_update_call_stack_list = function sv_update_call_stack_list() {
+    var calls = sv_call_stack_list(Immutable.List(sv_call_stack).reverse().toArray());
     var div = $('#sv-call-stack-list');
     div.children().remove();
     div.append(calls);
+    return div;
+}
+
+var sv_show_call_stack = function sv_show_call_stack() {
+    sv_call_stack_btn_for_hide();
+    var div = sv_update_call_stack_list();
     div.css('max-height', radius * 1.5);
     div.show();
 }

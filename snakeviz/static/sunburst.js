@@ -93,7 +93,7 @@ var click = function click(d) {
 
   reset_vis();
   drawSunburst(heirarchy);
-  sv_call_stack_list();
+  sv_update_call_stack_list();
 
   // Activate the reset button if we aren't already at the root node
   // And deactivate it if this is the root node
@@ -133,7 +133,7 @@ var resetVis = function resetViz() {
 
   // Reset the call stack
   sv_call_stack = [sv_root_func_name];
-  sv_call_stack_list();
+  sv_update_call_stack_list();
 
   d3.select('#resetbutton').property('disabled', 'True');
 };

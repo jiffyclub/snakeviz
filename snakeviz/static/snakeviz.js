@@ -1,6 +1,6 @@
+// Look for something that calls other functions,
+// but is never called itself.
 var sv_find_root = function sv_find_root (stats) {
-    // looking for something that calls other functions,
-    // but is never called itself.
     var callers = Immutable.Set.fromKeys(stats);
     var callees = Immutable.Set();
 
@@ -12,11 +12,15 @@ var sv_find_root = function sv_find_root (stats) {
     return callers.subtract(callees).toJS()[0];
 }
 
+
+// Take the embedded stats JSON and turn it into an object tree
+// suitable for use with D3's partition/heirarchy machinery.
 var sv_build_heirarchy =
 function sv_build_heirarchy(
         stats, root_name, depth, node_size, parent_name, call_stack) {
-    // build a JSON heirarchy from stats data suitable for use with
-    // a D3 partition.
+
+    // We track the call stack both for display purposes and to avoid
+    // displaying recursive calls.
     if (call_stack == null) {
         var call_stack = Immutable.Set([root_name]);
     } else {
@@ -29,10 +33,12 @@ function sv_build_heirarchy(
     data['size'] = node_size;
     data['cumulative'] = stats[root_name]['stats'][3];
     if (parent_name == null) {
+        // This should only happen once: for the root node.
         data['parent_name'] = root_name;
         var parent_time = data['cumulative'];
     } else {
         data['parent_name'] = parent_name;
+        // the amount of time spent in root_name when it was called by parent_time
         var parent_time = stats[root_name]['callers'][parent_name][3];
     }
 
@@ -46,6 +52,7 @@ function sv_build_heirarchy(
                 continue;
             }
 
+            // the amount of time spent in a child when it was called by root_name
             var child_time = stats[child_name]['callers'][root_name][3];
             var child_size = child_time / parent_time * node_size;
             data['children'].push(
@@ -53,7 +60,9 @@ function sv_build_heirarchy(
                     stats, child_name, depth - 1, child_size, root_name, call_stack));
         }
 
-        // do all the children add up to be larger than the parent?
+        // Do all the children add up to be larger than the parent?
+        // This can happen when the stats data is confused by functions
+        // being called from more than one place.
         var size_of_children = _.reduce(
             data['children'],
             function (sum, child) {
@@ -89,22 +98,33 @@ function sv_build_heirarchy(
     return data;
 }
 
+
+// Returns the heirarchy depth value from the depth <select> element
 var sv_heirarchy_depth = function sv_heirarchy_depth() {
     return parseInt($('#sv-depth-select').val());
 }
 
+
+// Configures the call stack button's settings and appearance
+// for when the call stack is hidden.
 var sv_call_stack_btn_for_show = function sv_call_stack_btn_for_show() {
     var btn = $('#sv-call-stack-btn');
     btn.on('click', sv_show_call_stack);
     btn.removeClass('btn-active');
 }
 
+
+// Configures the call stack button's settings and appearance
+// for when the call stack is visible.
 var sv_call_stack_btn_for_hide = function sv_call_stack_btn_for_hide() {
     var btn = $('#sv-call-stack-btn');
     btn.on('click', sv_hide_call_stack);
     btn.addClass('btn-active');
 }
 
+
+// Items on the call stack can include directory names that we want
+// to remove for display in the call stack list.
 var sv_item_name = function sv_item_name (name) {
     var slash = name.lastIndexOf('/');
     var rename = name;
@@ -114,6 +134,9 @@ var sv_item_name = function sv_item_name (name) {
     return rename;
 }
 
+
+// Builds a list of div elements, each of which contain a number and
+// a function description: file name:line number(function name)
 var sv_call_stack_list = function sv_call_stack_list(call_stack) {
     var call_tpl = _.template('<div><%= i %>. <%- name %></div>');
     var calls = [];
@@ -128,6 +151,8 @@ var sv_call_stack_list = function sv_call_stack_list(call_stack) {
     return calls;
 }
 
+
+// update the displayed call stack list
 var sv_update_call_stack_list = function sv_update_call_stack_list() {
     var calls = sv_call_stack_list(sv_call_stack);
     var div = $('#sv-call-stack-list');
@@ -136,6 +161,8 @@ var sv_update_call_stack_list = function sv_update_call_stack_list() {
     return div;
 }
 
+
+// make the call stack list visible
 var sv_show_call_stack = function sv_show_call_stack() {
     sv_call_stack_btn_for_hide();
     var div = sv_update_call_stack_list();
@@ -143,9 +170,10 @@ var sv_show_call_stack = function sv_show_call_stack() {
     div.show();
 }
 
+
+// hide the call stack list
 var sv_hide_call_stack = function sv_hide_call_stack () {
     var div = $('#sv-call-stack-list');
     div.hide();
-    div.children().remove();
     sv_call_stack_btn_for_show();
 }

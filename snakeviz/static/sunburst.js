@@ -1,16 +1,19 @@
 // This contains the code that renders and controls
 // the sunburst visualization.
 
-// Copied, then modified, from http://www.jasondavies.com/coffee-wheel/
 
+// 80% of the smallest window dimension
 var width = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     height = width,
     radius = width / 2,
     scale = d3.scale.category20c()   // colors
 
+
+// should make it so that a given function is always the same color
 var color = function color(d) {
   return scale(d.name);
 }
+
 
 var make_vis_obj = function make_vis_obj () {
   return d3.select("#chart")
@@ -25,22 +28,28 @@ var make_vis_obj = function make_vis_obj () {
 }
 var vis = make_vis_obj();
 
+
 var reset_vis = function reset_vis () {
   // Remove the current figure
   d3.select('svg').remove();
 
-  // Make and draw the new figure
+  // Make and draw the new svg container
   vis = make_vis_obj();
 }
+
 
 var partition = d3.layout.partition()
   .size([2 * Math.PI, radius * radius])
   .value(function(d) { return d.size; });
 
+
+// By default D3 makes the y size proportional to some area,
+// so y is a transformation from ~area to a linear scale
+// so that all arcs have the same radial size.
 var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
 var arc = d3.svg.arc()
-    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x)); })
-    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx)); })
+  .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x)); })
+  .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx)); })
   .innerRadius(function(d) { return y(d.y); })
   .outerRadius(function(d) { return y(d.y + d.dy); });
 
@@ -48,6 +57,9 @@ var tooltipText = function tooltipText(d, i) {
   return d.display_name + ' [' + d.cumulative.toPrecision(3) + 's]';
 };
 
+
+// This is the function that runs whenever the user clicks on an SVG
+// element to trigger zooming.
 var click = function click(d) {
   // check whether we need to do anything
   // (e.g. that the user hasn't clicked on the original root node)
@@ -104,6 +116,8 @@ var click = function click(d) {
   }
 }
 
+
+// This is having D3 do its thing.
 var drawSunburst = function drawSunburst(json) {
   // For efficiency, filter nodes to keep only those large enough to see.
   var nodes = partition.nodes(json)
@@ -123,6 +137,9 @@ var drawSunburst = function drawSunburst(json) {
       .call(d3helpertooltip(tooltipText));
 };
 
+
+// Reset the visualization to its original state starting from the
+// main root function.
 var resetVis = function resetViz() {
   // Create new JSON for drawing a vis from a new root
   var heirarchy = sv_build_heirarchy(
@@ -140,6 +157,7 @@ var resetVis = function resetViz() {
 d3.select('#resetbutton').on('click', resetVis);
 
 
+// The handler for when the user changes the depth selection dropdown.
 var sv_depth_changed = function sv_depth_changed() {
   // Create new JSON for drawing a vis from a new root
   var heirarchy = sv_build_heirarchy(

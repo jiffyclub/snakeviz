@@ -66,11 +66,27 @@ select {
 
 #sv-call-stack-list {
   overflow: scroll;
-  display: none;
   border: 2px solid gray;
   margin-top: 5px;
+  display: none;
 }
 
 #sv-call-stack-list div {
   padding: 0 10px 0 10px;
+}
+
+#sv-info-div {
+  position: absolute;
+  top: 160px;
+  display: none;
+  overflow: hidden;
+}
+
+.sv-info-label {
+  font-weight: bold;
+}
+
+.sv-info-item {
+  font-family: monospace;
+  word-wrap: break-word;
 }

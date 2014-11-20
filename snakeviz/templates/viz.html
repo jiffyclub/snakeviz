@@ -7,8 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="/static/snakeviz.css" rel="stylesheet">
-    <!-- Mouse-over tooltip -->
-    <link href="/static/tooltip.css" rel="stylesheet">
 
     <!-- DataTables CSS -->
     <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet">
@@ -34,6 +32,9 @@
         {% end %}
       </select>
     </label>
+
+    <!-- information div -->
+    <div id="sv-info-div"></div>
 
     <!-- call stack -->
     <div id="sv-call-stack">
@@ -64,7 +65,6 @@
     <script src="/static/vendor/lodash.compat.min.js"></script>
     <script src="/static/vendor/immutable.min.js"></script>
     <script src='/static/snakeviz.js'></script>
-    <script src="/static/tooltip.js"></script>
     <script src='/static/sunburst.js'></script>
 
     <script>
@@ -88,6 +88,7 @@
       $(document).ready(function () {
         sv_root_func_name = sv_find_root(profile_data);
         sv_call_stack = [sv_root_func_name];
+        sv_total_time = profile_data[sv_root_func_name]['stats'][3];
         sv_base_size = 1000;
         sv_root_heirarchy = sv_build_heirarchy(
           profile_data, sv_root_func_name, sv_heirarchy_depth(), sv_base_size);
@@ -95,6 +96,7 @@
       });
       // Initialize the call stack button
       $(document).ready(function () {
+        sv_update_call_stack_list();
         sv_call_stack_btn_for_show();
       });
     </script>

@@ -116,9 +116,73 @@ var click = function click(d) {
   }
 }
 
+var sv_info_tpl = _.template(
+  ['<div class="sv-info-label">Name:</div>',
+   '<div class="sv-info-item"><%- name %></div>',
+   '<div class="sv-info-label">Cumulative Time:</div>',
+   '<div class="sv-info-item"><%= cumulative %> s (<%= cumulative_percent %> %)</div>',
+   '<div class="sv-info-label">File:</div>',
+   '<div class="sv-info-item"><%- file %></div>',
+   '<div class="sv-info-label">Line:</div>',
+   '<div class="sv-info-item"><%= line %></div>',
+   '<div class="sv-info-label">Directory:</div>',
+   '<div class="sv-info-item"><%- directory %></div>'
+  ].join('\n'));
+
+var sv_update_info_div = function sv_update_info_div (d) {
+  var re = /^(.*):(\d+)\((.*)\)$/;
+  var result = re.exec(d.name);
+  var file = result[1];
+  var directory = '';
+  var slash = file.lastIndexOf('/');
+  if (slash !== -1) {
+    directory = file.slice(0, slash + 1);
+    file = file.slice(slash + 1)
+  }
+  var info = {
+    'file': file,
+    'directory': directory,
+    'line': result[2],
+    'name': result[3],
+    'cumulative': d.cumulative.toPrecision(3),
+    'cumulative_percent': (d.cumulative / sv_total_time * 100).toFixed(2)
+  };
+  $('#sv-info-div')
+    .html(sv_info_tpl(info))
+    .height(radius * 1.5)
+    .width(($('body').width() - (2 * radius)) / 2.1);
+}
+
+
+var apply_mouseover = function apply_mouseover (selection) {
+  selection.on('mouseover', function (d, i) {
+    // select all the nodes that represent this exact function
+    // and highlight them by darkening their color
+    var thisname = d.name;
+    var thispath = selection.filter(function(d, i) {
+        return d.name === thisname;})
+    var thiscolor = d3.rgb('#ff00ff');
+    thispath.style('fill', thiscolor.toString());
+    sv_update_info_div(d);
+  })
+  .on('mouseout', function(d, i){
+      // reset nodes to their original color
+      var thisname = d.name;
+      var thispath = selection.filter(function(d, i) {
+          return d.name === thisname;})
+      thispath.style('fill', color(d))
+  });
+}
+
 
 // This is having D3 do its thing.
 var drawSunburst = function drawSunburst(json) {
+  // Bounding circle underneath the sunburst, to make it easier to detect
+  // when the mouse leaves the parent g.
+  vis.append("svg:circle")
+    .attr("r", radius)
+    .style("opacity", 0);
+
   // For efficiency, filter nodes to keep only those large enough to see.
   var nodes = partition.nodes(json)
     .filter(function(d) {
@@ -126,16 +190,20 @@ var drawSunburst = function drawSunburst(json) {
     });
 
   var path = vis.data([json]).selectAll("path")
-      .data(nodes)
-      .enter().append("svg:path")
-      .attr("id", function(d, i) { return "path-" + i; })
-      .attr("d", arc)
-      .attr("fill-rule", "evenodd")
-      .style("fill", color)
-      .style("stroke", "#fff")
-      .on("click", click)
-      .call(d3helpertooltip(tooltipText));
-};
+    .data(nodes)
+    .enter().append("svg:path")
+    .attr("id", function(d, i) { return "path-" + i; })
+    .attr("d", arc)
+    .attr("fill-rule", "evenodd")
+    .style("fill", color)
+    .style("stroke", "#fff")
+    .on('click', click)
+    .call(apply_mouseover);
+
+  d3.select('#container')
+    .on('mouseenter', sv_show_info_div)
+    .on('mouseleave', sv_hide_info_div);
+}
 
 
 // Reset the visualization to its original state starting from the

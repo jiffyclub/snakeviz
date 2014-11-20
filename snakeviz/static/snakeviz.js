@@ -137,15 +137,15 @@ var sv_item_name = function sv_item_name (name) {
 
 // Builds a list of div elements, each of which contain a number and
 // a function description: file name:line number(function name)
+var sv_call_tpl = _.template('<div><%= i %>. <%- name %></div>');
 var sv_call_stack_list = function sv_call_stack_list(call_stack) {
-    var call_tpl = _.template('<div><%= i %>. <%- name %></div>');
     var calls = [];
     // the call stack list comes in ordered from root -> leaf,
     // but we want to display it leaf -> root, so we iterate over call_stack
     // in reverse here.
     for (var i = call_stack.length - 1; i >= 0; i--) {
         calls.push(
-            call_tpl(
+            sv_call_tpl(
                 {'name': sv_item_name(call_stack[i]), 'i': i}));
     };
     return calls;
@@ -165,15 +165,27 @@ var sv_update_call_stack_list = function sv_update_call_stack_list() {
 // make the call stack list visible
 var sv_show_call_stack = function sv_show_call_stack() {
     sv_call_stack_btn_for_hide();
-    var div = sv_update_call_stack_list();
+    var div = $('#sv-call-stack-list');
     div.css('max-height', radius * 1.5);
     div.show();
 }
 
 
 // hide the call stack list
-var sv_hide_call_stack = function sv_hide_call_stack () {
+var sv_hide_call_stack = function sv_hide_call_stack() {
     var div = $('#sv-call-stack-list');
     div.hide();
     sv_call_stack_btn_for_show();
+}
+
+
+// show the information div
+var sv_show_info_div = function sv_show_info_div() {
+    $('#sv-info-div').show();
+}
+
+
+// hide the information div
+var sv_hide_info_div = function sv_hide_info_div() {
+    $('#sv-info-div').hide();
 }

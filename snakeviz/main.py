@@ -3,6 +3,11 @@
 import os.path
 from pstats import Stats
 
+try:
+    from urllib.parse import unquote_plus
+except ImportError:
+    from urllib import unquote_plus
+
 import tornado.ioloop
 import tornado.web
 
@@ -18,13 +23,14 @@ settings = {
 
 class VizHandler(tornado.web.RequestHandler):
     def get(self, profile_name):
+        profile_name = unquote_plus(profile_name)
         s = Stats(profile_name)
         self.render(
             'viz.html', profile_name=profile_name,
             table_rows=table_rows(s), callees=json_stats(s))
 
 
-handlers = [(r'/viz/(.*)', VizHandler)]
+handlers = [(r'/snakeviz/(.*)', VizHandler)]
 
 app = tornado.web.Application(handlers, **settings)
 

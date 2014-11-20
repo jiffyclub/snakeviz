@@ -10,6 +10,11 @@ import sys
 import threading
 import webbrowser
 
+try:
+  from urllib.parse import quote_plus
+except ImportError:
+  from urllib import quote_plus
+
 
 def main(argv=sys.argv[1:]):
     parser = optparse.OptionParser(
@@ -46,6 +51,8 @@ def main(argv=sys.argv[1:]):
         parser.error('the file %s could not be opened: %s'
                      % (filename, str(e)))
 
+    filename = quote_plus(filename)
+
     hostname = options.hostname
     port = options.port
 
@@ -69,14 +76,9 @@ def main(argv=sys.argv[1:]):
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))
 
-    # Launce the browser in a separate thread to avoid blocking the ioloop from
+    # Launch the browser in a separate thread to avoid blocking the ioloop from
     # starting
-
-    import platform
-    if platform.system() == 'Windows':
-        filename = '/' + filename
-
-    bt = lambda: browser.open('http://%s:%d/viz/%s' %
+    bt = lambda: browser.open('http://%s:%d/snakeviz/%s' %
                               (hostname, port, filename), new=2)
     threading.Thread(target=bt).start()
 

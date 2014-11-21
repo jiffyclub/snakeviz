@@ -29,7 +29,7 @@ def snakeviz_magic(line, cell=None):
     sv = subprocess.Popen(['snakeviz', filename])
 
     # give time for the Snakeviz page to load then shut down the server
-    time.sleep(20)
+    time.sleep(3)
     sv.terminate()
 
 

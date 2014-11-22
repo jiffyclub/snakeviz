@@ -8,8 +8,18 @@ var sv_find_root = function sv_find_root (stats) {
         callees = callees.union(Immutable.Set.fromKeys(stats[key]['children']));
     }
 
-    // hopefully there's only one thing left...
-    return callers.subtract(callees).toJS()[0];
+    var diff = callers.subtract(callees);
+    if (diff.size !== 0) {
+        // hopefully there's only one thing left...
+        return diff.toJS()[0];
+    } else {
+        // fall back on finding the thing with the most
+        // cummulative time
+        return _.max(_.keys(stats), function (s) {
+            return stats[s]['stats'][3];
+        });
+    }
+    throw 'no root found';
 }
 
 

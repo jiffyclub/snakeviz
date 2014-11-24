@@ -53,6 +53,27 @@ function sv_build_heirarchy(
     }
 
     if (depth !== 0 && _.size(stats[root_name]['children']) !== 0) {
+        // figure out the child sizes
+        // we do this here because it needs to be correct before
+        // heading further into the call stack
+        var child_sizes = {};
+        var size_of_children = 0;
+
+        for (var child_name in stats[root_name]['children']) {
+            // the amount of time spent in a child when it was called by root_name
+            var child_time = stats[child_name]['callers'][root_name][3];
+            child_sizes[child_name] = child_time / parent_time * node_size;
+            size_of_children += child_sizes[child_name];
+        }
+
+        // if the children add up to be larger than the parent
+        // then normalize them to the parent size
+        if (size_of_children > node_size) {
+            for (var child_name in stats[root_name]['children']) {
+                child_sizes[child_name] *= (node_size / size_of_children);
+            }
+        }
+
         data['children'] = [];
 
         for (var child_name in stats[root_name]['children']) {
@@ -62,31 +83,14 @@ function sv_build_heirarchy(
                 continue;
             }
 
-            // the amount of time spent in a child when it was called by root_name
-            var child_time = stats[child_name]['callers'][root_name][3];
-            var child_size = child_time / parent_time * node_size;
+
             data['children'].push(
                 sv_build_heirarchy(
-                    stats, child_name, depth - 1, child_size, root_name, call_stack));
+                    stats, child_name, depth - 1, child_sizes[child_name],
+                    root_name, call_stack));
         }
 
-        // Do all the children add up to be larger than the parent?
-        // This can happen when the stats data is confused by functions
-        // being called from more than one place.
-        var size_of_children = _.reduce(
-            data['children'],
-            function (sum, child) {
-                return sum + child['size'];
-            },
-            0
-        );
-        // if so, normalize them to the size of this node
-        if (size_of_children > node_size) {
-            for (var i in data['children']) {
-                data['children'][i]['size'] =
-                    data['children'][i]['size'] / size_of_children * node_size;
-            }
-        } else {
+        if (size_of_children < node_size) {
             // make a child representing the internal time of this function
             var time_in_children = _.reduce(
                 stats[root_name]['children'],
@@ -100,7 +104,8 @@ function sv_build_heirarchy(
                 display_name: data['display_name'],
                 parent_name: data['parent_name'],
                 cumulative: stats[root_name]['stats'][3],
-                size: Math.max(0, (parent_time - time_in_children) / parent_time * node_size)
+                size: Math.max(
+                    0, (parent_time - time_in_children) / parent_time * node_size)
             });
         }
     }

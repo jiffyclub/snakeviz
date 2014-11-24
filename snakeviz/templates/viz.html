@@ -10,11 +10,6 @@
 
     <!-- DataTables CSS -->
     <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet">
-
-    <script>
-      var table_data = {% raw table_rows %};
-      var profile_data = {% raw callees %};
-    </script>
   </head>
 
   <body>
@@ -67,6 +62,8 @@
     <script src='/static/sunburst.js'></script>
 
     <script>
+      var table_data = {% raw table_rows %};
+      var profile_data = {% raw callees %};
       // Make the stats table
       $(document).ready(function() {
         $('#pstats-table').dataTable({
@@ -84,7 +81,7 @@
         });
       });
       // Make the visualization
-      $(document).ready(function () {
+      $(document).ready(_.defer(function () {
         sv_root_func_name = sv_find_root(profile_data);
         sv_call_stack = [sv_root_func_name];
         sv_total_time = profile_data[sv_root_func_name]['stats'][3];
@@ -92,12 +89,12 @@
         sv_root_heirarchy = sv_build_heirarchy(
           profile_data, sv_root_func_name, sv_heirarchy_depth(), sv_base_size);
         drawSunburst(sv_root_heirarchy);
-      });
+      }));
       // Initialize the call stack button
-      $(document).ready(function () {
+      $(document).ready(_.defer(function () {
         sv_update_call_stack_list();
         sv_call_stack_btn_for_show();
-      });
+      }));
     </script>
   </body>
 </html>

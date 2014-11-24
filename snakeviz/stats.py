@@ -71,7 +71,7 @@ def json_stats(stats):
     called = set(chain.from_iterable(
         d['children'].keys() for d in nstats.values()))
     cruft = no_calls - called
-    print(cruft)
+
     for c in cruft:
         del nstats[c]
 

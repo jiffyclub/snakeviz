@@ -115,6 +115,18 @@ var sv_hide_info_div = function sv_hide_info_div() {
 };
 
 
+// Show the "app is working" indicator
+var sv_show_working = function sv_show_working() {
+    $('#working-spinner').show();
+};
+
+
+// Hide the "app is working" indicator
+var sv_hide_working = function sv_hide_working() {
+    $('#working-spinner').hide();
+};
+
+
 // Make the worker and sv_draw_vis function
 var sv_make_worker = function sv_make_worker() {
     var URL = URL || window.URL || window.webkitURL;
@@ -126,16 +138,19 @@ var sv_make_worker = function sv_make_worker() {
     sv_worker.onmessage = function (event) {
         reset_vis();
         drawSunburst(JSON.parse(event.data));
+        sv_hide_working();
     };
 
     sv_worker.onerror = function (event) {
         console.log(event);
         sv_cycle_worker();
+        sv_hide_working();
     };
 
     sv_end_worker = function () {
         sv_worker.terminate();
         URL.revokeObjectURL(blobURL);
+        sv_hide_working();
     };
 
     return sv_worker;
@@ -148,7 +163,8 @@ var sv_cycle_worker = function sv_cycle_worker() {
 };
 
 
-sv_draw_vis = function (root_name, parent_name) {
+var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
+    sv_show_working();
     var message = {
         'depth': sv_heirarchy_depth(),
         'name': root_name,

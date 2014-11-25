@@ -53,18 +53,17 @@
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
+    <!-- Vendor JS -->
     <script src="/static/vendor/jquery-1.11.1.min.js"></script>
     <script src="/static/vendor/d3.min.js"></script>
     <script src="/static/vendor/jquery.dataTables.min.js"></script>
     <script src="/static/vendor/lodash.compat.min.js"></script>
     <script src="/static/vendor/immutable.min.js"></script>
-    <script src='/static/snakeviz.js'></script>
-    <script src='/static/sunburst.js'></script>
 
+    <!-- SnakeViz JS -->
     <script>
-      var table_data = {% raw table_rows %};
-      var profile_data = {% raw callees %};
       // Make the stats table
+      var table_data = {% raw table_rows %};
       $(document).ready(function() {
         $('#pstats-table').dataTable({
           'data': table_data,
@@ -84,20 +83,141 @@
           'paging': false
         });
       });
-      // Make the visualization
+    </script>
+
+    <!-- Web worker code for generating D3 JSON in a separate thread -->
+    <script id="heirarchy-worker" type="javascript/worker">
+      // This will all go into a web worker that will be used to generate
+      // the visualization JSON while leaving the rest of the app responsive.
+      //
+      // We put this here instead of in a separate JS file so that the worker
+      // can be stopped and restarted without loading the code from the server,
+      // and so that the stats data can be embedded in the worker.
+
+      var stats = {% raw callees %}
+      var sv_base_size = 1000;
+      function sv_build_heirarchy(
+          root_name, depth, node_size, parent_name, call_stack) {
+
+        // We track the call stack to avoid displaying recursive calls.
+        if (call_stack == null) {
+          var call_stack = Immutable.Set([root_name]);
+        } else {
+          var call_stack = call_stack.add(root_name);
+        }
+
+        var data = {};
+        data['name'] = root_name;
+        data['display_name'] = stats[root_name]['display_name'];
+        data['size'] = node_size;
+        data['cumulative'] = stats[root_name]['stats'][3];
+        if (parent_name == null) {
+          // This should only happen once: for the root node.
+          data['parent_name'] = root_name;
+          var parent_time = data['cumulative'];
+        } else {
+          data['parent_name'] = parent_name;
+          // the amount of time spent in root_name when it was called by parent_time
+          var parent_time = stats[root_name]['callers'][parent_name][3];
+        }
+
+        if (depth !== 0 && _.size(stats[root_name]['children']) !== 0) {
+          // figure out the child sizes
+          // we do this here because it needs to be correct before
+          // heading further into the call stack
+          var child_sizes = {};
+          var size_of_children = 0;
+
+          for (var child_name in stats[root_name]['children']) {
+            // the amount of time spent in a child when it was called by root_name
+            var child_time = stats[child_name]['callers'][root_name][3];
+            child_sizes[child_name] = child_time / parent_time * node_size;
+            size_of_children += child_sizes[child_name];
+          }
+
+          // if the children add up to be larger than the parent
+          // then normalize them to the parent size
+          if (size_of_children > node_size) {
+            for (var child_name in stats[root_name]['children']) {
+              child_sizes[child_name] *= (node_size / size_of_children);
+            }
+          }
+
+          data['children'] = [];
+
+          for (var child_name in stats[root_name]['children']) {
+            // make sure we're not recursing into a function
+            // that's already on the stack
+            if (call_stack.contains(child_name)) {
+              continue;
+            }
+
+
+            data['children'].push(
+              sv_build_heirarchy(
+                child_name, depth - 1, child_sizes[child_name],
+                root_name, call_stack));
+          }
+
+          if (size_of_children < node_size) {
+            // make a child representing the internal time of this function
+            var time_in_children = _.reduce(
+              stats[root_name]['children'],
+              function (sum, child) {
+                return sum + child[3];
+              },
+              0
+            );
+            data['children'].push({
+              name: root_name,
+              display_name: data['display_name'],
+              parent_name: data['parent_name'],
+              cumulative: stats[root_name]['stats'][3],
+              size: Math.max(
+                0, (parent_time - time_in_children) / parent_time * node_size)
+            });
+          }
+        }
+
+        return data;
+      }
+
+      self.onmessage = function (event) {
+        if (event.data['url'] != null) {
+          importScripts(
+            event.data['url'] + "/static/vendor/immutable.min.js",
+            event.data['url'] + "/static/vendor/lodash.compat.min.js");
+        }
+        var depth = event.data['depth'];
+        var root_name = event.data['name'];
+        var parent_name = event.data['parent_name'];
+        self.postMessage(JSON.stringify(
+          sv_build_heirarchy(root_name, depth, sv_base_size, parent_name)));
+      };
+    </script>
+
+    <!-- Load SnakeViz JS Files -->
+    <script src='/static/snakeviz.js'></script>
+    <script src='/static/sunburst.js'></script>
+
+    <!-- Do initial setup stuff -->
+    <script>
+      // Initialize data
       $(document).ready(_.defer(function () {
+        var profile_data = {% raw callees %}
+        sv_worker = sv_make_worker();
         sv_root_func_name = sv_find_root(profile_data);
         sv_call_stack = [sv_root_func_name];
         sv_total_time = profile_data[sv_root_func_name]['stats'][3];
-        sv_base_size = 1000;
-        sv_root_heirarchy = sv_build_heirarchy(
-          profile_data, sv_root_func_name, sv_heirarchy_depth(), sv_base_size);
-        drawSunburst(sv_root_heirarchy);
       }));
       // Initialize the call stack button
       $(document).ready(_.defer(function () {
         sv_update_call_stack_list();
         sv_call_stack_btn_for_show();
+      }));
+      // Draw the visualization
+      $(document).ready(_.defer(function () {
+        sv_draw_vis(sv_root_func_name);
       }));
     </script>
   </body>

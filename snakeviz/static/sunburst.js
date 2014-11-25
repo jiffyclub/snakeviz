@@ -100,11 +100,7 @@ var click = function click(d) {
   }
 
   // Create new JSON for drawing a vis from a new root
-  var heirarchy = sv_build_heirarchy(
-    profile_data, new_root, sv_heirarchy_depth(), sv_base_size, new_parent_name);
-
-  reset_vis();
-  drawSunburst(heirarchy);
+  sv_draw_vis(new_root, new_parent_name);
   sv_update_call_stack_list();
 
   // Activate the reset button if we aren't already at the root node
@@ -209,12 +205,7 @@ var drawSunburst = function drawSunburst(json) {
 // Reset the visualization to its original state starting from the
 // main root function.
 var resetVis = function resetViz() {
-  // Create new JSON for drawing a vis from a new root
-  var heirarchy = sv_build_heirarchy(
-    profile_data, sv_root_func_name, sv_heirarchy_depth(), sv_base_size);
-
-  reset_vis();
-  drawSunburst(heirarchy);
+  sv_draw_vis(sv_root_func_name);
 
   // Reset the call stack
   sv_call_stack = [sv_root_func_name];
@@ -227,11 +218,11 @@ d3.select('#resetbutton').on('click', resetVis);
 
 // The handler for when the user changes the depth selection dropdown.
 var sv_depth_changed = function sv_depth_changed() {
-  // Create new JSON for drawing a vis from a new root
-  var heirarchy = sv_build_heirarchy(
-    profile_data, _.last(sv_call_stack), sv_heirarchy_depth(), sv_base_size);
-
-  reset_vis();
-  drawSunburst(heirarchy);
+  sv_cycle_worker();
+  var parent_name = null;
+  if (sv_call_stack.length > 1) {
+    parent_name = sv_call_stack[sv_call_stack.length - 2];
+  }
+  sv_draw_vis(_.last(sv_call_stack), parent_name);
 }
 d3.select('#sv-depth-select').on('change', sv_depth_changed);

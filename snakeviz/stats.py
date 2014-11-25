@@ -24,7 +24,7 @@ def table_rows(stats):
         if v[0] == v[1]:
             calls = str(v[0])
         else:
-            calls = '{0}/{1}'.format(v[0], v[1])
+            calls = '{1}/{0}'.format(v[0], v[1])
 
         fmt = '{0:.4g}'.format
 

@@ -69,7 +69,11 @@
         $('#pstats-table').dataTable({
           'data': table_data,
           'columns': [
-            {'title': 'ncalls', 'type': 'num', 'searchable': 'false'},
+            {'title': 'ncalls', 'type': 'num', 'searchable': 'false',
+             'data': {
+              '_': function (row) {return row[0][0];},
+              'sort': function (row) {return row[0][1]}
+             }},
             {'title': 'tottime', 'type': 'num', 'searchable': 'false'},
             {'title': 'percall', 'type': 'num', 'searchable': 'false'},
             {'title': 'cumtime', 'type': 'num', 'searchable': 'false'},

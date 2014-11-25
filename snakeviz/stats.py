@@ -34,7 +34,7 @@ def table_rows(stats):
         cum_time_per = fmt(v[3] / v[0])
 
         rows.append(
-            [calls, tot_time, tot_time_per, cum_time, cum_time_per, flf])
+            [[calls, v[1]], tot_time, tot_time_per, cum_time, cum_time_per, flf])
 
     return rows
 

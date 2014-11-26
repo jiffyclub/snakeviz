@@ -145,8 +145,11 @@ var sv_make_worker = function sv_make_worker() {
     var sv_worker = new Worker(blobURL);
 
     sv_worker.onmessage = function (event) {
-        reset_vis();
-        drawSunburst(JSON.parse(event.data));
+        var json = JSON.parse(event.data);
+        if (cache_key != null) {
+            sv_json_cache[cache_key] = json;
+        }
+        redraw_vis(json);
         sv_hide_working();
     };
 
@@ -171,7 +174,6 @@ var sv_cycle_worker = function sv_cycle_worker() {
     sv_worker = sv_make_worker();
 };
 
-
 var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
     sv_show_working();
     var message = {
@@ -181,5 +183,12 @@ var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
         'parent_name': parent_name,
         'url': window.location.origin
     };
-    sv_worker.postMessage(message);
+
+    cache_key = JSON.stringify(message);
+    if (_.has(sv_json_cache, cache_key)) {
+        redraw_vis(sv_json_cache[cache_key]);
+        sv_hide_working();
+    } else {
+        sv_worker.postMessage(message);
+    }
 };

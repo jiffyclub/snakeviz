@@ -227,7 +227,8 @@
     <script>
       // Initialize data
       $(document).ready(_.defer(function () {
-        var profile_data = {% raw callees %}
+        var profile_data = {% raw callees %};
+        sv_json_cache = {};
         sv_worker = sv_make_worker();
         sv_root_func_name = sv_find_root(profile_data);
         sv_call_stack = [sv_root_func_name];

@@ -53,10 +53,6 @@ var arc = d3.svg.arc()
   .innerRadius(function(d) { return y(d.y); })
   .outerRadius(function(d) { return y(d.y + d.dy); });
 
-var tooltipText = function tooltipText(d, i) {
-  return d.display_name + ' [' + d.cumulative.toPrecision(3) + 's]';
-};
-
 
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
@@ -200,6 +196,13 @@ var drawSunburst = function drawSunburst(json) {
     .on('mouseenter', sv_show_info_div)
     .on('mouseleave', sv_hide_info_div);
 }
+
+
+// Clear and redraw the visualization
+var redraw_vis = function redraw_vis(json) {
+  reset_vis();
+  drawSunburst(json);
+};
 
 
 // Reset the visualization to its original state starting from the

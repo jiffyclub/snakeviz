@@ -226,6 +226,7 @@ var sv_selects_changed = function sv_selects_changed() {
   if (sv_call_stack.length > 1) {
     parent_name = sv_call_stack[sv_call_stack.length - 2];
   }
+  sv_hide_error_msg();
   sv_draw_vis(_.last(sv_call_stack), parent_name);
 }
 d3.select('#sv-depth-select').on('change', sv_selects_changed);

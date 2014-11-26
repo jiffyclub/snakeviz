@@ -8,8 +8,8 @@ button {
   background: white;
   padding: 10px 20px 10px 20px;
   border: 2px solid;
-  -webkit-border-radius: 28;
-  -moz-border-radius: 28;
+  -webkit-border-radius: 28px;
+  -moz-border-radius: 28px;
   border-radius: 28px;
   color: #444444;
   border-color: #444444;
@@ -95,6 +95,47 @@ select {
 .sv-info-item {
   font-family: monospace;
   word-wrap: break-word;
+}
+
+#sv-error-div {
+  position: absolute;
+  display: none;
+}
+
+.sv-error-msg {
+  color: #ecf0f1;
+  background: #e74c3c;
+  border: 3px solid #95a5a6;
+  border-radius: 28px;
+  -webkit-border-radius: 28px;
+  -moz-border-radius: 28px;
+  padding: 10px;
+}
+
+.sv-error-msg a {
+  text-decoration: none;
+  color: #C9F0F2;
+}
+
+.sv-error-msg a:hover {
+  text-decoration: underline;
+  color: #5CBDED;
+}
+
+.sv-error-msg p {
+  padding: 0 20px 0 20px;
+}
+
+.sv-error-close {
+  background: #c0392b;
+  text-align: center;
+  padding: 4px;
+  margin: 0 20px 20px 20px;
+  border-radius: 10px;
+}
+
+.sv-error-close:hover {
+  background: #a52112;
 }
 
 

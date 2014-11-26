@@ -154,6 +154,7 @@ var sv_make_worker = function sv_make_worker() {
     };
 
     sv_worker.onerror = function (event) {
+        sv_show_error_msg();
         console.log(event);
         sv_cycle_worker();
         sv_hide_working();
@@ -174,6 +175,7 @@ var sv_cycle_worker = function sv_cycle_worker() {
     sv_worker = sv_make_worker();
 };
 
+
 var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
     sv_show_working();
     var message = {
@@ -192,3 +194,19 @@ var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
         sv_worker.postMessage(message);
     }
 };
+
+
+// An error message for when the worker fails building the call tree
+var sv_show_error_msg = function sv_show_error_msg() {
+    $('#sv-error-div')
+        .css('top', window.innerHeight / 2 - radius)
+        .css('left', window.innerWidth / 2 - radius)
+        .width(radius * 2)
+        .show();
+};
+
+
+var sv_hide_error_msg = function sv_hide_error_msg() {
+    $('#sv-error-div').hide();
+};
+$('#sv-error-close-div').on('click', sv_hide_error_msg);

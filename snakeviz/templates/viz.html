@@ -27,6 +27,15 @@
       </select>
     </label>
 
+    <!-- cutoff select -->
+    <label id='sv-cutoff-label'>Cutoff:
+      <select name="sv-cutoff" id="sv-cutoff-select">
+        <option value="0.001" selected>1 &frasl; 1000</option>
+        <option value="0.01">1 &frasl; 100</option>
+        <option value="0">None</option>
+      </select>
+    </label>
+
     <!-- information div -->
     <div id="sv-info-div"></div>
 
@@ -99,10 +108,10 @@
       // can be stopped and restarted without loading the code from the server,
       // and so that the stats data can be embedded in the worker.
 
-      var stats = {% raw callees %}
+      var stats = {% raw callees %};
       var sv_base_size = 1000;
       function sv_build_heirarchy(
-          root_name, depth, node_size, parent_name, call_stack) {
+          root_name, depth, cutoff, node_size, parent_name, call_stack) {
 
         // We track the call stack to avoid displaying recursive calls.
         if (call_stack == null) {
@@ -151,16 +160,23 @@
           data['children'] = [];
 
           for (var child_name in stats[root_name]['children']) {
-            // make sure we're not recursing into a function
-            // that's already on the stack
+            // Make sure we're not recursing into a function
+            // that's already on the stack.
             if (call_stack.contains(child_name)) {
               continue;
             }
 
+            // If this child is so small that it's less than some cutoff
+            // size of its parent we'll add this child but go no deeper.
+            var child_time = stats[child_name]['callers'][root_name][3];
+            var new_depth = depth - 1;
+            if (child_time / parent_time < cutoff) {
+              new_depth = 0;
+            }
 
             data['children'].push(
               sv_build_heirarchy(
-                child_name, depth - 1, child_sizes[child_name],
+                child_name, new_depth, cutoff, child_sizes[child_name],
                 root_name, call_stack));
           }
 
@@ -194,10 +210,12 @@
             event.data['url'] + "/static/vendor/lodash.compat.min.js");
         }
         var depth = event.data['depth'];
+        var cutoff = event.data['cutoff'];
         var root_name = event.data['name'];
         var parent_name = event.data['parent_name'];
         self.postMessage(JSON.stringify(
-          sv_build_heirarchy(root_name, depth, sv_base_size, parent_name)));
+          sv_build_heirarchy(
+            root_name, depth, cutoff, sv_base_size, parent_name)));
       };
     </script>
 

@@ -217,7 +217,7 @@ d3.select('#resetbutton').on('click', resetVis);
 
 
 // The handler for when the user changes the depth selection dropdown.
-var sv_depth_changed = function sv_depth_changed() {
+var sv_selects_changed = function sv_selects_changed() {
   sv_cycle_worker();
   var parent_name = null;
   if (sv_call_stack.length > 1) {
@@ -225,4 +225,5 @@ var sv_depth_changed = function sv_depth_changed() {
   }
   sv_draw_vis(_.last(sv_call_stack), parent_name);
 }
-d3.select('#sv-depth-select').on('change', sv_depth_changed);
+d3.select('#sv-depth-select').on('change', sv_selects_changed);
+d3.select('#sv-cutoff-select').on('change', sv_selects_changed);

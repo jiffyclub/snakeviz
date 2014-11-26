@@ -57,6 +57,12 @@ select {
   top: 120px;
 }
 
+#sv-cutoff-label {
+  font-family: monospace;
+  position: absolute;
+  top: 160px;
+}
+
 #sv-call-stack {
   position: absolute;
   right: 0;
@@ -77,7 +83,7 @@ select {
 
 #sv-info-div {
   position: absolute;
-  top: 160px;
+  top: 200px;
   display: none;
   overflow: hidden;
 }

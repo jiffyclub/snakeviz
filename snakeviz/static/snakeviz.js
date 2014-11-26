@@ -29,6 +29,15 @@ var sv_heirarchy_depth = function sv_heirarchy_depth() {
 };
 
 
+// Returns the heirarchy cutoff value from the cutoff <select> element
+// This value is used to prune elements when building the call tree:
+// if a child's cumulative time is less than this fraction of the parent
+// then the program skips the descent into that child.
+var sv_heirarchy_cutoff = function sv_heirarchy_cutoff() {
+    return parseFloat($('#sv-cutoff-select').val());
+};
+
+
 // Configures the call stack button's settings and appearance
 // for when the call stack is hidden.
 var sv_call_stack_btn_for_show = function sv_call_stack_btn_for_show() {
@@ -167,6 +176,7 @@ var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
     sv_show_working();
     var message = {
         'depth': sv_heirarchy_depth(),
+        'cutoff': sv_heirarchy_cutoff(),
         'name': root_name,
         'parent_name': parent_name,
         'url': window.location.origin

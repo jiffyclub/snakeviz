@@ -68,6 +68,7 @@ select {
   right: 0;
   padding-right: 10px;
   font-family: monospace;
+  text-align: right;
 }
 
 #sv-call-stack-list {

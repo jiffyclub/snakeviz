@@ -150,7 +150,7 @@ var sv_make_worker = function sv_make_worker() {
             sv_json_cache[cache_key] = json;
         }
         redraw_vis(json);
-        sv_hide_working();
+        _.defer(sv_hide_working);
     };
 
     sv_worker.onerror = function (event) {

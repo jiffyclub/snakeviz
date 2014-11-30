@@ -47,18 +47,14 @@ setup(
     packages=['snakeviz'],
     package_data={
         'snakeviz': ['static/*.ico',
-                     'static/bootstrap/js/*.js',
-                     'static/bootstrap/css/*.css',
-                     'static/tooltip/*.js',
-                     'static/tooltip/*.css',
-                     'static/viz/*.js',
                      'static/*.js',
+                     'static/*.css',
                      'static/vendor/*.js',
                      'static/vendor/*.css',
                      'static/images/*.png',
                      'templates/*.html']
     },
-    install_requires=['tornado>=2.0', 'jinja2>=2.0'],
+    install_requires=['tornado>=2.0'],
     entry_points={
         'console_scripts': ['snakeviz = snakeviz.cli:main']
     }

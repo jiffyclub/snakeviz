@@ -6,9 +6,31 @@ from __future__ import print_function
 
 import optparse
 import os
+import random
+import socket
 import sys
 import threading
 import webbrowser
+
+try:
+    from urllib.parse import quote_plus
+except ImportError:
+    from urllib import quote_plus
+
+
+# As seen in IPython:
+# https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
+# See the IPython license at:
+# https://github.com/ipython/ipython/blob/master/COPYING.rst.
+def random_ports(port, n):
+    """Generate a list of n random ports near the given port.
+    The first 5 ports will be sequential, and the remaining n-5 will be
+    randomly selected in the range [port-2*n, port+2*n].
+    """
+    for i in range(min(5, n)):
+        yield port + i
+    for i in range(n-5):
+        yield max(1, port + random.randint(-2*n, 2*n))
 
 
 def main(argv=sys.argv[1:]):
@@ -18,9 +40,8 @@ def main(argv=sys.argv[1:]):
     parser.add_option('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
                       help='hostname to bind to (default: 127.0.0.1')
 
-    # TODO: Make this help text actually true
     parser.add_option('-p', '--port', type='int', metavar='PORT', default=8080,
-                      help='port to bind to; if this port is already in use a'
+                      help='port to bind to; if this port is already in use a '
                            'free port will be selected automatically '
                            '(default: %default)')
 
@@ -46,6 +67,8 @@ def main(argv=sys.argv[1:]):
         parser.error('the file %s could not be opened: %s'
                      % (filename, str(e)))
 
+    filename = quote_plus(filename)
+
     hostname = options.hostname
     port = options.port
 
@@ -64,20 +87,28 @@ def main(argv=sys.argv[1:]):
     from .main import app
     import tornado.ioloop
 
-    app.listen(port, address=hostname)
-    app.settings['single_user_mode'] = True
+    # As seen in IPython:
+    # https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
+    # See the IPython license at:
+    # https://github.com/ipython/ipython/blob/master/COPYING.rst.
+    for p in random_ports(port, 10):
+        try:
+            app.listen(p, address=hostname)
+        except socket.error as e:
+            print('Port {0} in use, trying another.'.format(p))
+        else:
+            port = p
+            break
+    else:
+        print('No available port found.')
+        return 1
 
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))
 
-    # Launce the browser in a separate thread to avoid blocking the ioloop from
+    # Launch the browser in a separate thread to avoid blocking the ioloop from
     # starting
-
-    import platform
-    if platform.system() == 'Windows':
-        filename = '/' + filename
-
-    bt = lambda: browser.open('http://%s:%d/viz/file%s' %
+    bt = lambda: browser.open('http://%s:%d/snakeviz/%s' %
                               (hostname, port, filename), new=2)
     threading.Thread(target=bt).start()
 

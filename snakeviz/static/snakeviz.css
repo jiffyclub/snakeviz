@@ -1,0 +1,193 @@
+body {
+  padding: 20px;
+}
+
+button {
+  font-family: monospace;
+  font-size: 20px;
+  background: white;
+  padding: 10px 20px 10px 20px;
+  border: 2px solid;
+  -webkit-border-radius: 28px;
+  -moz-border-radius: 28px;
+  border-radius: 28px;
+  color: #444444;
+  border-color: #444444;
+}
+
+button:hover {
+  background: #C9F0F2;
+}
+
+button:disabled {
+  color: #cccccc;
+  border-color: #cccccc;
+}
+
+button:disabled:hover {
+  background: white;
+}
+
+.btn-active {
+  background: #5CBDED;
+}
+
+#resetbutton {
+  position: absolute;
+  top: 60px;
+}
+
+#snakeviz-text {
+  color: #cccccc;
+  font-family: monospace;
+  position: absolute;
+  top: -10px;
+}
+
+select {
+  font-family: monospace;
+  font-size: 20px;
+  background: white;
+  padding: 10px 20px 10px 20px;
+}
+
+#sv-depth-label {
+  font-family: monospace;
+  position: absolute;
+  top: 120px;
+}
+
+#sv-cutoff-label {
+  font-family: monospace;
+  position: absolute;
+  top: 160px;
+}
+
+#sv-call-stack {
+  position: absolute;
+  right: 0;
+  padding-right: 10px;
+  font-family: monospace;
+  text-align: right;
+}
+
+#sv-call-stack-list {
+  text-align: left;
+  overflow-y: scroll;
+  border: 2px solid gray;
+  background-color: white;
+  margin-top: 5px;
+  display: none;
+}
+
+#sv-call-stack-list div {
+  padding: 0 10px 0 10px;
+}
+
+#sv-call-stack-list div span {
+  display: table-cell;
+}
+
+#sv-info-div {
+  position: absolute;
+  top: 200px;
+  display: none;
+  overflow: hidden;
+}
+
+.sv-info-label {
+  font-weight: bold;
+}
+
+.sv-info-item {
+  font-family: monospace;
+  word-wrap: break-word;
+}
+
+#sv-error-div {
+  position: absolute;
+  display: none;
+}
+
+.sv-error-msg {
+  color: #ecf0f1;
+  background: #e74c3c;
+  border: 3px solid #95a5a6;
+  border-radius: 28px;
+  -webkit-border-radius: 28px;
+  -moz-border-radius: 28px;
+  padding: 10px;
+}
+
+.sv-error-msg a {
+  text-decoration: none;
+  color: #C9F0F2;
+}
+
+.sv-error-msg a:hover {
+  text-decoration: underline;
+  color: #5CBDED;
+}
+
+.sv-error-msg p {
+  padding: 0 20px 0 20px;
+}
+
+.sv-error-close {
+  background: #c0392b;
+  text-align: center;
+  padding: 4px;
+  margin: 0 20px 20px 20px;
+  border-radius: 10px;
+}
+
+.sv-error-close:hover {
+  background: #a52112;
+}
+
+
+/* Spinner CSS from http://tobiasahlin.com/spinkit/ */
+.spinner {
+  display: inline-block;
+  width: 100px;
+  text-align: center;
+}
+
+.spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #333;
+
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: bouncedelay 1.4s infinite ease-in-out;
+  animation: bouncedelay 1.4s infinite ease-in-out;
+  /* Prevent first frame from flickering when animation starts */
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+
+@-webkit-keyframes bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0.0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes bouncedelay {
+  0%, 80%, 100% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 40% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}

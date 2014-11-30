@@ -1,108 +1,105 @@
 <!doctype html>
-
 <html>
   <head>
     <meta charset="utf-8" .>
     <title>{{profile_name.split('/')[-1].split('.')[0]}}</title>
 
-    <!-- bootstrap stuff -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" />
-    <style>
-      body {
-        padding-bottom: 10px;
-      }
-    </style>
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/static/snakeviz.css" rel="stylesheet">
 
     <!-- DataTables CSS -->
-    <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet" />
-
-    <!-- Load d3 -->
-    <script src="/static/vendor/d3.v2.min.js"></script>
-
-    <!-- Mouse-over tooltip -->
-    <script src="/static/tooltip/tooltip.js"></script>
-    <link href="/static/tooltip/tooltip.css" rel="stylesheet" />
-
-    <!-- Stats table. -->
-    <script>
-    var tableData = [
-      {% for row in stats_rows %}
-        ["{{row.calls_str}}", "{{row.tottime_str}}", "{{row.tottime_percall_str}}",
-         "{{row.cumtime_str}}", "{{row.cumtime_percall_str}}",
-         "{{row.file_line_func | escape}}"],
-      {%- endfor %}
-    ];
-    </script>
-
-    <!-- Global variable with the profile name. -->
-    <script>
-      var profile_json_path = '{{json_path}}';
-    </script>
+    <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet">
   </head>
 
   <body>
-    <!-- Navbar -->
-    <div class="navbar navbar-static-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">SnakeViz</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li class="dropdown" id="vizmenu">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#vizmenu">
-                  Viz Type
-                  <b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a href="#">Sunburst</a></li>
-                </ul>
-              <li><a href="{{json_path}}">JSON</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
+    <h1 id="snakeviz-text">SnakeViz</h1>
+
+    <!-- reset button -->
+    <button id="resetbutton" disabled="True">Reset</button>
+
+    <!-- depth select -->
+    <label id='sv-depth-label'>Depth:
+      <select name="sv-depth" id="sv-depth-select">
+        {% for i in [3, 5, 10, 15, 20] %}
+          <option value="{{i}}" {% if i == 5 %}selected{% end %}>{{i}}</option>
+        {% end %}
+      </select>
+    </label>
+
+    <!-- cutoff select -->
+    <label id='sv-cutoff-label'>Cutoff:
+      <select name="sv-cutoff" id="sv-cutoff-select">
+        <option value="0.001" selected>1 &frasl; 1000</option>
+        <option value="0.01">1 &frasl; 100</option>
+        <option value="0">None</option>
+      </select>
+    </label>
+
+    <!-- information div -->
+    <div id="sv-info-div"></div>
+
+    <!-- call stack -->
+    <div id="sv-call-stack">
+      <div id="working-spinner" class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
       </div>
+      <div style="display: inline-block;">
+        <button id="sv-call-stack-btn">Call Stack</button>
+      </div>
+      <div id="sv-call-stack-list"></div>
     </div>
 
-    <!-- Everything else -->
-    <div class="container">
-      <div class="gallery" id="chart">
-        <button class="btn" id="resetbutton" disabled="True"
-                style="position: absolute; top: 60px;">
-                Reset
-        </button>
-      </div>
-      <script src='/static/viz/sunburst.js'> </script>
-      <script src='/static/loading.js'> </script>
-      <br>
-      <div id="table_div">
-        <table cellpadding="0" cellspacing="0" border="0" class="display" id="pstats-table">
-        </table>
-      </div>
+    <!-- Error message -->
+    <div id="sv-error-div" class="sv-error-msg">
+      <p>
+        An error occurred processing your profile.
+        You can try a lower depth, a larger cutoff,
+        or try profiling a smaller portion of your code.
+        If you continue to have problems you can
+        <a href="https://github.com/jiffyclub/snakeviz/issues">
+          contact us on GitHub</a>.
+      </p>
+      <div id="sv-error-close-div" class="sv-error-close">Close</div>
+    </div>
+
+    <!-- vis -->
+    <div style="text-align: center;">
+      <div id="chart"></div>
+    </div>
+    <br>
+
+    <!-- stats table -->
+    <div id="table_div">
+      <table cellpadding="0" cellspacing="0" border="0" class="display" id="pstats-table">
+      </table>
     </div>
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="/static/vendor/jquery-1.8.0.min.js"></script>
+    <!-- Vendor JS -->
+    <script src="/static/vendor/jquery-1.11.1.min.js"></script>
+    <script src="/static/vendor/d3.min.js"></script>
     <script src="/static/vendor/jquery.dataTables.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/vendor/lodash.compat.min.js"></script>
+    <script src="/static/vendor/immutable.min.js"></script>
 
+    <!-- SnakeViz JS -->
     <script>
+      // Make the stats table
+      var table_data = {% raw table_rows %};
       $(document).ready(function() {
         $('#pstats-table').dataTable({
-          'data': tableData,
+          'data': table_data,
           'columns': [
-            {'title': 'ncalls', 'type': 'num', 'searchable': 'false'},
+            {'title': 'ncalls', 'type': 'num', 'searchable': 'false',
+             'data': {
+              '_': function (row) {return row[0][0];},
+              'sort': function (row) {return row[0][1]}
+             }},
             {'title': 'tottime', 'type': 'num', 'searchable': 'false'},
             {'title': 'percall', 'type': 'num', 'searchable': 'false'},
             {'title': 'cumtime', 'type': 'num', 'searchable': 'false'},
@@ -113,6 +110,152 @@
           'paging': false
         });
       });
+    </script>
+
+    <!-- Web worker code for generating D3 JSON in a separate thread -->
+    <script id="heirarchy-worker" type="javascript/worker">
+      // This will all go into a web worker that will be used to generate
+      // the visualization JSON while leaving the rest of the app responsive.
+      //
+      // We put this here instead of in a separate JS file so that the worker
+      // can be stopped and restarted without loading the code from the server,
+      // and so that the stats data can be embedded in the worker.
+
+      var stats = {% raw callees %};
+      var sv_base_size = 1000;
+      function sv_build_heirarchy(
+          root_name, depth, cutoff, node_size, parent_name, call_stack) {
+
+        // We track the call stack to avoid displaying recursive calls.
+        if (call_stack == null) {
+          var call_stack = Immutable.Set([root_name]);
+        } else {
+          var call_stack = call_stack.add(root_name);
+        }
+
+        var data = {};
+        data['name'] = root_name;
+        data['display_name'] = stats[root_name]['display_name'];
+        data['size'] = node_size;
+        data['cumulative'] = stats[root_name]['stats'][3];
+        if (parent_name == null) {
+          // This should only happen once: for the root node.
+          data['parent_name'] = root_name;
+          var parent_time = data['cumulative'];
+        } else {
+          data['parent_name'] = parent_name;
+          // the amount of time spent in root_name when it was called by parent_time
+          var parent_time = stats[root_name]['callers'][parent_name][3];
+        }
+
+        if (depth !== 0 && _.size(stats[root_name]['children']) !== 0) {
+          // figure out the child sizes
+          // we do this here because it needs to be correct before
+          // heading further into the call stack
+          var child_sizes = {};
+          var size_of_children = 0;
+
+          for (var child_name in stats[root_name]['children']) {
+            // the amount of time spent in a child when it was called by root_name
+            var child_time = stats[child_name]['callers'][root_name][3];
+            child_sizes[child_name] = child_time / parent_time * node_size;
+            size_of_children += child_sizes[child_name];
+          }
+
+          // if the children add up to be larger than the parent
+          // then normalize them to the parent size
+          if (size_of_children > node_size) {
+            for (var child_name in stats[root_name]['children']) {
+              child_sizes[child_name] *= (node_size / size_of_children);
+            }
+          }
+
+          data['children'] = [];
+
+          for (var child_name in stats[root_name]['children']) {
+            // Make sure we're not recursing into a function
+            // that's already on the stack.
+            if (call_stack.contains(child_name)) {
+              continue;
+            }
+
+            // If this child is so small that it's less than some cutoff
+            // size of its parent we'll add this child but go no deeper.
+            var child_time = stats[child_name]['callers'][root_name][3];
+            var new_depth = depth - 1;
+            if (child_time / parent_time < cutoff) {
+              new_depth = 0;
+            }
+
+            data['children'].push(
+              sv_build_heirarchy(
+                child_name, new_depth, cutoff, child_sizes[child_name],
+                root_name, call_stack));
+          }
+
+          if (size_of_children < node_size) {
+            // make a child representing the internal time of this function
+            var time_in_children = _.reduce(
+              stats[root_name]['children'],
+              function (sum, child) {
+                return sum + child[3];
+              },
+              0
+            );
+            data['children'].push({
+              name: root_name,
+              display_name: data['display_name'],
+              parent_name: data['parent_name'],
+              cumulative: stats[root_name]['stats'][3],
+              size: Math.max(
+                0, (parent_time - time_in_children) / parent_time * node_size)
+            });
+          }
+        }
+
+        return data;
+      }
+
+      self.onmessage = function (event) {
+        if (event.data['url'] != null) {
+          importScripts(
+            event.data['url'] + "/static/vendor/immutable.min.js",
+            event.data['url'] + "/static/vendor/lodash.compat.min.js");
+        }
+        var depth = event.data['depth'];
+        var cutoff = event.data['cutoff'];
+        var root_name = event.data['name'];
+        var parent_name = event.data['parent_name'];
+        self.postMessage(JSON.stringify(
+          sv_build_heirarchy(
+            root_name, depth, cutoff, sv_base_size, parent_name)));
+      };
+    </script>
+
+    <!-- Load SnakeViz JS Files -->
+    <script src='/static/snakeviz.js'></script>
+    <script src='/static/sunburst.js'></script>
+
+    <!-- Do initial setup stuff -->
+    <script>
+      // Initialize data
+      $(document).ready(_.defer(function () {
+        var profile_data = {% raw callees %};
+        sv_json_cache = {};
+        sv_worker = sv_make_worker();
+        sv_root_func_name = sv_find_root(profile_data);
+        sv_call_stack = [sv_root_func_name];
+        sv_total_time = profile_data[sv_root_func_name]['stats'][3];
+      }));
+      // Initialize the call stack button
+      $(document).ready(_.defer(function () {
+        sv_update_call_stack_list();
+        sv_call_stack_btn_for_show();
+      }));
+      // Draw the visualization
+      $(document).ready(_.defer(function () {
+        sv_draw_vis(sv_root_func_name);
+      }));
     </script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 include *.rst
 include ez_setup.py
+include LICENSE.txt
 recursive-include snakeviz/static *.ico *.css *.js *.png
 recursive-include snakeviz/templates *.html
-recursive-include licenses *.txt

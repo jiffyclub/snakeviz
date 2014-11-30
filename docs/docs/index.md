@@ -192,8 +192,13 @@ but can speed up the building and rendering of the visualization.
 - SnakeViz will sometimes be unable to create a visualization and will
     show an error.
     This is usually because the visualization is too complex.
-    You can make a simpler graph by increasing the cutoff
-    or reducing the depth.
+    You can make a simpler graph by increasing the cutoff, reducing the depth,
+    or profiling a smaller subsection of your code.
+
+## Contact
+
+If you'd like to contribute to SnakeViz you can [fork it on GitHub][gh].
+Please report issues on the [GitHub issue tracker][issues].
 
 [cProfile]: https://docs.python.org/3.4/library/profile.html#module-cProfile
 [RunSnakeRun]: http://www.vrplumber.com/programming/runsnakerun/
@@ -202,3 +207,5 @@ but can speed up the building and rendering of the visualization.
 [prun]: http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun
 [generating]: https://docs.python.org/3.4/library/profile.html#instant-user-s-manual
 [pstats]: https://docs.python.org/3.4/library/profile.html#pstats.Stats
+[gh]: https://github.com/jiffyclub/snakeviz
+[issues]: https://github.com/jiffyclub/snakeviz/issues

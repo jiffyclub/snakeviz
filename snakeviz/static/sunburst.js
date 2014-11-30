@@ -6,13 +6,13 @@
 var width = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     height = width,
     radius = width / 2,
-    scale = d3.scale.category20c()   // colors
+    scale = d3.scale.category20c();   // colors
 
 
 // should make it so that a given function is always the same color
 var color = function color(d) {
   return scale(d.name);
-}
+};
 
 
 var make_vis_obj = function make_vis_obj () {
@@ -25,7 +25,7 @@ var make_vis_obj = function make_vis_obj () {
     .append("svg:g")
     .attr("id", "container")
     .attr("transform", "translate(" + radius + "," + radius + ")");
-}
+};
 var vis = make_vis_obj();
 
 
@@ -35,7 +35,7 @@ var reset_vis = function reset_vis () {
 
   // Make and draw the new svg container
   vis = make_vis_obj();
-}
+};
 
 
 var partition = d3.layout.partition()
@@ -106,7 +106,7 @@ var click = function click(d) {
   } else {
     d3.select('#resetbutton').property('disabled', 'True');
   }
-}
+};
 
 var sv_info_tpl = _.template(
   ['<div class="sv-info-label">Name:</div>',
@@ -143,7 +143,7 @@ var sv_update_info_div = function sv_update_info_div (d) {
     .html(sv_info_tpl(info))
     .height(radius * 1.5)
     .width(($('body').width() - (2 * radius)) / 2.1);
-}
+};
 
 
 var apply_mouseover = function apply_mouseover (selection) {
@@ -161,10 +161,10 @@ var apply_mouseover = function apply_mouseover (selection) {
       // reset nodes to their original color
       var thisname = d.name;
       var thispath = selection.filter(function(d, i) {
-          return d.name === thisname;})
-      thispath.style('fill', color(d))
+          return d.name === thisname;});
+      thispath.style('fill', color(d));
   });
-}
+};
 
 
 // This is having D3 do its thing.
@@ -195,7 +195,7 @@ var drawSunburst = function drawSunburst(json) {
   d3.select('#container')
     .on('mouseenter', sv_show_info_div)
     .on('mouseleave', sv_hide_info_div);
-}
+};
 
 
 // Clear and redraw the visualization
@@ -228,6 +228,6 @@ var sv_selects_changed = function sv_selects_changed() {
   }
   sv_hide_error_msg();
   sv_draw_vis(_.last(sv_call_stack), parent_name);
-}
+};
 d3.select('#sv-depth-select').on('change', sv_selects_changed);
 d3.select('#sv-cutoff-select').on('change', sv_selects_changed);

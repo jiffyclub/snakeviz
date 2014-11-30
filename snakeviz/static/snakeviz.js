@@ -70,7 +70,7 @@ var sv_item_name = function sv_item_name (name) {
 
 // Builds a list of div elements, each of which contain a number and
 // a function description: file name:line number(function name)
-var sv_call_tpl = _.template('<div><%= i %>. <%- name %></div>');
+var sv_call_tpl = _.template('<div><span><%= i %>.&nbsp;</span><span><%- name %></span></div>');
 var sv_call_stack_list = function sv_call_stack_list(call_stack) {
     var calls = [];
     // the call stack list comes in ordered from root -> leaf,

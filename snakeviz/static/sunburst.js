@@ -129,7 +129,7 @@ var sv_update_info_div = function sv_update_info_div (d) {
   var slash = file.lastIndexOf('/');
   if (slash !== -1) {
     directory = file.slice(0, slash + 1);
-    file = file.slice(slash + 1)
+    file = file.slice(slash + 1);
   }
   var info = {
     'file': file,

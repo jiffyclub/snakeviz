@@ -72,14 +72,20 @@ select {
 }
 
 #sv-call-stack-list {
-  overflow: scroll;
+  text-align: left;
+  overflow-y: scroll;
   border: 2px solid gray;
+  background-color: white;
   margin-top: 5px;
   display: none;
 }
 
 #sv-call-stack-list div {
   padding: 0 10px 0 10px;
+}
+
+#sv-call-stack-list div span {
+  display: table-cell;
 }
 
 #sv-info-div {

@@ -1,0 +1,89 @@
+{
+    "docs": [
+        {
+            "location": "/",
+            "text": "SnakeViz\n\n\nSnakeViz is a browser based graphical viewer for the output of Python\u2019s\n\ncProfile\n module.\nIt was originally inspired by \nRunSnakeRun\n.\nSnakeViz works on Python 2.7 and Python 3.\nSnakeViz itself is still likely to work on Python 2.6,\nbut official support has been dropped now that \nTornado\n no longer\nsupports Python 2.6.\n\n\nInstallation\n\n\nSnakeViz is available \non PyPI\n. Install with \npip\n:\n\n\npip install snakeviz\n\n\n\n\nStarting SnakeViz\n\n\nCommand Line Interface\n\n\nIf you have generated a profile file called \nprogram.prof\n you can start\nSnakeViz from the command line:\n\n\nsnakeviz program.prof\n\n\n\n\nRun \nsnakeviz --help\n to see available options.\n\n\nIPython\n\n\nSnakeViz includes IPython line and cell magics for going straight\nfrom code to a visualization.\nFirst load the magics:\n\n\n%load_ext snakeviz\n\n\n\n\nThen use the \n%snakeviz\n and \n%%snakeviz\n magics to profile and view\nindividual lines or entire blocks of code:\n\n\n% snakeviz glob.glob('*.txt')\n\n\n\n\n%%snakeviz\nfiles = glob.glob('*.txt')\nfor file in files:\n    with open(file) as f:\n        print(hashlib.md5(f.read().encode('utf-8')).hexdigest())\n\n\n\n\nNote: Using the IPython \n%snakeviz\n magics requires internet access.\nIf you are working offline, use \nprun\n to save a profile file\nand then start SnakeViz from the command line.\n\n\nGenerating Profiles\n\n\ncProfile\n\n\nYou can use the \ncProfile\n module at the command line to create a\nprofile file for a script:\n\n\npython -m cProfile -o program.prof my_program.py\n\n\n\n\nSee the \nuser\u2019s manual\n for more info and other options.\n\n\nIPython\n\n\nYou can also generate profile files of specific code using\nIPython\u2019s \nprun\n magic using the \n-D\n flag:\n\n\n%prun -D program.prof glob.glob('*.txt')\n\n\n\n\nprun\n has both line and cell magics available,\nsee the \nIPython docs\n for more information.\n\n\nInterpreting Results\n\n\nSunburst\n\n\n\n\nSnakeViz displays profiles as a sunburst in which functions are represented\nas arcs.\nA root function is a circle at the middle, with functions it calls around,\nthen the functions those functions call, and so on.\nThe amount of time spent inside a function is represented by\nthe angular width of the arc.\nAn arc that wraps most of the way around the circle represents a function\nthat is taking up most of the time of its calling function, while a\nskinny arc represents a function that is using hardly any time at all.\n\n\nFunctions don\u2019t just spend time calling other functions, they also have their\nown internal time. SnakeViz shows this by putting a special child on each node\nthat represents internal time. Only functions that call other functions will\nhave this, functions with no calls are entirely internal time.\n\n\nFunction Info\n\n\nPlacing your cursor over an arc will highlight that arc and any other\nvisible instances of the same function call.\nIt will also display a list of information to the left of the sunburst.\n\n\n\n\nThe displayed information includes:\n\n\n\n\nName:\n function name\n\n\nCumulative Time:\n total cumulative amount of time spent in the function\n    in seconds and as a percentage of the total program run time\n\n\nFile:\n name of the file in which the function is defined\n\n\nLine:\n line number on which the function is defined\n\n\nDirectory:\n directory of the file\n\n\n\n\nNote: For some built-in functions the file name, line number, and\ndirectory will be \u2018~\u2019, 0, and blank, respectively.\n\n\nZooming and Call Stack\n\n\nClicking on an arc will zoom the visualization, making that function\nthe new root and allowing you to magnify different parts of the profile.\nClicking the center of the sunburst will zoom out one level and clicking\nthe \u201cReset\u201d button will return the visualization to its most zoomed-out\nstate.\n\n\n\n\nTo the right of the sunburst is a \u201cCall Stack\u201d button.\nClicking this will expand a list that shows all the functions\nleading up to the current root of the sunburst, with the root function\nat the bottom of the list.\nThe call stack can be useful for orienting yourself when you\u2019ve zoomed\ninto the profile.\nClick the \u201cCall Stack\u201d button again to hide the list.\n\n\nStats Table\n\n\nBelow the sunburst visualization is a table of profile data similar to the\none you\u2019d see working with Python\u2019s built-in \ncProfile\n and \npstats\n\nmodules.\n\n\n\n\nThe table contains one row per unique function called.\nCalls to the same function from different places are all grouped into\none row.\nThe columns are the same as described in the\n\ncProfile user\u2019s manual\n:\n\n\n\n\nncalls:\n Total number of calls to the function.\n    If there are two numbers, that means the function recursed and\n    the first is the total number of calls\n    and the second is the number of primitive (non-recursive) calls.\n\n\ntottime:\n Total time spent in the function,\n    not including time spent in calls to sub-functions\n\n\npercall:\n \ntottime\n divided by \nncalls\n\n\ncumtime:\n Cumulative time spent in this function and all sub-functions\n\n\npercall:\n \ncumtime\n divided by \nncalls\n\n\nfilename:lineno(function):\n File name and line number were the\n    function is defined, and the function\u2019s name\n\n\n\n\nThe columns of the table are all sortable and the search box can be used\nto filter the table based on the \nfilename:lineno(function)\n column.\n\n\nControls\n\n\nSnakeViz has two controls that affect the visualization:\n\u201cdepth\u201d and \u201ccutoff\u201d.\n\u201cDepth\u201d controls how deep into the call stack the application goes when\nbuilding the graph.\nAnything below this depth will not be shown until you zoom in by\nclicking on a new function deeper in the call stack.\nIncreasing the displayed depth will show more of your profile at once,\nbut it can take longer to build and display the graph.\n\n\n\n\n\u201cCutoff\u201d controls the display of functions that take up very little\nof their parents\u2019 cumulative time.\nIf a function\u2019s cumulative time divided by its parent\u2019s cumulative time\nis less than the currently set cutoff, then that function will be displayed\nbut none of its sub-functions will be.\nSetting a larger cutoff may display less of a profile,\nbut can speed up the building and rendering of the visualization.\n\n\nNotes\n\n\n\n\nSnakeViz currently only works with files produced by \ncProfile\n,\n    it will not work with files from the \nprofile\n module.\n\n\nSnakeViz will sometimes be unable to create a visualization and will\n    show an error.\n    This is usually because the visualization is too complex.\n    You can make a simpler graph by increasing the cutoff, reducing the depth,\n    or profiling a smaller subsection of your code.\n\n\n\n\nContact\n\n\nIf you\u2019d like to contribute to SnakeViz you can \nfork it on GitHub\n.\nPlease report issues on the \nGitHub issue tracker\n.",
+            "title": "Home"
+        },
+        {
+            "location": "/#snakeviz",
+            "text": "SnakeViz is a browser based graphical viewer for the output of Python\u2019s cProfile  module.\nIt was originally inspired by  RunSnakeRun .\nSnakeViz works on Python 2.7 and Python 3.\nSnakeViz itself is still likely to work on Python 2.6,\nbut official support has been dropped now that  Tornado  no longer\nsupports Python 2.6.",
+            "title": "SnakeViz"
+        },
+        {
+            "location": "/#installation",
+            "text": "SnakeViz is available  on PyPI . Install with  pip :  pip install snakeviz",
+            "title": "Installation"
+        },
+        {
+            "location": "/#starting-snakeviz",
+            "text": "",
+            "title": "Starting SnakeViz"
+        },
+        {
+            "location": "/#command-line-interface",
+            "text": "If you have generated a profile file called  program.prof  you can start\nSnakeViz from the command line:  snakeviz program.prof  Run  snakeviz --help  to see available options.",
+            "title": "Command Line Interface"
+        },
+        {
+            "location": "/#ipython",
+            "text": "SnakeViz includes IPython line and cell magics for going straight\nfrom code to a visualization.\nFirst load the magics:  %load_ext snakeviz  Then use the  %snakeviz  and  %%snakeviz  magics to profile and view\nindividual lines or entire blocks of code:  % snakeviz glob.glob('*.txt')  %%snakeviz\nfiles = glob.glob('*.txt')\nfor file in files:\n    with open(file) as f:\n        print(hashlib.md5(f.read().encode('utf-8')).hexdigest())  Note: Using the IPython  %snakeviz  magics requires internet access.\nIf you are working offline, use  prun  to save a profile file\nand then start SnakeViz from the command line.",
+            "title": "IPython"
+        },
+        {
+            "location": "/#generating-profiles",
+            "text": "",
+            "title": "Generating Profiles"
+        },
+        {
+            "location": "/#cprofile",
+            "text": "You can use the  cProfile  module at the command line to create a\nprofile file for a script:  python -m cProfile -o program.prof my_program.py  See the  user\u2019s manual  for more info and other options.",
+            "title": "cProfile"
+        },
+        {
+            "location": "/#ipython_1",
+            "text": "You can also generate profile files of specific code using\nIPython\u2019s  prun  magic using the  -D  flag:  %prun -D program.prof glob.glob('*.txt')  prun  has both line and cell magics available,\nsee the  IPython docs  for more information.",
+            "title": "IPython"
+        },
+        {
+            "location": "/#interpreting-results",
+            "text": "",
+            "title": "Interpreting Results"
+        },
+        {
+            "location": "/#sunburst",
+            "text": "SnakeViz displays profiles as a sunburst in which functions are represented\nas arcs.\nA root function is a circle at the middle, with functions it calls around,\nthen the functions those functions call, and so on.\nThe amount of time spent inside a function is represented by\nthe angular width of the arc.\nAn arc that wraps most of the way around the circle represents a function\nthat is taking up most of the time of its calling function, while a\nskinny arc represents a function that is using hardly any time at all.  Functions don\u2019t just spend time calling other functions, they also have their\nown internal time. SnakeViz shows this by putting a special child on each node\nthat represents internal time. Only functions that call other functions will\nhave this, functions with no calls are entirely internal time.",
+            "title": "Sunburst"
+        },
+        {
+            "location": "/#function-info",
+            "text": "Placing your cursor over an arc will highlight that arc and any other\nvisible instances of the same function call.\nIt will also display a list of information to the left of the sunburst.   The displayed information includes:   Name:  function name  Cumulative Time:  total cumulative amount of time spent in the function\n    in seconds and as a percentage of the total program run time  File:  name of the file in which the function is defined  Line:  line number on which the function is defined  Directory:  directory of the file   Note: For some built-in functions the file name, line number, and\ndirectory will be \u2018~\u2019, 0, and blank, respectively.",
+            "title": "Function Info"
+        },
+        {
+            "location": "/#zooming-and-call-stack",
+            "text": "Clicking on an arc will zoom the visualization, making that function\nthe new root and allowing you to magnify different parts of the profile.\nClicking the center of the sunburst will zoom out one level and clicking\nthe \u201cReset\u201d button will return the visualization to its most zoomed-out\nstate.   To the right of the sunburst is a \u201cCall Stack\u201d button.\nClicking this will expand a list that shows all the functions\nleading up to the current root of the sunburst, with the root function\nat the bottom of the list.\nThe call stack can be useful for orienting yourself when you\u2019ve zoomed\ninto the profile.\nClick the \u201cCall Stack\u201d button again to hide the list.",
+            "title": "Zooming and Call Stack"
+        },
+        {
+            "location": "/#stats-table",
+            "text": "Below the sunburst visualization is a table of profile data similar to the\none you\u2019d see working with Python\u2019s built-in  cProfile  and  pstats \nmodules.   The table contains one row per unique function called.\nCalls to the same function from different places are all grouped into\none row.\nThe columns are the same as described in the cProfile user\u2019s manual :   ncalls:  Total number of calls to the function.\n    If there are two numbers, that means the function recursed and\n    the first is the total number of calls\n    and the second is the number of primitive (non-recursive) calls.  tottime:  Total time spent in the function,\n    not including time spent in calls to sub-functions  percall:   tottime  divided by  ncalls  cumtime:  Cumulative time spent in this function and all sub-functions  percall:   cumtime  divided by  ncalls  filename:lineno(function):  File name and line number were the\n    function is defined, and the function\u2019s name   The columns of the table are all sortable and the search box can be used\nto filter the table based on the  filename:lineno(function)  column.",
+            "title": "Stats Table"
+        },
+        {
+            "location": "/#controls",
+            "text": "SnakeViz has two controls that affect the visualization:\n\u201cdepth\u201d and \u201ccutoff\u201d.\n\u201cDepth\u201d controls how deep into the call stack the application goes when\nbuilding the graph.\nAnything below this depth will not be shown until you zoom in by\nclicking on a new function deeper in the call stack.\nIncreasing the displayed depth will show more of your profile at once,\nbut it can take longer to build and display the graph.   \u201cCutoff\u201d controls the display of functions that take up very little\nof their parents\u2019 cumulative time.\nIf a function\u2019s cumulative time divided by its parent\u2019s cumulative time\nis less than the currently set cutoff, then that function will be displayed\nbut none of its sub-functions will be.\nSetting a larger cutoff may display less of a profile,\nbut can speed up the building and rendering of the visualization.",
+            "title": "Controls"
+        },
+        {
+            "location": "/#notes",
+            "text": "SnakeViz currently only works with files produced by  cProfile ,\n    it will not work with files from the  profile  module.  SnakeViz will sometimes be unable to create a visualization and will\n    show an error.\n    This is usually because the visualization is too complex.\n    You can make a simpler graph by increasing the cutoff, reducing the depth,\n    or profiling a smaller subsection of your code.",
+            "title": "Notes"
+        },
+        {
+            "location": "/#contact",
+            "text": "If you\u2019d like to contribute to SnakeViz you can  fork it on GitHub .\nPlease report issues on the  GitHub issue tracker .",
+            "title": "Contact"
+        }
+    ]
+}

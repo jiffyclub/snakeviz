@@ -1,3 +1,13 @@
+v0.2
+====
+
+* Near-complete rewrite of SnakeViz for improved performance and usability
+* Most of the computation and call-tree building now happens in the client,
+  once the page is loaded it is self-sufficient
+* Display function info beside the sunburst instead of in tooltips
+* Option to display the current call stack (useful when zooming)
+* Controls for limiting depth of visualization and display of small functions
+
 v0.1.4
 ======
 

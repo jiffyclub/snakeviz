@@ -51,6 +51,10 @@ for file in files:
         print(hashlib.md5(f.read().encode('utf-8')).hexdigest())
 ```
 
+Note: Using the IPython `%snakeviz` magics requires internet access.
+If you are working offline, use [prun][] to save a profile file
+and then start SnakeViz from the command line.
+
 ## Generating Profiles
 
 ### cProfile

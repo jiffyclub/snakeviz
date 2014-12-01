@@ -1,3 +1,10 @@
+v0.2.1
+======
+
+* Try loading JS libraries from a CDN in the web worker so that it can
+  be restarted even if the SnakeViz server has been shut down
+  (as happens when using the IPython magic).
+
 v0.2
 ====
 

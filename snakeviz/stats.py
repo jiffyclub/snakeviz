@@ -30,11 +30,12 @@ def table_rows(stats):
 
         tot_time = fmt(v[2])
         cum_time = fmt(v[3])
-        tot_time_per = fmt(v[2] / v[0])
-        cum_time_per = fmt(v[3] / v[0])
+        tot_time_per = fmt(v[2] / v[0]) if v[0] > 0 else 0
+        cum_time_per = fmt(v[3] / v[0]) if v[0] > 0 else 0
 
         rows.append(
-            [[calls, v[1]], tot_time, tot_time_per, cum_time, cum_time_per, flf])
+            [[calls, v[1]], tot_time, tot_time_per,
+             cum_time, cum_time_per, flf])
 
     return rows
 

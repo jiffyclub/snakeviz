@@ -14,9 +14,10 @@ import webbrowser
 
 try:
     from urllib.parse import quote_plus
+    from urllib.parse import unquote_plus
 except ImportError:
     from urllib import quote_plus
-
+    from urllib import unquote_plus
 
 # As seen in IPython:
 # https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
@@ -51,11 +52,17 @@ def main(argv=sys.argv[1:]):
                            "Python's webbrowser module, which can also be "
                            "overridden with the BROWSER environment variable")
 
+    parser.add_option('-S', '--server', action="store_true", dest="server",
+                      default=False, help='start in server mode')
+
     options, args = parser.parse_args(argv)
 
     if len(args) != 1:
         parser.error('please provide the path to a profiler output file to '
                      'open')
+
+    if options.browser and options.server:
+        parser.error("options --browser and --server are mutually exclusive")
 
     filename = os.path.abspath(args[0])
     if not os.path.exists(filename):
@@ -75,11 +82,6 @@ def main(argv=sys.argv[1:]):
     if not 0 <= port <= 65535:
         parser.error('invalid port number %d: use a port between 0 and 65535'
                      % port)
-
-    try:
-        browser = webbrowser.get(options.browser)
-    except webbrowser.Error as e:
-        parser.error('no web browser found: %s' % e)
 
     # Go ahead and import the tornado app and start it; we do an inline import
     # here to avoid the extra overhead when just running the cli for --help and
@@ -103,14 +105,20 @@ def main(argv=sys.argv[1:]):
         print('No available port found.')
         return 1
 
+    url = "http://{0}:{1}/snakeviz/{2}".format(hostname, port, filename)
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))
+    print(unquote_plus(url))
 
-    # Launch the browser in a separate thread to avoid blocking the ioloop from
-    # starting
-    bt = lambda: browser.open('http://%s:%d/snakeviz/%s' %
-                              (hostname, port, filename), new=2)
-    threading.Thread(target=bt).start()
+    if not options.server:
+        try:
+            browser = webbrowser.get(options.browser)
+        except webbrowser.Error as e:
+            parser.error('no web browser found: %s' % e)
+        # Launch the browser in a separate thread to avoid blocking the ioloop from
+        # starting
+        bt = lambda: browser.open(url, new=2)
+        threading.Thread(target=bt).start()
 
     try:
         tornado.ioloop.IOLoop.instance().start()

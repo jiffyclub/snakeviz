@@ -48,7 +48,7 @@ def json_stats(stats):
     keyfmt = '{0}:{1}({2})'.format
 
     def _replace_keys(d):
-        return {keyfmt(*k): v for k, v in d.items()}
+        return dict((keyfmt(*k), v) for k, v in d.items())
 
     stats.calc_callees()
 
@@ -57,17 +57,17 @@ def json_stats(stats):
     for k, v in stats.all_callees.items():
         nk = keyfmt(*k)
         nstats[nk] = {}
-        nstats[nk]['children'] = {
-            keyfmt(*ck): list(cv) for ck, cv in v.items()}
+        nstats[nk]['children'] = dict(
+            (keyfmt(*ck), list(cv)) for ck, cv in v.items())
         nstats[nk]['stats'] = list(stats.stats[k][:4])
-        nstats[nk]['callers'] = {
-            keyfmt(*ck): list(cv) for ck, cv in stats.stats[k][-1].items()}
+        nstats[nk]['callers'] = dict(
+            (keyfmt(*ck), list(cv)) for ck, cv in stats.stats[k][-1].items())
         nstats[nk]['display_name'] = keyfmt(os.path.basename(k[0]), k[1], k[2])
 
     # remove anything that both never called anything and was never called
     # by anything.
     # this is profiler cruft.
-    no_calls = {k for k, v in nstats.items() if not v['children']}
+    no_calls = set(k for k, v in nstats.items() if not v['children'])
     called = set(chain.from_iterable(
         d['children'].keys() for d in nstats.values()))
     cruft = no_calls - called

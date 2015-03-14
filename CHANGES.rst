@@ -1,3 +1,12 @@
+v0.3.0
+======
+
+* Add a "server-only" mode so SnakeViz can be started without
+  it trying to open a browser
+* When starting the server, print a complete URL for viewing the profile
+* Get rid of dict/set comprehensions so SnakeViz works on Python 2.6
+* Fix a potential division-by-zero error
+
 v0.2.1
 ======
 

@@ -14,10 +14,8 @@ import webbrowser
 
 try:
     from urllib.parse import quote_plus
-    from urllib.parse import unquote_plus
 except ImportError:
     from urllib import quote_plus
-    from urllib import unquote_plus
 
 
 # As seen in IPython:
@@ -109,7 +107,7 @@ def main(argv=sys.argv[1:]):
     url = "http://{0}:{1}/snakeviz/{2}".format(hostname, port, filename)
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))
-    print(unquote_plus(url))
+    print(url)
 
     if not options.server:
         try:

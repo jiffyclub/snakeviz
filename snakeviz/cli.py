@@ -46,10 +46,9 @@ def main(argv=sys.argv[1:]):
                            '(default: %default)')
 
     parser.add_option('-b', '--browser', metavar='PATH',
-                      help="path to the web browser executable to use to open "
-                           "the visualization; uses the same default as "
-                           "Python's webbrowser module, which can also be "
-                           "overridden with the BROWSER environment variable")
+                      help='name of webbrowser to launch as described in '
+                           'the documentation of Python\'s webbrowser module: '
+                           'https://docs.python.org/3/library/webbrowser.html')
 
     parser.add_option('-s', '--server', action="store_true", dest="server",
                       default=False, help='start in server mode')

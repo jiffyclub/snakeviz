@@ -53,7 +53,7 @@ def main(argv=sys.argv[1:]):
                            "Python's webbrowser module, which can also be "
                            "overridden with the BROWSER environment variable")
 
-    parser.add_option('-S', '--server', action="store_true", dest="server",
+    parser.add_option('-s', '--server', action="store_true", dest="server",
                       default=False, help='start in server mode')
 
     options, args = parser.parse_args(argv)

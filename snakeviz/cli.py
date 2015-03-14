@@ -51,7 +51,9 @@ def main(argv=sys.argv[1:]):
                            'https://docs.python.org/3/library/webbrowser.html')
 
     parser.add_option('-s', '--server', action="store_true", dest="server",
-                      default=False, help='start in server mode')
+                      default=False,
+                      help='start SnakeViz in server-only mode--'
+                           'no attempt will be to open a browser')
 
     options, args = parser.parse_args(argv)
 

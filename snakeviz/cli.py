@@ -19,6 +19,7 @@ except ImportError:
     from urllib import quote_plus
     from urllib import unquote_plus
 
+
 # As seen in IPython:
 # https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
 # See the IPython license at:
@@ -115,9 +116,11 @@ def main(argv=sys.argv[1:]):
             browser = webbrowser.get(options.browser)
         except webbrowser.Error as e:
             parser.error('no web browser found: %s' % e)
-        # Launch the browser in a separate thread to avoid blocking the ioloop from
-        # starting
-        bt = lambda: browser.open(url, new=2)
+
+        # Launch the browser in a separate thread to avoid blocking the
+        # ioloop from starting
+        def bt():
+            browser.open(url, new=2)
         threading.Thread(target=bt).start()
 
     try:

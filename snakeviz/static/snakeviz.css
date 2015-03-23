@@ -81,6 +81,7 @@ select {
 }
 
 #sv-call-stack-list div {
+  cursor: pointer;
   padding: 0 10px 0 10px;
 }
 

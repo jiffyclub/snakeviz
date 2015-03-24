@@ -2,7 +2,7 @@ v0.3.1
 ======
 
 * Allow users to move the visualization through the call stack
-  by clicking on items in the call stack list.
+  by clicking on items in the call stack list. (Thanks @yxiong!)
 
 v0.3.0
 ======

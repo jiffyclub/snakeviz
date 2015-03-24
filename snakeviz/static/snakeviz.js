@@ -77,9 +77,23 @@ var sv_call_stack_list = function sv_call_stack_list(call_stack) {
     // but we want to display it leaf -> root, so we iterate over call_stack
     // in reverse here.
     for (var i = call_stack.length - 1; i >= 0; i--) {
-        calls.push(
-            sv_call_tpl(
-                {'name': sv_item_name(call_stack[i]), 'i': i}));
+        (function () {
+            var index = i;
+            var name = call_stack[i];
+            var parent_name = (i > 0) ? call_stack[i-1] : null;
+            calls.push($(sv_call_tpl(
+                {'name': sv_item_name(name), 'i': index}
+            )).click(function () {
+                sv_draw_vis(name, parent_name);
+                sv_call_stack = sv_call_stack.slice(0, index+1);
+                sv_update_call_stack_list();
+                if (name !== sv_root_func_name) {
+                    d3.select('#resetbutton').node().removeAttribute('disabled');
+                } else {
+                    d3.select('#resetbutton').property('disabled', 'True');
+                }
+            }));
+        })()
     }
     return calls;
 };

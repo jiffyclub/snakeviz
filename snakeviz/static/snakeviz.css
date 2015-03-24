@@ -85,6 +85,10 @@ select {
   padding: 0 10px 0 10px;
 }
 
+#sv-call-stack-list div:hover {
+  background-color: #C9F0F2;
+}
+
 #sv-call-stack-list div span {
   display: table-cell;
 }

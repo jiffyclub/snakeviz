@@ -1,0 +1,13 @@
+language: python
+sudo: false
+python:
+    - "2.6"
+    - "2.7"
+    - "3.3"
+    - "3.4"
+install:
+    - easy_install -U setuptools
+    - pip install requests tornado
+    - pip install .
+script:
+    - py.test

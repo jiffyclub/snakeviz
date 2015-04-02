@@ -32,7 +32,6 @@ var make_vis_obj = function make_vis_obj (style) {
     .append("svg:svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("position", "absolute")
     .append("svg:g")
     .attr("id", "container")
     .attr("transform", transform);
@@ -41,9 +40,6 @@ var vis = make_vis_obj("sunburst");
 
 
 var reset_vis = function reset_vis (style) {
-  // Move the info div by CSS.
-  $('#sv-info-div').attr({"class": style});
-
   // Remove the current figure
   d3.select('svg').remove();
 
@@ -153,7 +149,24 @@ var sv_update_info_div = function sv_update_info_div (d) {
     'cumulative': d.cumulative.toPrecision(3),
     'cumulative_percent': (d.cumulative / sv_total_time * 100).toFixed(2)
   };
-  $('#sv-info-div').html(sv_info_tpl(info));
+  var style = $('#sv-style-select').val();
+  if (style === "sunburst") {
+    $('#sv-info-div')
+      .html(sv_info_tpl(info))
+      .attr({
+        "class": "sunburst",
+        "height": radius * 1.5,
+        "width": ($('body').width() - (2 * radius)) / 2.1
+      });
+  } else if (style === "icicle") {
+    $('#sv-info-div')
+      .html(sv_info_tpl(info))
+      .attr({
+        "class": "icicle",
+        "height": 140,
+        "width": ($('body').width() * 0.6)
+      });
+  }
 };
 
 

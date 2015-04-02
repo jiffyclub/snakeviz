@@ -104,8 +104,6 @@ select {
   top: 240px;
   display: none;
   overflow: hidden;
-  height: 500px;
-  width: 100px;
 }
 
 #sv-info-div.icicle {
@@ -114,8 +112,6 @@ select {
   left: 300px;
   display: none;
   overflow: hidden;
-  height: 140px;
-  width: 500px;
 }
 
 .sv-info-label {

@@ -7,7 +7,8 @@ var width = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     height = width,
     radius = width / 2,
     scale = d3.scale.category20c();   // colors
-var icicle_top_margin = 60;
+var icicle_left_margin = 90,
+    icicle_top_margin = 60;
 
 // should make it so that a given function is always the same color
 var color = function color(d) {
@@ -24,7 +25,7 @@ var make_vis_obj = function make_vis_obj (style) {
   } else if (style === "icicle") {
     width = 0.75 * window.innerWidth;
     height = window.innerHeight * 0.8;
-    transform = "translate(90," + icicle_top_margin + ")";
+    transform = "translate(" + icicle_left_margin + "," + icicle_top_margin + ")";
   }
   return d3.select("#chart")
     .style('margin-left', 'auto')
@@ -214,7 +215,7 @@ var drawSunburst = function drawSunburst(json, nodes) {
 var drawIcicle = function drawIcicle(json, nodes) {
   var x = d3.scale.linear()
       .domain([0, nodes[0].dx])
-      .range([0, width]);
+      .range([0, width - icicle_left_margin]);
   var y = d3.scale.linear()
       .domain([0, nodes[0].dy * $('#sv-depth-select').val()])
       .range([0, height - icicle_top_margin]);

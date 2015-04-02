@@ -99,17 +99,9 @@ select {
   display: table-cell;
 }
 
-#sv-info-div.sunburst {
+#sv-info-div {
   position: absolute;
   top: 240px;
-  display: none;
-  overflow: hidden;
-}
-
-#sv-info-div.icicle {
-  position: absolute;
-  top: 90px;
-  left: 300px;
   display: none;
   overflow: hidden;
 }

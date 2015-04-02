@@ -7,7 +7,7 @@ var width = 0.8 * Math.min(window.innerHeight, window.innerWidth),
     height = width,
     radius = width / 2,
     scale = d3.scale.category20c();   // colors
-var icicle_top_margin = 240;
+var icicle_top_margin = 60;
 
 // should make it so that a given function is always the same color
 var color = function color(d) {
@@ -22,9 +22,9 @@ var make_vis_obj = function make_vis_obj (style) {
     height = width;
     transform = "translate(" + radius + "," + radius + ")";
   } else if (style === "icicle") {
-    width = 0.9 * window.innerWidth;
-    height = width * 0.4 + icicle_top_margin;
-    transform = "translate(0," + icicle_top_margin + ")";
+    width = 0.75 * window.innerWidth;
+    height = window.innerHeight * 0.8;
+    transform = "translate(90," + icicle_top_margin + ")";
   }
   return d3.select("#chart")
     .style('margin-left', 'auto')
@@ -149,23 +149,23 @@ var sv_update_info_div = function sv_update_info_div (d) {
     'cumulative': d.cumulative.toPrecision(3),
     'cumulative_percent': (d.cumulative / sv_total_time * 100).toFixed(2)
   };
+
   var style = $('#sv-style-select').val();
-  if (style === "sunburst") {
-    $('#sv-info-div')
-      .html(sv_info_tpl(info))
-      .attr({
-        "class": "sunburst",
-        "height": radius * 1.5,
-        "width": ($('body').width() - (2 * radius)) / 2.1
-      });
-  } else if (style === "icicle") {
-    $('#sv-info-div')
-      .html(sv_info_tpl(info))
-      .attr({
-        "class": "icicle",
-        "height": 140,
-        "width": ($('body').width() * 0.6)
-      });
+  var div = $('#sv-info-div');
+  div.html(sv_info_tpl(info));
+
+  if ((style === "sunburst") & (!div.hasClass('sunburst'))) {
+    div
+      .addClass('sunburst')
+      .removeClass('icicle')
+      .height(radius * 1.5)
+      .width(($('body').width() - (2 * radius)) / 2.1);
+  } else if ((style === "icicle") & (!div.hasClass('icicle'))) {
+    div
+      .addClass('icicle')
+      .removeClass('sunburst')
+      .height(radius * 1.5)
+      .width(200);
   }
 };
 

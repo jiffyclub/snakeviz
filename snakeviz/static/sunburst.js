@@ -16,15 +16,26 @@ var color = function color(d) {
 
 
 var make_vis_obj = function make_vis_obj () {
-  return d3.select("#chart")
+  var style = $('#sv-style-select').val();
+  if (style === "sunburst") {
+    width = 0.8 * Math.min(window.innerHeight, window.innerWidth);
+    height = width;
+  } else if (style === "icicle") {
+    width = 0.7 * window.innerWidth;
+    height = width * 0.6;
+  }
+  var g = d3.select("#chart")
     .style('margin-left', 'auto')
     .style('margin-right', 'auto')
     .append("svg:svg")
     .attr("width", width)
     .attr("height", height)
     .append("svg:g")
-    .attr("id", "container")
-    .attr("transform", "translate(" + radius + "," + radius + ")");
+    .attr("id", "container");
+  if (style === "sunburst") {
+    g.attr("transform", "translate(" + radius + "," + radius + ")");
+  }
+  return g;
 };
 var vis = make_vis_obj();
 
@@ -197,11 +208,47 @@ var drawSunburst = function drawSunburst(json) {
     .on('mouseleave', sv_hide_info_div);
 };
 
+var drawIcicle = function drawIcicle(json) {
+  // For efficiency, filter nodes to keep only those large enough to see.
+  var nodes = partition.nodes(json)
+    .filter(function(d) {
+      return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
+    });
+
+  var x = d3.scale.linear()
+      .domain([0, nodes[0].dx])
+      .range([0, width]);
+  var y = d3.scale.linear()
+      .domain([0, nodes[0].dy * $('#sv-depth-select').val()])
+      .range([0, height]);
+  var rect = vis.data([json]).selectAll("rect")
+      .data(nodes)
+      .enter().append("rect")
+      .attr("id", function(d, i) { return "path-" + i; })
+      .attr("x", function(d) { return x(d.x); })
+      .attr("y", function(d) { return y(d.y); })
+      .attr("width", function(d) { return x(d.dx); })
+      .attr("height", function(d) { return y(d.dy); })
+      .attr("fill-rule", "evenodd")
+      .attr("fill", color)
+      .attr("stroke", "#FFF")
+      .on('click', click)
+      .call(apply_mouseover);
+
+  d3.select('#container')
+    .on('mouseenter', sv_show_info_div)
+    .on('mouseleave', sv_hide_info_div);
+};
 
 // Clear and redraw the visualization
 var redraw_vis = function redraw_vis(json) {
+  var style = $('#sv-style-select').val();
   reset_vis();
-  drawSunburst(json);
+  if (style === "sunburst") {
+    drawSunburst(json);
+  } else if (style === "icicle") {
+    drawIcicle(json);
+  }
 };
 
 
@@ -229,5 +276,6 @@ var sv_selects_changed = function sv_selects_changed() {
   sv_hide_error_msg();
   sv_draw_vis(_.last(sv_call_stack), parent_name);
 };
+d3.select('#sv-style-select').on('change', sv_selects_changed);
 d3.select('#sv-depth-select').on('change', sv_selects_changed);
 d3.select('#sv-cutoff-select').on('change', sv_selects_changed);

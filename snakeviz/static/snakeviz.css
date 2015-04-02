@@ -51,16 +51,22 @@ select {
   padding: 10px 20px 10px 20px;
 }
 
-#sv-depth-label {
+#sv-style-label {
   font-family: monospace;
   position: absolute;
   top: 120px;
 }
 
-#sv-cutoff-label {
+#sv-depth-label {
   font-family: monospace;
   position: absolute;
   top: 160px;
+}
+
+#sv-cutoff-label {
+  font-family: monospace;
+  position: absolute;
+  top: 200px;
 }
 
 #sv-call-stack {
@@ -95,7 +101,7 @@ select {
 
 #sv-info-div {
   position: absolute;
-  top: 200px;
+  top: 240px;
   display: none;
   overflow: hidden;
 }

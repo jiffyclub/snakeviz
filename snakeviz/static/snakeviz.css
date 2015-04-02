@@ -99,11 +99,23 @@ select {
   display: table-cell;
 }
 
-#sv-info-div {
+#sv-info-div.sunburst {
   position: absolute;
   top: 240px;
   display: none;
   overflow: hidden;
+  height: 500px;
+  width: 100px;
+}
+
+#sv-info-div.icicle {
+  position: absolute;
+  top: 90px;
+  left: 300px;
+  display: none;
+  overflow: hidden;
+  height: 140px;
+  width: 500px;
 }
 
 .sv-info-label {

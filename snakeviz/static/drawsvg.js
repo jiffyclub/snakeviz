@@ -150,22 +150,20 @@ var sv_update_info_div = function sv_update_info_div (d) {
     'cumulative_percent': (d.cumulative / sv_total_time * 100).toFixed(2)
   };
   var style = $('#sv-style-select').val();
-  if (style === "sunburst") {
-    $('#sv-info-div')
-      .html(sv_info_tpl(info))
-      .attr({
-        "class": "sunburst",
-        "height": radius * 1.5,
-        "width": ($('body').width() - (2 * radius)) / 2.1
-      });
-  } else if (style === "icicle") {
-    $('#sv-info-div')
-      .html(sv_info_tpl(info))
-      .attr({
-        "class": "icicle",
-        "height": 140,
-        "width": ($('body').width() * 0.6)
-      });
+  var div = $('#sv-info-div');
+  div.html(sv_info_tpl(info));
+  if ((style === "sunburst") & (!div.hasClass('sunburst'))) {
+    div
+      .addClass('sunburst')
+      .removeClass('icicle')
+      .height(radius * 1.5)
+      .width(($('body').width() - (2 * radius)) / 2.1);
+  } else if ((style === "icicle") & (!div.hasClass('icicle'))) {
+    div
+      .addClass('icicle')
+      .removeClass('sunburst')
+      .height(140)
+      .width($('body').width() * 0.6);
   }
 };
 

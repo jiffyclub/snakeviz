@@ -1,3 +1,8 @@
+v0.4.0
+======
+
+* Add icicle plot option. (Thanks @yxiong!)
+
 v0.3.1
 ======
 

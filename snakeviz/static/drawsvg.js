@@ -1,55 +1,63 @@
 // This contains the code that renders and controls the visualization.
 
-function get_render_params(style) {
+var get_sunburst_render_params = function get_sunburst_render_params() {
+  // 80% of the smallest window dimension
+  var width = 0.8 * Math.min(window.innerHeight, window.innerWidth);
+  var height = width;
+  var radius = width / 2;
+  var partition = d3.layout.partition()
+      .size([2 * Math.PI, radius * radius])
+      .value(function(d) { return d.size; });
+  // By default D3 makes the y size proportional to some area,
+  // so y is a transformation from ~area to a linear scale
+  // so that all arcs have the same radial size.
+  var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
+  var arc = d3.svg.arc()
+      .startAngle(function(d) {
+        return Math.max(0, Math.min(2 * Math.PI, d.x));
+      })
+      .endAngle(function(d) {
+        return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
+      })
+      .innerRadius(function(d) { return y(d.y); })
+      .outerRadius(function(d) { return y(d.y + d.dy); });
+  return {
+    "width": width,
+    "height": height,
+    "radius": radius,
+    "transform": "translate(" + radius + "," + radius + ")",
+    "partition": partition,
+    "arc": arc
+  };
+};
+
+var get_icicle_render_params = function get_icicle_render_params() {
+  var width = window.innerWidth * 0.75;
+  var height = window.innerHeight * 0.8;
+  var leftMargin = 90;
+  var topMargin = 60;
+  var partition = d3.layout.partition()
+      .size([width - leftMargin, height - topMargin])
+      .value(function(d) { return d.size; });
+  return {
+    "width": width,
+    "height": height,
+    "leftMargin": leftMargin,
+    "topMargin": topMargin,
+    "transform": "translate(" + leftMargin + "," + topMargin + ")",
+    "partition": partition
+  };
+};
+
+var get_render_params = function get_render_params(style) {
   if (style === "sunburst") {
-    // 80% of the smallest window dimension
-    var width = 0.8 * Math.min(window.innerHeight, window.innerWidth);
-    var height = width;
-    var radius = width / 2;
-    var partition = d3.layout.partition()
-        .size([2 * Math.PI, radius * radius])
-        .value(function(d) { return d.size; });
-    // By default D3 makes the y size proportional to some area,
-    // so y is a transformation from ~area to a linear scale
-    // so that all arcs have the same radial size.
-    var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
-    var arc = d3.svg.arc()
-        .startAngle(function(d) {
-          return Math.max(0, Math.min(2 * Math.PI, d.x));
-        })
-        .endAngle(function(d) {
-          return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
-        })
-        .innerRadius(function(d) { return y(d.y); })
-        .outerRadius(function(d) { return y(d.y + d.dy); });
-    return {
-      "width": width,
-      "height": height,
-      "radius": radius,
-      "transform": "translate(" + radius + "," + radius + ")",
-      "partition": partition,
-      "arc": arc
-    };
+    return get_sunburst_render_params();
   } else if (style === "icicle") {
-    var width = window.innerWidth * 0.75;
-    var height = window.innerHeight * 0.8;
-    var leftMargin = 90;
-    var topMargin = 60;
-    var partition = d3.layout.partition()
-        .size([width - leftMargin, height - topMargin])
-        .value(function(d) { return d.size; });
-    return {
-      "width": width,
-      "height": height,
-      "leftMargin": leftMargin,
-      "topMargin": topMargin,
-      "transform": "translate(" + leftMargin + "," + topMargin + ")",
-      "partition": partition
-    }
+    return get_icicle_render_params();
   } else {
     throw new Error("Unknown rendering style '" + style + "'.");
   }
-}
+};
 
 // Colors.
 var scale = d3.scale.category20c();
@@ -173,7 +181,7 @@ var sv_update_info_div = function sv_update_info_div (d) {
   var div = $('#sv-info-div');
   div.html(sv_info_tpl(info));
 
-  var radius = get_render_params("sunburst")["radius"];
+  var radius = get_sunburst_render_params()["radius"];
   if ((style === "sunburst") & (!div.hasClass('sunburst'))) {
     div
       .addClass('sunburst')

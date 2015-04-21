@@ -113,7 +113,7 @@ var sv_update_call_stack_list = function sv_update_call_stack_list() {
 var sv_show_call_stack = function sv_show_call_stack() {
     sv_call_stack_btn_for_hide();
     var div = $('#sv-call-stack-list');
-    div.css('max-height', radius * 1.5);
+    div.css('max-height', get_sunburst_render_params()["radius"] * 1.5);
     div.show();
 };
 
@@ -212,6 +212,7 @@ var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
 
 // An error message for when the worker fails building the call tree
 var sv_show_error_msg = function sv_show_error_msg() {
+    var radius = get_sunburst_render_params()["radius"];
     $('#sv-error-div')
         .css('top', window.innerHeight / 2 - radius)
         .css('left', window.innerWidth / 2 - radius)

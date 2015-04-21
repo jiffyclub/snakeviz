@@ -1,14 +1,66 @@
-// This contains the code that renders and controls
-// the sunburst visualization.
+// This contains the code that renders and controls the visualization.
 
+var get_sunburst_render_params = function get_sunburst_render_params() {
+  // 80% of the smallest window dimension
+  var width = 0.8 * Math.min(window.innerHeight, window.innerWidth);
+  var height = width;
+  var radius = width / 2;
+  var partition = d3.layout.partition()
+      .size([2 * Math.PI, radius * radius])
+      .value(function(d) { return d.size; });
+  // By default D3 makes the y size proportional to some area,
+  // so y is a transformation from ~area to a linear scale
+  // so that all arcs have the same radial size.
+  var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
+  var arc = d3.svg.arc()
+      .startAngle(function(d) {
+        return Math.max(0, Math.min(2 * Math.PI, d.x));
+      })
+      .endAngle(function(d) {
+        return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
+      })
+      .innerRadius(function(d) { return y(d.y); })
+      .outerRadius(function(d) { return y(d.y + d.dy); });
+  return {
+    "width": width,
+    "height": height,
+    "radius": radius,
+    "transform": "translate(" + radius + "," + radius + ")",
+    "partition": partition,
+    "arc": arc
+  };
+};
 
-// 80% of the smallest window dimension
-var width = 0.8 * Math.min(window.innerHeight, window.innerWidth),
-    height = width,
-    radius = width / 2,
-    scale = d3.scale.category20c();   // colors
-var icicle_left_margin = 90,
-    icicle_top_margin = 60;
+var get_icicle_render_params = function get_icicle_render_params() {
+  var width = window.innerWidth * 0.75;
+  var height = window.innerHeight * 0.8;
+  var leftMargin = 90;
+  var topMargin = 60;
+  var partition = d3.layout.partition()
+      .size([width - leftMargin, height - topMargin])
+      .value(function(d) { return d.size; });
+  return {
+    "width": width,
+    "height": height,
+    "leftMargin": leftMargin,
+    "topMargin": topMargin,
+    "transform": "translate(" + leftMargin + "," + topMargin + ")",
+    "partition": partition
+  };
+};
+
+var get_render_params = function get_render_params(style) {
+  if (style === "sunburst") {
+    return get_sunburst_render_params();
+  } else if (style === "icicle") {
+    return get_icicle_render_params();
+  } else {
+    throw new Error("Unknown rendering style '" + style + "'.");
+  }
+};
+
+// Colors.
+var scale = d3.scale.category20c();
 
 // should make it so that a given function is always the same color
 var color = function color(d) {
@@ -17,25 +69,16 @@ var color = function color(d) {
 
 
 var make_vis_obj = function make_vis_obj (style) {
-  var transform;
-  if (style === "sunburst") {
-    width = 0.8 * Math.min(window.innerHeight, window.innerWidth);
-    height = width;
-    transform = "translate(" + radius + "," + radius + ")";
-  } else if (style === "icicle") {
-    width = 0.75 * window.innerWidth;
-    height = window.innerHeight * 0.8;
-    transform = "translate(" + icicle_left_margin + "," + icicle_top_margin + ")";
-  }
+  var params = get_render_params(style);
   return d3.select("#chart")
     .style('margin-left', 'auto')
     .style('margin-right', 'auto')
     .append("svg:svg")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", params["width"])
+    .attr("height", params["height"])
     .append("svg:g")
     .attr("id", "container")
-    .attr("transform", transform);
+    .attr("transform", params["transform"]);
 };
 var vis = make_vis_obj("sunburst");
 
@@ -47,23 +90,6 @@ var reset_vis = function reset_vis (style) {
   // Make and draw the new svg container
   vis = make_vis_obj(style);
 };
-
-
-var partition = d3.layout.partition()
-  .size([2 * Math.PI, radius * radius])
-  .value(function(d) { return d.size; });
-
-
-// By default D3 makes the y size proportional to some area,
-// so y is a transformation from ~area to a linear scale
-// so that all arcs have the same radial size.
-var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
-var arc = d3.svg.arc()
-  .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x)); })
-  .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx)); })
-  .innerRadius(function(d) { return y(d.y); })
-  .outerRadius(function(d) { return y(d.y + d.dy); });
-
 
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
@@ -155,6 +181,7 @@ var sv_update_info_div = function sv_update_info_div (d) {
   var div = $('#sv-info-div');
   div.html(sv_info_tpl(info));
 
+  var radius = get_sunburst_render_params()["radius"];
   if ((style === "sunburst") & (!div.hasClass('sunburst'))) {
     div
       .addClass('sunburst')
@@ -194,18 +221,25 @@ var apply_mouseover = function apply_mouseover (selection) {
 
 
 // This is having D3 do its thing.
-var drawSunburst = function drawSunburst(json, nodes) {
+var drawSunburst = function drawSunburst(json) {
+  var params = get_render_params("sunburst");
+
+  // For efficiency, filter nodes to keep only those large enough to see.
+  var nodes = params["partition"].nodes(json).filter(function(d) {
+    return (d.dx > 0.005); // 0.005 radians = 0.29 degrees.
+  });
+
   // Bounding circle underneath the sunburst, to make it easier to detect
   // when the mouse leaves the parent g.
   vis.append("svg:circle")
-    .attr("r", radius)
+    .attr("r", params["radius"])
     .style("opacity", 0);
 
   var path = vis.data([json]).selectAll("path")
     .data(nodes)
     .enter().append("svg:path")
     .attr("id", function(d, i) { return "path-" + i; })
-    .attr("d", arc)
+    .attr("d", params["arc"])
     .attr("fill-rule", "evenodd")
     .style("fill", color)
     .style("stroke", "#fff")
@@ -213,13 +247,17 @@ var drawSunburst = function drawSunburst(json, nodes) {
     .call(apply_mouseover);
 };
 
-var drawIcicle = function drawIcicle(json, nodes) {
+var drawIcicle = function drawIcicle(json) {
+  params = get_render_params("icicle");
+  var nodes = params["partition"].nodes(json).filter(function(d) {
+    return (d.dx > 0.5); // at least half-a-pixel wide to be visible.
+  });
   var x = d3.scale.linear()
       .domain([0, nodes[0].dx])
-      .range([0, width - icicle_left_margin]);
+      .range([0, params["width"] - params["leftMargin"]]);
   var y = d3.scale.linear()
       .domain([0, nodes[0].dy * $('#sv-depth-select').val()])
-      .range([0, height - icicle_top_margin]);
+      .range([0, params["height"] - params["topMargin"]]);
   var rect = vis.data([json]).selectAll("rect")
       .data(nodes)
       .enter().append("rect")
@@ -239,15 +277,10 @@ var drawIcicle = function drawIcicle(json, nodes) {
 var redraw_vis = function redraw_vis(json) {
   var style = $('#sv-style-select').val();
   reset_vis(style);
-  // For efficiency, filter nodes to keep only those large enough to see.
-  var nodes = partition.nodes(json)
-    .filter(function(d) {
-      return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
-    });
   if (style === "sunburst") {
-    drawSunburst(json, nodes);
+    drawSunburst(json);
   } else if (style === "icicle") {
-    drawIcicle(json, nodes);
+    drawIcicle(json);
   }
   d3.select('#container')
     .on('mouseenter', sv_show_info_div)

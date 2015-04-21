@@ -181,6 +181,7 @@ var apply_mouseover = function apply_mouseover (selection) {
     var thiscolor = d3.rgb('#ff00ff');
     thispath.style('fill', thiscolor.toString());
     sv_update_info_div(d);
+    sv_show_info_div();
   })
   .on('mouseout', function(d, i){
       // reset nodes to their original color

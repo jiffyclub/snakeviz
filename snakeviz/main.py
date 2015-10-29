@@ -24,7 +24,10 @@ settings = {
 class VizHandler(tornado.web.RequestHandler):
     def get(self, profile_name):
         profile_name = unquote_plus(profile_name)
-        s = Stats(profile_name)
+        try:
+            s = Stats(profile_name)
+        except:
+            raise RuntimeError('Could not read %s.' % profile_name)
         self.render(
             'viz.html', profile_name=profile_name,
             table_rows=table_rows(s), callees=json_stats(s))

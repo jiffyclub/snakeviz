@@ -11,6 +11,7 @@ import socket
 import sys
 import threading
 import webbrowser
+from pstats import Stats
 
 try:
     from urllib.parse import quote_plus
@@ -73,6 +74,13 @@ def main(argv=sys.argv[1:]):
     except IOError as e:
         parser.error('the file %s could not be opened: %s'
                      % (filename, str(e)))
+
+    try:
+        Stats(filename)
+    except:
+        parser.error(('the file %s is not a valid profile. ' % filename) +
+                     'Generate profiles using: \n\n'
+                     '\tpython -m cProfile -o my_program.prof my_program.py\n')
 
     filename = quote_plus(filename)
 

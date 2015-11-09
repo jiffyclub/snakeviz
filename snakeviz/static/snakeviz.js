@@ -1,6 +1,11 @@
+var STYLE_SELECT = '#sv-style-select';
+var DEPTH_SELECT = '#sv-depth-select';
+var CUTOFF_SELECT = '#sv-cutoff-select';
+var CALL_STACK = '#sv-call-stack-list';
+
 // Look for something that calls other functions,
 // but is never called itself.
-var sv_find_root = function sv_find_root (stats) {
+var sv_find_root = function(stats) {
     var callers = Immutable.Set.fromKeys(stats);
     var callees = Immutable.Set();
 
@@ -24,8 +29,8 @@ var sv_find_root = function sv_find_root (stats) {
 
 
 // Returns the heirarchy depth value from the depth <select> element
-var sv_heirarchy_depth = function sv_heirarchy_depth() {
-    return parseInt($('#sv-depth-select').val(), 10);
+var sv_heirarchy_depth = function() {
+    return parseInt($(DEPTH_SELECT).val(), 10);
 };
 
 
@@ -33,14 +38,14 @@ var sv_heirarchy_depth = function sv_heirarchy_depth() {
 // This value is used to prune elements when building the call tree:
 // if a child's cumulative time is less than this fraction of the parent
 // then the program skips the descent into that child.
-var sv_heirarchy_cutoff = function sv_heirarchy_cutoff() {
-    return parseFloat($('#sv-cutoff-select').val());
+var sv_heirarchy_cutoff = function() {
+    return parseFloat($(CUTOFF_SELECT).val());
 };
 
 
 // Configures the call stack button's settings and appearance
 // for when the call stack is hidden.
-var sv_call_stack_btn_for_show = function sv_call_stack_btn_for_show() {
+var sv_call_stack_btn_for_show = function() {
     var btn = $('#sv-call-stack-btn');
     btn.on('click', sv_show_call_stack);
     btn.removeClass('btn-active');
@@ -49,7 +54,7 @@ var sv_call_stack_btn_for_show = function sv_call_stack_btn_for_show() {
 
 // Configures the call stack button's settings and appearance
 // for when the call stack is visible.
-var sv_call_stack_btn_for_hide = function sv_call_stack_btn_for_hide() {
+var sv_call_stack_btn_for_hide = function() {
     var btn = $('#sv-call-stack-btn');
     btn.on('click', sv_hide_call_stack);
     btn.addClass('btn-active');
@@ -58,7 +63,7 @@ var sv_call_stack_btn_for_hide = function sv_call_stack_btn_for_hide() {
 
 // Items on the call stack can include directory names that we want
 // to remove for display in the call stack list.
-var sv_item_name = function sv_item_name (name) {
+var sv_item_name = function(name) {
     var slash = name.lastIndexOf('/');
     var rename = name;
     if (slash !== -1) {
@@ -100,9 +105,9 @@ var sv_call_stack_list = function sv_call_stack_list(call_stack) {
 
 
 // update the displayed call stack list
-var sv_update_call_stack_list = function sv_update_call_stack_list() {
+var sv_update_call_stack_list = function() {
     var calls = sv_call_stack_list(sv_call_stack);
-    var div = $('#sv-call-stack-list');
+    var div = $(CALL_STACK);
     div.children().remove();
     div.append(calls);
     return div;
@@ -110,48 +115,43 @@ var sv_update_call_stack_list = function sv_update_call_stack_list() {
 
 
 // make the call stack list visible
-var sv_show_call_stack = function sv_show_call_stack() {
+var sv_show_call_stack = function() {
     sv_call_stack_btn_for_hide();
-    var div = $('#sv-call-stack-list');
-    div.css('max-height', get_sunburst_render_params()["radius"] * 1.5);
+    var div = $(CALL_STACK);
+    div.css('max-height', $("#chart").height());
     div.show();
 };
 
 
 // hide the call stack list
-var sv_hide_call_stack = function sv_hide_call_stack() {
-    var div = $('#sv-call-stack-list');
+var sv_hide_call_stack = function() {
+    var div = $(CALL_STACK);
     div.hide();
     sv_call_stack_btn_for_show();
 };
 
-
 // show the information div
-var sv_show_info_div = function sv_show_info_div() {
+var sv_show_info_div = function() {
     $('#sv-info-div').show();
 };
 
-
 // hide the information div
-var sv_hide_info_div = function sv_hide_info_div() {
+var sv_hide_info_div = function() {
     $('#sv-info-div').hide();
 };
 
-
 // Show the "app is working" indicator
-var sv_show_working = function sv_show_working() {
+var sv_show_working = function() {
     $('#working-spinner').show();
 };
 
-
 // Hide the "app is working" indicator
-var sv_hide_working = function sv_hide_working() {
+var sv_hide_working = function() {
     $('#working-spinner').hide();
 };
 
-
 // Make the worker and sv_draw_vis function
-var sv_make_worker = function sv_make_worker() {
+var sv_make_worker = function() {
     var URL = URL || window.URL || window.webkitURL;
     var blob = new Blob(
         [$('#heirarchy-worker').text()], {'type': 'text/javascript'});
@@ -163,7 +163,7 @@ var sv_make_worker = function sv_make_worker() {
         if (cache_key != null) {
             sv_json_cache[cache_key] = json;
         }
-        redraw_vis(json);
+        clear_and_redraw_vis(json);
         _.defer(sv_hide_working);
     };
 
@@ -184,13 +184,13 @@ var sv_make_worker = function sv_make_worker() {
 };
 
 
-var sv_cycle_worker = function sv_cycle_worker() {
+var sv_cycle_worker = function() {
     sv_end_worker();
     sv_worker = sv_make_worker();
 };
 
 
-var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
+var sv_draw_vis = function(root_name, parent_name) {
     sv_show_working();
     var message = {
         'depth': sv_heirarchy_depth(),
@@ -202,7 +202,7 @@ var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
 
     cache_key = JSON.stringify(message);
     if (_.has(sv_json_cache, cache_key)) {
-        redraw_vis(sv_json_cache[cache_key]);
+        clear_and_redraw_vis(sv_json_cache[cache_key]);
         sv_hide_working();
     } else {
         sv_worker.postMessage(message);
@@ -211,17 +211,15 @@ var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
 
 
 // An error message for when the worker fails building the call tree
-var sv_show_error_msg = function sv_show_error_msg() {
-    var radius = get_sunburst_render_params()["radius"];
+var sv_show_error_msg = function() {
     $('#sv-error-div')
-        .css('top', window.innerHeight / 2 - radius)
-        .css('left', window.innerWidth / 2 - radius)
-        .width(radius * 2)
+        .css('top', window.innerHeight / 3)
+        .css('left', window.innerWidth / 4)
+        .width(window.innerWidth / 2)
         .show();
 };
 
-
-var sv_hide_error_msg = function sv_hide_error_msg() {
+var sv_hide_error_msg = function() {
     $('#sv-error-div').hide();
 };
 $('#sv-error-close-div').on('click', sv_hide_error_msg);

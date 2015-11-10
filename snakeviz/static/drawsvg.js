@@ -17,35 +17,45 @@ var LAYOUT_DICTIONARY={
 	     icicle: Icicle, 
 	};
 
-function  DrawStratergy(layout){
-	this.layout = layout;
-	this.layout.get_render_params();
-};
-DrawStratergy.prototype.draw= function(json){
-	this.layout.draw(json);
-};		
-
 function DrawLayout() {
-	this.params={};
+	this.params = this.get_render_params();
+	this.vis = this.setUp();
+};
+DrawLayout.prototype.setUp = function(){
+	return  d3.select("#chart")
+		.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
+		.style('margin-right', 'auto')
+		.style('margin-top', DIMS["topMargin"]+"px");
+};
+DrawLayout.prototype.resetVis = function(){
+	d3.select('svg').remove();
 };
 DrawLayout.prototype.get_render_params = function(){};
 DrawLayout.prototype.draw = function(json){
-	pixcelLimit = this.params["minPixel"];
-	var nodes = this.params["drawData"].nodes(json).filter(function(d) {
+	var pixcelLimit = this.params["minPixel"];
+	var visibleNodes = this.params["drawData"].nodes(json).filter(function(d) {
 	    return (d.dx > pixcelLimit);
 	});
-	vis = vis.append("svg:g")
-	    .attr("id", "container")
-	    .attr("transform", this.params["transform"]);
-	this.renderPre();
-	var diagram = vis.data([json]).selectAll(this.params["svgItem"])
-	    .data(nodes)
+	var thisVis = this.addContainer(this.vis);
+	this.renderPre(thisVis);
+	var diagram = thisVis.data([json]).selectAll(this.params["svgItem"])
+	    .data(visibleNodes)
 	    .enter().append(this.params["svgItem"]);
 	diagram.call(this.render,this.params);
     diagram.call(this.commonAttr);
 	};
-DrawLayout.prototype.renderPre = function(){};
+DrawLayout.prototype.renderPre = function(vis){};
 DrawLayout.prototype.render = function(){};
+DrawLayout.prototype.addContainer = function(vis){
+	return vis.append("svg:svg")
+		.attr("width", SVG_DIMS.width)
+		.attr("height", SVG_DIMS.height)
+		.append("g")
+	    .attr("id", "container")
+	    .attr("transform", this.params["transform"])
+	    .on('mouseenter', sv_show_info_div)
+        .on('mouseleave', sv_hide_info_div);
+}
 DrawLayout.prototype.commonAttr = function(){
 	this.attr("fill-rule", "evenodd")
 	    .style("fill", color)
@@ -54,7 +64,9 @@ DrawLayout.prototype.commonAttr = function(){
 	    .call(apply_mouseover);	
 };
 
-function Sunburst() {};
+function Sunburst() {
+	DrawLayout.call(this);	
+};
 Sunburst.prototype = Object.create(DrawLayout.prototype);
 Sunburst.prototype.get_render_params = function(){
 		  var radius = Math.min(SVG_DIMS.width,SVG_DIMS.height) / 2;
@@ -74,7 +86,7 @@ Sunburst.prototype.get_render_params = function(){
 		      })
 		      .innerRadius(function(d) { return yScale(d.y); })
 		      .outerRadius(function(d) { return yScale(d.y + d.dy); });
-		  this.params=  {
+		  return {
 		    "radius": radius,
 		    "transform": "translate(" + SVG_DIMS.width/2 + "," + radius + ")",
 		    "minPixel":0.005, // 0.005 radians = 0.29 degrees.
@@ -83,7 +95,7 @@ Sunburst.prototype.get_render_params = function(){
 		    "arc": arc
 		  };
 		};
-Sunburst.prototype.renderPre = function(){
+Sunburst.prototype.renderPre = function(vis){
 	// Bounding circle for the sunburst
 	vis.append("circle")
     .attr("r", this.params["radius"])
@@ -94,13 +106,15 @@ Sunburst.prototype.render = function(selection,params){
 		.attr("d", params["arc"]);	
 };
 
-function Icicle(){}
+function Icicle(){
+	DrawLayout.call(this);	
+}
 Icicle.prototype = Object.create(DrawLayout.prototype);
 Icicle.prototype.get_render_params =  function(){
 	var partition = d3.layout.partition()
 		.size([SVG_DIMS.width, SVG_DIMS.height])
 		.value(function(d) { return d.size; });
-	this.params= {
+	return {
 		"minPixel":0.5, // half pixcel width
 		"svgItem": "rect",
 		"drawData": partition
@@ -122,52 +136,26 @@ var color = function(d) {
   return scale(d.name);
 };
 
-var make_vis_obj = function() {
-	return d3.select("#chart")
-		.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
-		.style('margin-right', 'auto')
-		.style('margin-top', DIMS["topMargin"]+"px")
-		.append("svg:svg")
-		.attr("width", SVG_DIMS.width)
-		.attr("height", SVG_DIMS.height);
-};
-
 var get_style_value = function(){
 	return $(STYLE_SELECT).val();
 };
 
-
 var select_current_style = function(){
 	style = get_style_value();
 	if (style in LAYOUT_DICTIONARY) {
-		var currentLayout = new LAYOUT_DICTIONARY[style];
+		var currentLayout = new LAYOUT_DICTIONARY[style]();
 	}
 	else{
 		throw new Error("Unknown rendering style '" + style + "'.");
 	};
-	layout = new DrawStratergy(currentLayout);
-	return layout;
+	return currentLayout;
 };
-
-var vis = make_vis_obj();
-
-var reset_vis = function() {
-  // Remove the current figure
-  d3.select('svg').remove();
-  // Make and draw the new svg container
-  vis = make_vis_obj();
-};
-
 
 var clear_and_redraw_vis = function(json) {
   layout = select_current_style();
-  reset_vis();
+  layout.resetVis();
   layout.draw(json);
-  d3.select('#container')
-    .on('mouseenter', sv_show_info_div)
-    .on('mouseleave', sv_hide_info_div);
 };
-
 
 
 // This is the function that runs whenever the user clicks on an SVG
@@ -258,11 +246,8 @@ var sv_update_info_div = function(d) {
   var style = get_style_value();
   var div = $('#sv-info-div');
   div.html(sv_info_template(info));
-  // should this be a static width in which case we dont need to change the class types
   if (!div.hasClass(style)){
 	  div
-	  .removeClass()
-	  .addClass(style)
 	  .width(DIMS["widthInfo"]);
   }
 };

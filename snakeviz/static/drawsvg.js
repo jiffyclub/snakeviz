@@ -199,16 +199,18 @@ var sv_update_info_div = function sv_update_info_div (d) {
 
 
 var apply_mouseover = function apply_mouseover (selection) {
-  selection.on('mouseover', function (d, i) {
-    // select all the nodes that represent this exact function
-    // and highlight them by darkening their color
-    var thisname = d.name;
-    var thispath = selection.filter(function(d, i) {
-        return d.name === thisname;})
-    var thiscolor = d3.rgb('#ff00ff');
-    thispath.style('fill', thiscolor.toString());
-    sv_update_info_div(d);
-    sv_show_info_div();
+	var highlighter = new rowHighlighter('#pstats-table');
+	selection.on('mouseover', function (d, i) {
+		// select all the nodes that represent this exact function
+		// and highlight them by darkening their color
+		var thisname = d.name;
+		var thispath = selection.filter(function(d, i) {
+			return d.name === thisname;})
+		var thiscolor = d3.rgb('#ff00ff');
+		thispath.style('fill', thiscolor.toString());
+		sv_update_info_div(d);
+		sv_show_info_div();
+		highlighter.highlight(sv_item_name(thisname));
   })
   .on('mouseout', function(d, i){
       // reset nodes to their original color
@@ -216,9 +218,33 @@ var apply_mouseover = function apply_mouseover (selection) {
       var thispath = selection.filter(function(d, i) {
           return d.name === thisname;});
       thispath.style('fill', color(d));
+      highlighter.remove();
   });
 };
 
+var rowHighlighter = function(tableRefernce){
+	var table = $(tableRefernce).DataTable();
+	this.highlight = function(rowName){
+		var rowToHighlight = table.rows().eq(0).filter( function(rowIdx){
+			return htmlToText(table.cell( rowIdx, 5 ).data()) === rowName ? true : false;
+			});
+		table.rows( rowToHighlight )
+		    .nodes()
+		    .to$()
+		    .addClass( 'highlight' );
+		this.highlightedRows = rowToHighlight;
+		};
+	this.remove = function(){
+		table.rows( this.highlightedRows )
+		    .nodes()
+		    .to$()
+		    .removeClass( 'highlight' );
+	};
+};
+
+var htmlToText = function(html){
+	return $.parseHTML(html)[0].textContent;
+};
 
 // This is having D3 do its thing.
 var drawSunburst = function drawSunburst(json) {

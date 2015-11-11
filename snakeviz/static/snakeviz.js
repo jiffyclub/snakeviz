@@ -59,7 +59,7 @@ var sv_call_stack_btn_for_hide = function sv_call_stack_btn_for_hide() {
 // Items on the call stack can include directory names that we want
 // to remove for display in the call stack list.
 var sv_item_name = function sv_item_name (name) {
-    var slash = name.lastIndexOf('/');
+    var slash = Math.max(name.lastIndexOf('/'),name.lastIndexOf('\\'));
     var rename = name;
     if (slash !== -1) {
         rename = name.slice(slash + 1);

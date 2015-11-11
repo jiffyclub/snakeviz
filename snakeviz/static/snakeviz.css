@@ -202,3 +202,10 @@ select {
     -webkit-transform: scale(1.0);
   }
 }
+
+.highlight{
+	background-color: #E0E0E0 !important;
+}
+.highlight td.sorting_1 {
+	background-color: transparent !important;
+}

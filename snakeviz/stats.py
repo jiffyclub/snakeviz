@@ -6,20 +6,26 @@ from itertools import chain
 from tornado.escape import xhtml_escape
 
 
+keyfmt = '{0}:{1}({2})'.format
+
+
+def display_name(call):
+    return keyfmt(os.path.basename(call[0]), call[1], call[2])
+
+
 def table_rows(stats):
     """
     Generate a list of stats info lists for the snakeviz stats table.
 
     Each list will be a series of strings of:
 
-    calls tot_time tot_time_per_call cum_time cum_time_per_call file_line_func
+    calls tot_time tot_time_per_call cum_time cum_time_per_call file_line_func callers
 
     """
     rows = []
-
+    stats.calc_callees()
     for k, v in stats.stats.items():
-        flf = xhtml_escape('{0}:{1}({2})'.format(
-            os.path.basename(k[0]), k[1], k[2]))
+        flf = xhtml_escape(display_name(k))
 
         if v[0] == v[1]:
             calls = str(v[0])
@@ -32,10 +38,12 @@ def table_rows(stats):
         cum_time = fmt(v[3])
         tot_time_per = fmt(v[2] / v[0]) if v[0] > 0 else 0
         cum_time_per = fmt(v[3] / v[0]) if v[0] > 0 else 0
-
+        file = xhtml_escape(keyfmt(*k))
+        callers = list(xhtml_escape(keyfmt(*ck)) for ck, cv in stats.stats[k][-1].items())
+        # xhtml_escape(
         rows.append(
             [[calls, v[1]], tot_time, tot_time_per,
-             cum_time, cum_time_per, flf])
+             cum_time, cum_time_per, flf, file, callers])
 
     return rows
 
@@ -46,7 +54,6 @@ def json_stats(stats):
     JSON. Mostly this means all keys need to be strings.
 
     """
-    keyfmt = '{0}:{1}({2})'.format
 
     def _replace_keys(d):
         return dict((keyfmt(*k), v) for k, v in d.items())
@@ -63,7 +70,7 @@ def json_stats(stats):
         nstats[nk]['stats'] = list(stats.stats[k][:4])
         nstats[nk]['callers'] = dict(
             (keyfmt(*ck), list(cv)) for ck, cv in stats.stats[k][-1].items())
-        nstats[nk]['display_name'] = keyfmt(os.path.basename(k[0]), k[1], k[2])
+        nstats[nk]['display_name'] = display_name(k)
 
     # remove anything that both never called anything and was never called
     # by anything.

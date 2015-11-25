@@ -81,7 +81,7 @@ var make_vis_obj = function make_vis_obj (style) {
     .attr("transform", params["transform"]);
 };
 var vis = make_vis_obj("sunburst");
-
+var masterData = null;
 
 var reset_vis = function reset_vis (style) {
   // Remove the current figure
@@ -91,47 +91,63 @@ var reset_vis = function reset_vis (style) {
   vis = make_vis_obj(style);
 };
 
+
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
 var click = function click(d) {
-  // check whether we need to do anything
-  // (e.g. that the user hasn't clicked on the original root node)
-  if (d.name === sv_root_func_name) {
-    return;
-  }
+	var highlighter = new rowHighlighter('#pstats-table');
+	highlighter.removeAll();
+	buildStack(d);
+};
 
-  var stack_last = _.last(sv_call_stack);
-  if (d.name === stack_last) {
-    // need to go up a level in the call stack
-    sv_call_stack.pop();
-    var new_root = _.last(sv_call_stack);
-  } else {
-    var new_root = d.name;
+var findData= function(functionName, parentName){
+	 var matchingData = masterData.filter(function(obj){
+		return obj.name===functionName && 
+		obj.parent_name === parentName;});
+	 if (matchingData.length != 0){
+		 matchingData = matchingData[0];
+	 }
+	 return matchingData;
+};
 
-    // need to construct a new call stack
-    // go up the tree until we hit the tip of the call stack
-    var this_node = d;
-    var local_stack = [new_root];
-    while (this_node.parent != null) {
-      if (this_node.parent.name === stack_last) {
-        // extend the call stack with what we've accumulated
-        local_stack.reverse();
-        sv_call_stack = sv_call_stack.concat(local_stack);
-        break;
-      } else {
-        local_stack.push(this_node.parent.name);
-        this_node = this_node.parent;
-      }
-    }
-  }
+var buildStack = function(d){
+	var thisNode = d;
+	var functionName = thisNode.name;
+	// check whether we need to do anything
+	// (e.g. that the user hasn't clicked on the original root node)
+	if (functionName === sv_root_func_name) {
+		return;
+	}
+	var stack_last = _.last(sv_call_stack);
+	if (functionName === stack_last) {
+		// need to go up a level in the call stack
+		sv_call_stack.pop();
+		var new_root = _.last(sv_call_stack);
+	} else {
+		var new_root = functionName;
+		// need to construct a new call stack
+		// go up the tree until we hit the tip of the call stack
+		var local_stack = [new_root];
+		thisParent = thisNode.parent;
+	    while (thisParent.name != null) {
+	      if (thisParent.name === stack_last) {
+	        // extend the call stack with what we've accumulated
+	        local_stack.reverse();
+	        sv_call_stack = sv_call_stack.concat(local_stack);
+	        break;
+	      } else {
+	        local_stack.push(thisParent.name);
+	        thisParent = thisParent.parent;
+	      	}
+	    }
+	}
 
   //figure out the new parent name
-  if (sv_call_stack.length === 1) {
-    var new_parent_name = null;
-  } else {
-    var new_parent_name = _.first(_.last(sv_call_stack, 2));
-  }
-
+	  if (sv_call_stack.length === 1) {
+	    var new_parent_name = null;
+	  } else {
+	    var new_parent_name = _.first(_.last(sv_call_stack, 2));
+	  }
   // Create new JSON for drawing a vis from a new root
   sv_draw_vis(new_root, new_parent_name);
   sv_update_call_stack_list();
@@ -142,7 +158,7 @@ var click = function click(d) {
     d3.select('#resetbutton').node().removeAttribute('disabled');
   } else {
     d3.select('#resetbutton').property('disabled', 'True');
-  }
+  };	
 };
 
 var sv_info_tpl = _.template(
@@ -200,30 +216,30 @@ var sv_update_info_div = function sv_update_info_div (d) {
 
 var apply_mouseover = function apply_mouseover (selection) {
 	var highlighter = new rowHighlighter('#pstats-table');
-	selection.on('mouseover', function (d, i) {
+	selection.on('mouseover', function (d) {
 		// select all the nodes that represent this exact function
 		// and highlight them by darkening their color
-		var thisname = d.name;
-		var thispath = selection.filter(function(d, i) {
-			return d.name === thisname;})
+		var thisName = d.name;
+		var thispath = selection.filter(function(d) {
+			return d.name === thisName;})
 		var thiscolor = d3.rgb('#ff00ff');
 		thispath.style('fill', thiscolor.toString());
 		sv_update_info_div(d);
 		sv_show_info_div();
-		highlighter.highlight(sv_item_name(thisname));
+		highlighter.highlight(sv_item_name(thisName));
   })
-  .on('mouseout', function(d, i){
+  .on('mouseout', function(d){
       // reset nodes to their original color
-      var thisname = d.name;
-      var thispath = selection.filter(function(d, i) {
-          return d.name === thisname;});
-      thispath.style('fill', color(d));
       highlighter.remove();
+      var thisName = d.name;
+      var thispath = selection.filter(function(d) {
+          return d.name === thisName;});
+      thispath.style('fill', color(d));
   });
 };
 
-var rowHighlighter = function(tableRefernce){
-	var table = $(tableRefernce).DataTable();
+var rowHighlighter = function(tableReference){
+	var table = $(tableReference).DataTable();
 	this.highlight = function(rowName){
 		var rowToHighlight = table.rows().eq(0).filter( function(rowIdx){
 			return htmlToText(table.cell( rowIdx, 5 ).data()) === rowName ? true : false;
@@ -235,12 +251,43 @@ var rowHighlighter = function(tableRefernce){
 		this.highlightedRows = rowToHighlight;
 		};
 	this.remove = function(){
-		table.rows( this.highlightedRows )
+		unhighlight( this.highlightedRows );
+	};
+	this.removeAll = function(){
+		unhighlight( table.rows );
+	}
+	unhighlight = function(rows){
+		table.rows( rows )
 		    .nodes()
 		    .to$()
 		    .removeClass( 'highlight' );
-	};
+	}
 };
+
+
+lastFunctionName = "";
+lastParentNumber = 0;
+
+var tableClick = function(){
+	var table = $('#pstats-table').DataTable();
+	var rowIdx = table.cell(this).index().row;
+	var functionName = htmlToText(table.cell( rowIdx, 6 ).data());
+	var parentArray = table.cell( rowIdx, 7 ).data();
+	if(lastFunctionName===functionName){
+		lastParentNumber+=1;
+		if (lastParentNumber===parentArray.length){
+			lastParentNumber=0;
+		}
+	}else{
+		lastParentNumber=0;
+	};
+	parentName = htmlToText(parentArray[lastParentNumber]);
+	clickedItem = findData(functionName,parentName);
+	sv_call_stack =[sv_root_func_name];
+	buildStack(clickedItem);
+	lastFunctionName = functionName;
+};
+
 
 var htmlToText = function(html){
 	return $.parseHTML(html)[0].textContent;
@@ -264,7 +311,7 @@ var drawSunburst = function drawSunburst(json) {
   var path = vis.data([json]).selectAll("path")
     .data(nodes)
     .enter().append("svg:path")
-    .attr("id", function(d, i) { return "path-" + i; })
+    .attr("id", function(d, i) { return "path" + i; })
     .attr("d", params["arc"])
     .attr("fill-rule", "evenodd")
     .style("fill", color)
@@ -287,7 +334,7 @@ var drawIcicle = function drawIcicle(json) {
   var rect = vis.data([json]).selectAll("rect")
       .data(nodes)
       .enter().append("rect")
-      .attr("id", function(d, i) { return "path-" + i; })
+      .attr("id", function(d, i) { return "path"; })
       .attr("x", function(d) { return x(d.x); })
       .attr("y", function(d) { return y(d.y); })
       .attr("width", function(d) { return x(d.dx); })
@@ -307,6 +354,9 @@ var redraw_vis = function redraw_vis(json) {
     drawSunburst(json);
   } else if (style === "icicle") {
     drawIcicle(json);
+  }
+  if (masterData === null){
+	  masterData =  d3.layout.partition().nodes(json);
   }
   d3.select('#container')
     .on('mouseenter', sv_show_info_div)

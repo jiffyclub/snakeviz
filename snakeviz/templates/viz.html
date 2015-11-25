@@ -112,11 +112,14 @@
             {'title': 'percall', 'type': 'num', 'searchable': 'false'},
             {'title': 'cumtime', 'type': 'num', 'searchable': 'false'},
             {'title': 'percall', 'type': 'num', 'searchable': 'false'},
-            {'title': 'filename:lineno(function)'}
+            {'title': 'filename:lineno(function)'},
+            {'title': 'filename', 'searchable': 'false', 'visible': false},
+            {'title': 'parents', 'searchable': 'false', 'visible': false}
           ],
           'order': [1, 'desc'],
           'paging': false
         });
+        $('#pstats-table tbody').on('click', 'td' ,tableClick);
       });
     </script>
 
@@ -133,14 +136,12 @@
       var sv_base_size = 1000;
       function sv_build_heirarchy(
           root_name, depth, cutoff, node_size, parent_name, call_stack) {
-
         // We track the call stack to avoid displaying recursive calls.
         if (call_stack == null) {
           var call_stack = Immutable.Set([root_name]);
         } else {
           var call_stack = call_stack.add(root_name);
         }
-
         var data = {};
         data['name'] = root_name;
         data['display_name'] = stats[root_name]['display_name'];
@@ -274,7 +275,8 @@
       }));
       // Draw the visualization
       $(document).ready(_.defer(function () {
-        sv_draw_vis(sv_root_func_name);
+      	sv_worker.postMessage(buildMessage(sv_root_func_name,null,true))
+        sv_draw_vis(sv_root_func_name);    
       }));
     </script>
   </body>

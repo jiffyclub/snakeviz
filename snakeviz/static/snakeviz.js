@@ -159,11 +159,12 @@ var sv_make_worker = function sv_make_worker() {
     var sv_worker = new Worker(blobURL);
 
     sv_worker.onmessage = function (event) {
-        var json = JSON.parse(event.data);
-        if (cache_key != null) {
+        cache_key = JSON.stringify(event.data);        
+        if (!(_.has(sv_json_cache, cache_key))) {
+        	var json = JSON.parse(event.data);
             sv_json_cache[cache_key] = json;
         }
-        redraw_vis(json);
+        redraw_vis(sv_json_cache[cache_key]);
         _.defer(sv_hide_working);
     };
 
@@ -192,23 +193,27 @@ var sv_cycle_worker = function sv_cycle_worker() {
 
 var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
     sv_show_working();
-    var message = {
-        'depth': sv_heirarchy_depth(),
-        'cutoff': sv_heirarchy_cutoff(),
-        'name': root_name,
-        'parent_name': parent_name,
-        'url': window.location.origin
-    };
-
-    cache_key = JSON.stringify(message);
-    if (_.has(sv_json_cache, cache_key)) {
-        redraw_vis(sv_json_cache[cache_key]);
-        sv_hide_working();
-    } else {
-        sv_worker.postMessage(message);
-    }
+    var message = buildMessage(root_name,parent_name);
+	sv_worker.postMessage(message);
+    sv_hide_working();
 };
 
+var buildMessage = function(rootName, parentName,initialRun){
+	if (initialRun){
+		depth = 10000;
+		cutoff = 0;
+	}else{
+		depth = sv_heirarchy_depth();
+		cutoff = sv_heirarchy_cutoff();
+	}
+	return {
+        'depth': depth,
+        'cutoff': cutoff,
+        'name': rootName,
+        'parent_name': parentName,
+        'url': window.location.origin
+    };
+}
 
 // An error message for when the worker fails building the call tree
 var sv_show_error_msg = function sv_show_error_msg() {

@@ -164,7 +164,7 @@ var sv_make_worker = function() {
         	var json = JSON.parse(event.data);
             sv_json_cache[cache_key] = json;
         }
-        redraw_vis(sv_json_cache[cache_key]);
+        clear_and_redraw_vis(sv_json_cache[cache_key]);
         _.defer(sv_hide_working);
     };
 

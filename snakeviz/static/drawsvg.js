@@ -156,6 +156,9 @@ var clear_and_redraw_vis = function(json) {
   layout = select_current_style();
   layout.resetVis();
   layout.draw(json);
+  if (masterData === null){
+	  masterData =  d3.layout.partition().nodes(json);
+  }
 };
 
 
@@ -166,7 +169,7 @@ var click = function(d) {
 	highlighter.removeAll();
 	buildStack(d);
 };
-var findData= function(functionName, parentName){
+var findData= function(functionName, parentName){	
 	 var matchingData = masterData.filter(function(obj){
 		return obj.name===functionName && 
 		obj.parent_name === parentName;});

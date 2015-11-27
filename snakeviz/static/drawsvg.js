@@ -224,9 +224,9 @@ var buildStack = function(d){
   // Activate the reset button if we aren't already at the root node
   // And deactivate it if this is the root node
   if (new_root !== sv_root_func_name) {
-    d3.select('#resetbutton').node().removeAttribute('disabled');
+	  resetButton.enable();
   } else {
-    d3.select('#resetbutton').property('disabled', 'True');
+	  resetButton.disable();
   };	
 };
 
@@ -359,11 +359,23 @@ var resetVis = function() {
   // Reset the call stack
   sv_call_stack = [sv_root_func_name];
   sv_update_call_stack_list();
-
-  d3.select('#resetbutton').property('disabled', 'True');
+  resetButton.disable();
 };
-d3.select('#resetbutton').on('click', resetVis);
 
+var resetButton =  {	
+	button : d3.select('#resetbutton'),	
+	enable : function(){
+		this.button.node().removeAttribute('disabled');
+		},
+	disable : function(){
+		this.button.property('disabled','True');
+	},
+	setup : function(){
+		this.button.on('click', resetVis);
+	}
+};
+
+resetButton.setup();
 
 // The handler for when the user changes the depth selection dropdown.
 var sv_selects_changed = function() {

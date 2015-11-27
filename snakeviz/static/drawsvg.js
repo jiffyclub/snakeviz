@@ -1,105 +1,171 @@
 // This contains the code that renders and controls the visualization.
 
-var get_sunburst_render_params = function get_sunburst_render_params() {
-  // 80% of the smallest window dimension
-  var width = 0.8 * Math.min(window.innerHeight, window.innerWidth);
-  var height = width;
-  var radius = width / 2;
-  var partition = d3.layout.partition()
-      .size([2 * Math.PI, radius * radius])
-      .value(function(d) { return d.size; });
-  // By default D3 makes the y size proportional to some area,
-  // so y is a transformation from ~area to a linear scale
-  // so that all arcs have the same radial size.
-  var y = d3.scale.linear().domain([0, radius * radius]).range([0, radius]);
-  var arc = d3.svg.arc()
-      .startAngle(function(d) {
-        return Math.max(0, Math.min(2 * Math.PI, d.x));
-      })
-      .endAngle(function(d) {
-        return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
-      })
-      .innerRadius(function(d) { return y(d.y); })
-      .outerRadius(function(d) { return y(d.y + d.dy); });
-  return {
-    "width": width,
-    "height": height,
-    "radius": radius,
-    "transform": "translate(" + radius + "," + radius + ")",
-    "partition": partition,
-    "arc": arc
-  };
+var DIMS = {
+		"leftMargin": parseInt($('body').css('padding')) + parseInt($('body').css('margin')), 
+		"rightMargin": 60,
+		"topMargin":60,
+		"widthInfo": 200,
 };
 
-var get_icicle_render_params = function get_icicle_render_params() {
-  var width = window.innerWidth * 0.75;
-  var height = window.innerHeight * 0.8;
-  var leftMargin = 90;
-  var topMargin = 60;
-  var partition = d3.layout.partition()
-      .size([width - leftMargin, height - topMargin])
-      .value(function(d) { return d.size; });
-  return {
-    "width": width,
-    "height": height,
-    "leftMargin": leftMargin,
-    "topMargin": topMargin,
-    "transform": "translate(" + leftMargin + "," + topMargin + ")",
-    "partition": partition
-  };
+var SVG_DIMS={
+		width: window.innerWidth-DIMS["leftMargin"]-DIMS["widthInfo"]-DIMS["rightMargin"],
+		height: .75 * (window.innerHeight-DIMS["topMargin"]),
+	};
+
+var LAYOUT_DICTIONARY={ 
+	     sunburst: Sunburst, 
+	     icicle: Icicle, 
+	};
+
+function DrawLayout() {
+	this.params = this.get_render_params();
+	this.vis = this.setUp();
+};
+DrawLayout.prototype.setUp = function(){
+	return  d3.select("#chart")
+		.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
+		.style('margin-right', 'auto')
+		.style('margin-top', DIMS["topMargin"]+"px");
+};
+DrawLayout.prototype.resetVis = function(){
+	d3.select('svg').remove();
+};
+DrawLayout.prototype.get_render_params = function(){};
+DrawLayout.prototype.draw = function(json){
+	var pixcelLimit = this.params["minPixel"];
+	var visibleNodes = this.params["drawData"].nodes(json).filter(function(d) {
+	    return (d.dx > pixcelLimit);
+	});
+	var thisVis = this.addContainer(this.vis);
+	this.renderPre(thisVis);
+	var diagram = thisVis.data([json]).selectAll(this.params["svgItem"])
+	    .data(visibleNodes)
+	    .enter().append(this.params["svgItem"]);
+	diagram.call(this.render,this.params);
+    diagram.call(this.commonAttr);
+	};
+DrawLayout.prototype.renderPre = function(vis){};
+DrawLayout.prototype.render = function(){};
+DrawLayout.prototype.addContainer = function(vis){
+	return vis.append("svg:svg")
+		.attr("width", SVG_DIMS.width)
+		.attr("height", SVG_DIMS.height)
+		.append("g")
+	    .attr("id", "container")
+	    .attr("transform", this.params["transform"])
+	    .on('mouseenter', sv_show_info_div)
+        .on('mouseleave', sv_hide_info_div);
+};
+DrawLayout.prototype.commonAttr = function(){
+	this.attr("fill-rule", "evenodd")
+	    .style("fill", color)
+	    .style("stroke", "#fff")
+	    .on('click', click)
+	    .call(apply_mouseover);	
 };
 
-var get_render_params = function get_render_params(style) {
-  if (style === "sunburst") {
-    return get_sunburst_render_params();
-  } else if (style === "icicle") {
-    return get_icicle_render_params();
-  } else {
-    throw new Error("Unknown rendering style '" + style + "'.");
-  }
+function Sunburst() {
+	DrawLayout.call(this);	
+};
+Sunburst.prototype = Object.create(DrawLayout.prototype);
+Sunburst.prototype.get_render_params = function(){
+		  var radius = Math.min(SVG_DIMS.width,SVG_DIMS.height) / 2;
+		  var partition = d3.layout.partition()
+		      .size([2 * Math.PI, radius * radius])
+		      .value(function(d) { return d.size; });
+		  // By default D3 makes the y size proportional to some area,
+		  // so y is a transformation from ~area to a linear scale
+		  // so that all arcs have the same radial size.
+		  var yScale = d3.scale.linear().domain([0, radius*radius]).range([0, radius]);
+		  var arc = d3.svg.arc()
+		      .startAngle(function(d) {
+		        return Math.max(0, Math.min(2 * Math.PI, d.x));
+		      })
+		      .endAngle(function(d) {
+		        return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
+		      })
+		      .innerRadius(function(d) { return yScale(d.y); })
+		      .outerRadius(function(d) { return yScale(d.y + d.dy); });
+		  return {
+		    "radius": radius,
+		    "transform": "translate(" + SVG_DIMS.width/2 + "," + radius + ")",
+		    "minPixel":0.005, // 0.005 radians = 0.29 degrees.
+		    "drawData": partition,
+		    "svgItem": "path",
+		    "arc": arc
+		  };
+		};
+Sunburst.prototype.renderPre = function(vis){
+	// Bounding circle for the sunburst
+	vis.append("circle")
+    .attr("r", this.params["radius"])
+    .style("opacity", 0);
+};
+Sunburst.prototype.render = function(selection,params){
+	selection.attr("id", function(d, i) { return "path-" + i; })
+		.attr("d", params["arc"]);	
+};
+
+function Icicle(){
+	DrawLayout.call(this);	
+}
+Icicle.prototype = Object.create(DrawLayout.prototype);
+Icicle.prototype.get_render_params =  function(){
+	var partition = d3.layout.partition()
+		.size([SVG_DIMS.width, SVG_DIMS.height])
+		.value(function(d) { return d.size; });
+	return {
+		"minPixel":0.5, // half pixcel width
+		"svgItem": "rect",
+		"drawData": partition
+	};
+};
+Icicle.prototype.render = function(selection,params){
+     this.attr("id", function(d, i) { return "path-" + i; })
+	     .attr("x", function(d) { return d.x; })
+	     .attr("y", function(d) { return d.y; })
+	     .attr("width", function(d) { return d.dx; })
+	     .attr("height", function(d) { return d.dy; });	
 };
 
 // Colors.
 var scale = d3.scale.category20c();
 
 // should make it so that a given function is always the same color
-var color = function color(d) {
+var color = function(d) {
   return scale(d.name);
 };
 
-
-var make_vis_obj = function make_vis_obj (style) {
-  var params = get_render_params(style);
-  return d3.select("#chart")
-    .style('margin-left', 'auto')
-    .style('margin-right', 'auto')
-    .append("svg:svg")
-    .attr("width", params["width"])
-    .attr("height", params["height"])
-    .append("svg:g")
-    .attr("id", "container")
-    .attr("transform", params["transform"]);
+var get_style_value = function(){
+	return $(STYLE_SELECT).val();
 };
-var vis = make_vis_obj("sunburst");
+
+var select_current_style = function(){
+	style = get_style_value();
+	if (style in LAYOUT_DICTIONARY) {
+		var currentLayout = new LAYOUT_DICTIONARY[style]();
+	}
+	else{
+		throw new Error("Unknown rendering style '" + style + "'.");
+	};
+	return currentLayout;
+};
 var masterData = null;
 
-var reset_vis = function reset_vis (style) {
-  // Remove the current figure
-  d3.select('svg').remove();
-
-  // Make and draw the new svg container
-  vis = make_vis_obj(style);
+var clear_and_redraw_vis = function(json) {
+  layout = select_current_style();
+  layout.resetVis();
+  layout.draw(json);
 };
 
 
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
-var click = function click(d) {
+var click = function(d) {
 	var highlighter = new rowHighlighter('#pstats-table');
 	highlighter.removeAll();
 	buildStack(d);
 };
-
 var findData= function(functionName, parentName){
 	 var matchingData = masterData.filter(function(obj){
 		return obj.name===functionName && 
@@ -161,7 +227,7 @@ var buildStack = function(d){
   };	
 };
 
-var sv_info_tpl = _.template(
+var sv_info_template = _.template(
   ['<div class="sv-info-label">Name:</div>',
    '<div class="sv-info-item"><%- name %></div>',
    '<div class="sv-info-label">Cumulative Time:</div>',
@@ -174,12 +240,12 @@ var sv_info_tpl = _.template(
    '<div class="sv-info-item"><%- directory %></div>'
   ].join('\n'));
 
-var sv_update_info_div = function sv_update_info_div (d) {
+var sv_update_info_div = function(d) {
   var re = /^(.*):(\d+)\((.*)\)$/;
   var result = re.exec(d.name);
   var file = result[1];
   var directory = '';
-  var slash = file.lastIndexOf('/');
+  var slash = Math.max(file.lastIndexOf('/'),file.lastIndexOf('\\'));
   if (slash !== -1) {
     directory = file.slice(0, slash + 1);
     file = file.slice(slash + 1);
@@ -193,28 +259,17 @@ var sv_update_info_div = function sv_update_info_div (d) {
     'cumulative_percent': (d.cumulative / sv_total_time * 100).toFixed(2)
   };
 
-  var style = $('#sv-style-select').val();
+  var style = get_style_value();
   var div = $('#sv-info-div');
-  div.html(sv_info_tpl(info));
-
-  var radius = get_sunburst_render_params()["radius"];
-  if ((style === "sunburst") & (!div.hasClass('sunburst'))) {
-    div
-      .addClass('sunburst')
-      .removeClass('icicle')
-      .height(radius * 1.5)
-      .width(($('body').width() - (2 * radius)) / 2.1);
-  } else if ((style === "icicle") & (!div.hasClass('icicle'))) {
-    div
-      .addClass('icicle')
-      .removeClass('sunburst')
-      .height(radius * 1.5)
-      .width(200);
+  div.html(sv_info_template(info));
+  if (!div.hasClass(style)){
+	  div
+	  .width(DIMS["widthInfo"]);
   }
 };
 
 
-var apply_mouseover = function apply_mouseover (selection) {
+var apply_mouseover = function(selection) {
 	var highlighter = new rowHighlighter('#pstats-table');
 	selection.on('mouseover', function (d) {
 		// select all the nodes that represent this exact function
@@ -293,80 +348,9 @@ var htmlToText = function(html){
 	return $.parseHTML(html)[0].textContent;
 };
 
-// This is having D3 do its thing.
-var drawSunburst = function drawSunburst(json) {
-  var params = get_render_params("sunburst");
-
-  // For efficiency, filter nodes to keep only those large enough to see.
-  var nodes = params["partition"].nodes(json).filter(function(d) {
-    return (d.dx > 0.005); // 0.005 radians = 0.29 degrees.
-  });
-
-  // Bounding circle underneath the sunburst, to make it easier to detect
-  // when the mouse leaves the parent g.
-  vis.append("svg:circle")
-    .attr("r", params["radius"])
-    .style("opacity", 0);
-
-  var path = vis.data([json]).selectAll("path")
-    .data(nodes)
-    .enter().append("svg:path")
-    .attr("id", function(d, i) { return "path" + i; })
-    .attr("d", params["arc"])
-    .attr("fill-rule", "evenodd")
-    .style("fill", color)
-    .style("stroke", "#fff")
-    .on('click', click)
-    .call(apply_mouseover);
-};
-
-var drawIcicle = function drawIcicle(json) {
-  params = get_render_params("icicle");
-  var nodes = params["partition"].nodes(json).filter(function(d) {
-    return (d.dx > 0.5); // at least half-a-pixel wide to be visible.
-  });
-  var x = d3.scale.linear()
-      .domain([0, nodes[0].dx])
-      .range([0, params["width"] - params["leftMargin"]]);
-  var y = d3.scale.linear()
-      .domain([0, nodes[0].dy * $('#sv-depth-select').val()])
-      .range([0, params["height"] - params["topMargin"]]);
-  var rect = vis.data([json]).selectAll("rect")
-      .data(nodes)
-      .enter().append("rect")
-      .attr("id", function(d, i) { return "path"; })
-      .attr("x", function(d) { return x(d.x); })
-      .attr("y", function(d) { return y(d.y); })
-      .attr("width", function(d) { return x(d.dx); })
-      .attr("height", function(d) { return y(d.dy); })
-      .attr("fill-rule", "evenodd")
-      .attr("fill", color)
-      .attr("stroke", "#FFF")
-      .on('click', click)
-      .call(apply_mouseover);
-};
-
-// Clear and redraw the visualization
-var redraw_vis = function redraw_vis(json) {
-  var style = $('#sv-style-select').val();
-  reset_vis(style);
-  if (style === "sunburst") {
-    drawSunburst(json);
-  } else if (style === "icicle") {
-    drawIcicle(json);
-  }
-  if (masterData === null){
-	  masterData =  d3.layout.partition().nodes(json);
-  }
-  d3.select('#container')
-    .on('mouseenter', sv_show_info_div)
-    .on('mouseleave', sv_hide_info_div);
-};
-
-
 // Reset the visualization to its original state starting from the
 // main root function.
-var resetVis = function resetViz() {
+var resetVis = function() {
   sv_draw_vis(sv_root_func_name);
 
   // Reset the call stack
@@ -379,7 +363,7 @@ d3.select('#resetbutton').on('click', resetVis);
 
 
 // The handler for when the user changes the depth selection dropdown.
-var sv_selects_changed = function sv_selects_changed() {
+var sv_selects_changed = function() {
   sv_cycle_worker();
   var parent_name = null;
   if (sv_call_stack.length > 1) {
@@ -388,6 +372,6 @@ var sv_selects_changed = function sv_selects_changed() {
   sv_hide_error_msg();
   sv_draw_vis(_.last(sv_call_stack), parent_name);
 };
-d3.select('#sv-style-select').on('change', sv_selects_changed);
-d3.select('#sv-depth-select').on('change', sv_selects_changed);
-d3.select('#sv-cutoff-select').on('change', sv_selects_changed);
+d3.select(STYLE_SELECT).on('change', sv_selects_changed);
+d3.select(DEPTH_SELECT).on('change', sv_selects_changed);
+d3.select(CUTOFF_SELECT).on('change', sv_selects_changed);

@@ -43,24 +43,6 @@ var sv_heirarchy_cutoff = function() {
 };
 
 
-// Configures the call stack button's settings and appearance
-// for when the call stack is hidden.
-var sv_call_stack_btn_for_show = function() {
-    var btn = $('#sv-call-stack-btn');
-    btn.on('click', sv_show_call_stack);
-    btn.removeClass('btn-active');
-};
-
-
-// Configures the call stack button's settings and appearance
-// for when the call stack is visible.
-var sv_call_stack_btn_for_hide = function() {
-    var btn = $('#sv-call-stack-btn');
-    btn.on('click', sv_hide_call_stack);
-    btn.addClass('btn-active');
-};
-
-
 // Items on the call stack can include directory names that we want
 // to remove for display in the call stack list.
 var sv_item_name = function(name) {
@@ -72,11 +54,29 @@ var sv_item_name = function(name) {
     return rename;
 };
 
+var callStackObject = function(){
+	var self = this;
+    var button = $('#sv-call-stack-btn');
+    var listDiv = $('#sv-call-stack-list');
+    this.show = function(){    	
+    	button.on('click', self.hide);
+    	button.removeClass('btn-active');
+    	listDiv.css('max-height', $("#chart").height());
+    	listDiv.show();
+    };
+    this.hide = function(){
+    	button.on('click', self.show);
+    	button.addClass('btn-active');
+    	listDiv.hide();
+    };
+};
+
+var callStack = new callStackObject();
 
 // Builds a list of div elements, each of which contain a number and
 // a function description: file name:line number(function name)
 var sv_call_tpl = _.template('<div><span><%= i %>.&nbsp;</span><span><%- name %></span></div>');
-var sv_call_stack_list = function sv_call_stack_list(call_stack) {
+var sv_call_stack_list = function (call_stack) {
     var calls = [];
     // the call stack list comes in ordered from root -> leaf,
     // but we want to display it leaf -> root, so we iterate over call_stack
@@ -98,7 +98,7 @@ var sv_call_stack_list = function sv_call_stack_list(call_stack) {
                 	resetButton.disable();
                }
             }));
-        })()
+        })();
     }
     return calls;
 };
@@ -113,22 +113,6 @@ var sv_update_call_stack_list = function() {
     return div;
 };
 
-
-// make the call stack list visible
-var sv_show_call_stack = function() {
-    sv_call_stack_btn_for_hide();
-    var div = $(CALL_STACK);
-    div.css('max-height', $("#chart").height());
-    div.show();
-};
-
-
-// hide the call stack list
-var sv_hide_call_stack = function() {
-    var div = $(CALL_STACK);
-    div.hide();
-    sv_call_stack_btn_for_show();
-};
 
 // show the information div
 var sv_show_info_div = function() {

@@ -161,13 +161,12 @@ var clear_and_redraw_vis = function(json) {
   }
 };
 
-
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
 var click = function(d) {
 	var highlighter = new rowHighlighter('#pstats-table');
 	highlighter.removeAll();
-	buildStack(d);
+	callStack.updateStack(d);
 };
 var findData= function(functionName, parentName){	
 	 var matchingData = masterData.filter(function(obj){
@@ -177,57 +176,6 @@ var findData= function(functionName, parentName){
 		 matchingData = matchingData[0];
 	 }
 	 return matchingData;
-};
-
-var buildStack = function(d){
-	var thisNode = d;
-	var functionName = thisNode.name;
-	// check whether we need to do anything
-	// (e.g. that the user hasn't clicked on the original root node)
-	if (functionName === sv_root_func_name) {
-		return;
-	}
-	var stack_last = _.last(sv_call_stack);
-	if (functionName === stack_last) {
-		// need to go up a level in the call stack
-		sv_call_stack.pop();
-		var new_root = _.last(sv_call_stack);
-	} else {
-		var new_root = functionName;
-		// need to construct a new call stack
-		// go up the tree until we hit the tip of the call stack
-		var local_stack = [new_root];
-		thisParent = thisNode.parent;
-	    while (thisParent.name != null) {
-	      if (thisParent.name === stack_last) {
-	        // extend the call stack with what we've accumulated
-	        local_stack.reverse();
-	        sv_call_stack = sv_call_stack.concat(local_stack);
-	        break;
-	      } else {
-	        local_stack.push(thisParent.name);
-	        thisParent = thisParent.parent;
-	      	}
-	    }
-	}
-
-  //figure out the new parent name
-	  if (sv_call_stack.length === 1) {
-	    var new_parent_name = null;
-	  } else {
-	    var new_parent_name = _.first(_.last(sv_call_stack, 2));
-	  }
-  // Create new JSON for drawing a vis from a new root
-  sv_draw_vis(new_root, new_parent_name);
-  sv_update_call_stack_list();
-
-  // Activate the reset button if we aren't already at the root node
-  // And deactivate it if this is the root node
-  if (new_root !== sv_root_func_name) {
-	  resetButton.enable();
-  } else {
-	  resetButton.disable();
-  };	
 };
 
 var sv_info_template = _.template(
@@ -341,8 +289,8 @@ var tableClick = function(){
 	};
 	parentName = htmlToText(parentArray[lastParentNumber]);
 	clickedItem = findData(functionName,parentName);
-	sv_call_stack =[sv_root_func_name];
-	buildStack(clickedItem);
+	callStack.resetStack();
+	callStack.updateStack(clickedItem);
 	lastFunctionName = functionName;
 };
 
@@ -357,8 +305,8 @@ var resetVis = function() {
   sv_draw_vis(sv_root_func_name);
 
   // Reset the call stack
-  sv_call_stack = [sv_root_func_name];
-  sv_update_call_stack_list();
+  callStack.resetStack();
+  callStack.updateDisplay();
   resetButton.disable();
 };
 
@@ -379,13 +327,14 @@ resetButton.setup();
 
 // The handler for when the user changes the depth selection dropdown.
 var sv_selects_changed = function() {
-  sv_cycle_worker();
+  sv_cycle_worker()
+  currentStack = callStack.currentStack();
   var parent_name = null;
-  if (sv_call_stack.length > 1) {
-    parent_name = sv_call_stack[sv_call_stack.length - 2];
+  if (currentStack.length > 1) {
+    parent_name = currentStack[currentStack.length - 2];
   }
   sv_hide_error_msg();
-  sv_draw_vis(_.last(sv_call_stack), parent_name);
+  sv_draw_vis(_.last(currentStack), parent_name);
 };
 d3.select(STYLE_SELECT).on('change', sv_selects_changed);
 d3.select(DEPTH_SELECT).on('change', sv_selects_changed);

@@ -54,65 +54,121 @@ var sv_item_name = function(name) {
     return rename;
 };
 
-var callStackObject = function(){
+var callStackObject = function(rootFunctionName){
 	var self = this;
+	var rootName = rootFunctionName;
+    var callStack = [rootName];
     var button = $('#sv-call-stack-btn');
-    var listDiv = $('#sv-call-stack-list');
+    var listDiv = $(CALL_STACK);
+    var callTemplate = _.template('<div><span><%= i %>.&nbsp;</span><span><%- name %></span></div>');
+    
+    this.currentStack = function(){
+    	return callStack;
+    };
+    
+    this.resetStack = function(){
+    	callStack = [rootName];
+    };
+    
     this.show = function(){    	
     	button.on('click', self.hide);
     	button.removeClass('btn-active');
     	listDiv.css('max-height', $("#chart").height());
     	listDiv.show();
     };
+    
     this.hide = function(){
     	button.on('click', self.show);
     	button.addClass('btn-active');
     	listDiv.hide();
     };
+    
+    this.updateDisplay = function(){
+        var calls = makeDisplayList();
+        listDiv.children().remove();
+        listDiv.append(calls);
+    };
+    
+    makeDisplayList = function(){
+    	// Builds a list of div elements, each of which contain a number and
+    	// a function description: file name:line number(function name)
+    	 var calls = [];
+	    // the call stack list comes in ordered from root -> leaf,
+	    // but we want to display it leaf -> root, so we iterate over call_stack
+	    // in reverse here.
+	    for (var i = callStack.length - 1; i >= 0; i--) {
+	        (function () {
+	            var index = i;
+	            var name = callStack[i];
+	            var parent_name = (i > 0) ? callStack[i-1] : null;
+	            calls.push($(callTemplate(
+	                {'name': sv_item_name(name), 'i': index}
+	            )).click(function () {
+	                sv_draw_vis(name, parent_name);
+	                callStack = callStack.slice(0, index+1);
+	                self.updateDisplay();
+	                if (name !== rootName) {
+	                	resetButton.enable();
+	                } else {
+	                	resetButton.disable();
+	               }
+	            }));
+	        })();
+	    }
+    	return calls;
+    	};
+    	
+    this.updateStack = function(d){
+    	var thisNode = d;
+    	var functionName = thisNode.name;
+    	// check whether we need to do anything
+    	// (e.g. that the user hasn't clicked on the original root node)
+    	if (functionName === rootName) {
+    		return;
+    	}
+    	var stack_last = _.last(callStack);
+    	if (functionName === stack_last) {
+    		// need to go up a level in the call stack
+    		callStack.pop();
+    		var new_root = _.last(callStack);
+    	} else {
+    		var new_root = functionName;
+    		// need to construct a new call stack
+    		// go up the tree until we hit the tip of the call stack
+    		var local_stack = [new_root];
+    		thisParent = thisNode.parent;
+    	    while (thisParent.name != null) {
+    	      if (thisParent.name === stack_last) {
+    	        // extend the call stack with what we've accumulated
+    	        local_stack.reverse();
+    	        callStack = callStack.concat(local_stack);
+    	        break;
+    	      } else {
+    	        local_stack.push(thisParent.name);
+    	        thisParent = thisParent.parent;
+    	      	}
+    	    }
+    	}
+
+      //figure out the new parent name
+    	  if (callStack.length === 1) {
+    	    var new_parent_name = null;
+    	  } else {
+    	    var new_parent_name = _.first(_.last(callStack, 2));
+    	  }
+      // Create new JSON for drawing a vis from a new root
+      sv_draw_vis(new_root, new_parent_name);
+      self.updateDisplay();
+
+      // Activate the reset button if we aren't already at the root node
+      // And deactivate it if this is the root node
+      if (new_root !== rootName) {
+    	  resetButton.enable();
+      } else {
+    	  resetButton.disable();
+      };	
+    };
 };
-
-var callStack = new callStackObject();
-
-// Builds a list of div elements, each of which contain a number and
-// a function description: file name:line number(function name)
-var sv_call_tpl = _.template('<div><span><%= i %>.&nbsp;</span><span><%- name %></span></div>');
-var sv_call_stack_list = function (call_stack) {
-    var calls = [];
-    // the call stack list comes in ordered from root -> leaf,
-    // but we want to display it leaf -> root, so we iterate over call_stack
-    // in reverse here.
-    for (var i = call_stack.length - 1; i >= 0; i--) {
-        (function () {
-            var index = i;
-            var name = call_stack[i];
-            var parent_name = (i > 0) ? call_stack[i-1] : null;
-            calls.push($(sv_call_tpl(
-                {'name': sv_item_name(name), 'i': index}
-            )).click(function () {
-                sv_draw_vis(name, parent_name);
-                sv_call_stack = sv_call_stack.slice(0, index+1);
-                sv_update_call_stack_list();
-                if (name !== sv_root_func_name) {
-                	resetButton.enable();
-                } else {
-                	resetButton.disable();
-               }
-            }));
-        })();
-    }
-    return calls;
-};
-
-
-// update the displayed call stack list
-var sv_update_call_stack_list = function() {
-    var calls = sv_call_stack_list(sv_call_stack);
-    var div = $(CALL_STACK);
-    div.children().remove();
-    div.append(calls);
-    return div;
-};
-
 
 // show the information div
 var sv_show_info_div = function() {

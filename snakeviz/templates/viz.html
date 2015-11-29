@@ -265,12 +265,12 @@
         sv_json_cache = {};
         sv_worker = sv_make_worker();
         sv_root_func_name = sv_find_root(profile_data);
-        sv_call_stack = [sv_root_func_name];
         sv_total_time = profile_data[sv_root_func_name]['stats'][3];
+        callStack = new callStackObject(sv_root_func_name);
       }));
       // Initialize the call stack button
       $(document).ready(_.defer(function () {
-        sv_update_call_stack_list();
+        callStack.updateDisplay()
         callStack.hide();
       }));
       // Draw the visualization

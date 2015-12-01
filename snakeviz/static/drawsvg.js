@@ -164,7 +164,6 @@ var clear_and_redraw_vis = function(json) {
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
 var click = function(d) {
-	var highlighter = new rowHighlighter('#pstats-table');
 	highlighter.removeAll();
 	callStack.updateStack(d);
 };
@@ -221,13 +220,12 @@ var sv_update_info_div = function(d) {
 
 
 var apply_mouseover = function(selection) {
-	var highlighter = new rowHighlighter('#pstats-table');
 	selection.on('mouseover', function (d) {
 		// select all the nodes that represent this exact function
 		// and highlight them by darkening their color
 		var thisName = d.name;
 		var thispath = selection.filter(function(d) {
-			return d.name === thisName;})
+			return d.name === thisName;});
 		var thiscolor = d3.rgb('#ff00ff');
 		thispath.style('fill', thiscolor.toString());
 		sv_update_info_div(d);
@@ -245,15 +243,14 @@ var apply_mouseover = function(selection) {
 };
 
 var rowHighlighter = function(tableReference){
+	var htmlClassName = 'highlight';
 	var table = $(tableReference).DataTable();
 	this.highlight = function(rowName){
 		var rowToHighlight = table.rows().eq(0).filter( function(rowIdx){
 			return htmlToText(table.cell( rowIdx, 5 ).data()) === rowName ? true : false;
 			});
-		table.rows( rowToHighlight )
-		    .nodes()
-		    .to$()
-		    .addClass( 'highlight' );
+		selectRows( rowToHighlight )
+		    .addClass( htmlClassName );
 		this.highlightedRows = rowToHighlight;
 		};
 	this.remove = function(){
@@ -261,13 +258,16 @@ var rowHighlighter = function(tableReference){
 	};
 	this.removeAll = function(){
 		unhighlight( table.rows );
-	}
+	};
 	unhighlight = function(rows){
-		table.rows( rows )
+		selectRows(rows)
+		    .removeClass( htmlClassName );
+	};
+	selectRows = function(rows){
+		return table.rows( rows )
 		    .nodes()
-		    .to$()
-		    .removeClass( 'highlight' );
-	}
+		    .to$();
+	};
 };
 
 
@@ -327,7 +327,7 @@ resetButton.setup();
 
 // The handler for when the user changes the depth selection dropdown.
 var sv_selects_changed = function() {
-  sv_cycle_worker()
+  sv_cycle_worker();
   currentStack = callStack.currentStack();
   var parent_name = null;
   if (currentStack.length > 1) {

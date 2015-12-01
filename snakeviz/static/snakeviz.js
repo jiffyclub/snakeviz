@@ -107,11 +107,7 @@ var callStackObject = function(rootFunctionName){
 	                sv_draw_vis(name, parent_name);
 	                callStack = callStack.slice(0, index+1);
 	                self.updateDisplay();
-	                if (name !== rootName) {
-	                	resetButton.enable();
-	                } else {
-	                	resetButton.disable();
-	               }
+	                checkResetButtonState(name);
 	            }));
 	        })();
 	    }
@@ -136,7 +132,7 @@ var callStackObject = function(rootFunctionName){
     		// need to construct a new call stack
     		// go up the tree until we hit the tip of the call stack
     		var local_stack = [new_root];
-    		thisParent = thisNode.parent;
+    		var thisParent = thisNode.parent;
     	    while (thisParent.name != null) {
     	      if (thisParent.name === stack_last) {
     	        // extend the call stack with what we've accumulated
@@ -151,22 +147,25 @@ var callStackObject = function(rootFunctionName){
     	}
 
       //figure out the new parent name
-    	  if (callStack.length === 1) {
-    	    var new_parent_name = null;
-    	  } else {
-    	    var new_parent_name = _.first(_.last(callStack, 2));
-    	  }
+	    var new_parent_name = null;
+	    if (callStack.length > 1) {
+	    	var new_parent_name = _.first(_.last(callStack, 2));
+	    };
       // Create new JSON for drawing a vis from a new root
+	      self.updateDisplay();
+	      checkResetButtonState(new_root);
       sv_draw_vis(new_root, new_parent_name);
-      self.updateDisplay();
-
-      // Activate the reset button if we aren't already at the root node
-      // And deactivate it if this is the root node
-      if (new_root !== rootName) {
-    	  resetButton.enable();
-      } else {
-    	  resetButton.disable();
-      };	
+    };
+    
+    checkResetButtonState = function(currentRoot){
+    	//TODO confirm correct location of this?
+        // Activate the reset button if we aren't already at the root node
+        // And deactivate it if this is the root node
+        if (currentRoot !== rootName) {
+      	  resetButton.enable();
+        } else {
+      	  resetButton.disable();
+        };    	
     };
 };
 
@@ -253,7 +252,7 @@ var buildMessage = function(rootName, parentName,initialRun){
         'parent_name': parentName,
         'url': window.location.origin
     };
-}
+};
 
 // An error message for when the worker fails building the call tree
 var sv_show_error_msg = function() {

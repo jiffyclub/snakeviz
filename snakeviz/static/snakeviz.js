@@ -57,11 +57,20 @@ var sv_item_name = function(name) {
 var callStackObject = function(rootFunctionName){
 	var self = this;
 	var rootName = rootFunctionName;
+	var _currentRoot = rootName;
+	var _currentParent = null;
     var callStack = [rootName];
     var button = $('#sv-call-stack-btn');
     var listDiv = $(CALL_STACK);
     var callTemplate = _.template('<div><span><%= i %>.&nbsp;</span><span><%- name %></span></div>');
     
+    this.currentRoot = function(){
+    	return _currentRoot;
+    };
+    
+    this.currentParent = function() {
+    	return _currentParent;
+    };
     this.currentStack = function(){
     	return callStack;
     };
@@ -96,45 +105,51 @@ var callStackObject = function(rootFunctionName){
 	    // the call stack list comes in ordered from root -> leaf,
 	    // but we want to display it leaf -> root, so we iterate over call_stack
 	    // in reverse here.
-	    for (var i = callStack.length - 1; i >= 0; i--) {
+    	 lengthStack = callStack.length - 1;
+	    for (var i = lengthStack; i >= 0; i--) {
 	        (function () {
 	            var index = i;
 	            var name = callStack[i];
 	            var parent_name = (i > 0) ? callStack[i-1] : null;
-	            calls.push($(callTemplate(
-	                {'name': sv_item_name(name), 'i': index}
-	            )).click(function () {
-	                sv_draw_vis(name, parent_name);
-	                callStack = callStack.slice(0, index+1);
-	                self.updateDisplay();
-	                checkResetButtonState(name);
-	            }));
-	        })();
+	            var callStackLine = $(callTemplate(
+	            		{'name': sv_item_name(name), 'i': index}));
+	            // if we are at the root then there is no action on clicking
+	            // the stack
+	            if (i != lengthStack) {
+		                callStackLine.click(function () {
+		                	sv_draw_vis(name, parent_name);
+		                })
+		        };
+		        calls.push(callStackLine);
+	            }());
 	    }
     	return calls;
     	};
     	
-    this.updateStack = function(d){
-    	var thisNode = d;
-    	var functionName = thisNode.name;
-    	// check whether we need to do anything
-    	// (e.g. that the user hasn't clicked on the original root node)
+    this.updateStack = function(functionName,parentName){   	
+    	var new_root = functionName;
+    	var new_parent_name = (functionName === rootName) ? null : parentName;
+    	posParentInStack = callStack.indexOf(parentName);
+    	posFunctionInStack = callStack.indexOf(functionName);
     	if (functionName === rootName) {
-    		return;
-    	}
-    	var stack_last = _.last(callStack);
-    	if (functionName === stack_last) {
-    		// need to go up a level in the call stack
-    		callStack.pop();
-    		var new_root = _.last(callStack);
-    	} else {
-    		var new_root = functionName;
+    		// check whether we need to do anything
+        	// (e.g. that the user hasn't clicked on the original root node)
+    		self.resetStack();
+    	} else if(posParentInStack>=0 && posFunctionInStack>=0){
+    		// Check if stack contains the calls already
+    		if (functionName === _.last(callStack)){
+    			new_root = callStack[posParentInStack];
+    			new_parent_name = callStack[posParentInStack-1];
+    		}
+			callStack = _.first(callStack,posFunctionInStack);
+    	}else{
     		// need to construct a new call stack
     		// go up the tree until we hit the tip of the call stack
     		var local_stack = [new_root];
-    		var thisParent = thisNode.parent;
+        	var thisNode = findData(functionName,parentName);
+        	var thisParent = thisNode.parent;
     	    while (thisParent.name != null) {
-    	      if (thisParent.name === stack_last) {
+    	      if (thisParent.name === _.last(callStack)) {
     	        // extend the call stack with what we've accumulated
     	        local_stack.reverse();
     	        callStack = callStack.concat(local_stack);
@@ -143,25 +158,17 @@ var callStackObject = function(rootFunctionName){
     	        local_stack.push(thisParent.name);
     	        thisParent = thisParent.parent;
     	      	}
-    	    }
-    	}
-
-      //figure out the new parent name
-	    var new_parent_name = null;
-	    if (callStack.length > 1) {
-	    	var new_parent_name = _.first(_.last(callStack, 2));
-	    };
-      // Create new JSON for drawing a vis from a new root
-	      self.updateDisplay();
-	      checkResetButtonState(new_root);
-      sv_draw_vis(new_root, new_parent_name);
+	    	}
+    }
+      self.updateDisplay();
+      _currentRoot = new_root;
+      _currentParent = new_parent_name;
     };
     
-    checkResetButtonState = function(currentRoot){
-    	//TODO confirm correct location of this?
+    this.checkResetButtonState = function(){
         // Activate the reset button if we aren't already at the root node
         // And deactivate it if this is the root node
-        if (currentRoot !== rootName) {
+        if (_currentRoot !== rootName) {
       	  resetButton.enable();
         } else {
       	  resetButton.disable();
@@ -204,12 +211,10 @@ var sv_make_worker = function() {
             sv_json_cache[cache_key] = json;
         }
         clear_and_redraw_vis(sv_json_cache[cache_key]);
-        _.defer(sv_hide_working);
     };
 
     sv_worker.onerror = function (event) {
         sv_show_error_msg();
-        console.log(event);
         sv_cycle_worker();
         sv_hide_working();
     };
@@ -230,11 +235,13 @@ var sv_cycle_worker = function() {
 };
 
 
-var sv_draw_vis = function(root_name, parent_name) {
+var sv_draw_vis = function(root_name, parent_name,init) {
     sv_show_working();
-    var message = buildMessage(root_name,parent_name);
-	sv_worker.postMessage(message);
-    sv_hide_working();
+    callStack.updateStack(root_name,parent_name);
+    callStack.checkResetButtonState();
+    var message = buildMessage(callStack.currentRoot(),callStack.currentParent(),init);
+    sv_worker.postMessage(message);
+    _.defer(sv_hide_working);
 };
 
 var buildMessage = function(rootName, parentName,initialRun){

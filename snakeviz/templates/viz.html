@@ -146,7 +146,7 @@
         data['name'] = root_name;
         data['display_name'] = stats[root_name]['display_name'];
         data['size'] = node_size;
-        data['cumulative'] = stats[root_name]['stats'][3];
+        data['cumulative'] = stats[root_name]['stats'][3];        
         if (parent_name == null) {
           // This should only happen once: for the root node.
           data['parent_name'] = root_name;
@@ -221,7 +221,6 @@
             });
           }
         }
-
         return data;
       }
 
@@ -261,7 +260,7 @@
     <script>
       // Initialize data
       $(document).ready(_.defer(function () {
-        var profile_data = {% raw callees %};
+        profile_data = {% raw callees %};
         sv_json_cache = {};
         sv_worker = sv_make_worker();
         sv_root_func_name = sv_find_root(profile_data);
@@ -271,13 +270,14 @@
       }));
       // Initialize the call stack button
       $(document).ready(_.defer(function () {
-        callStack.updateDisplay()
         callStack.hide();
       }));
       // Draw the visualization
       $(document).ready(_.defer(function () {
-      	sv_worker.postMessage(buildMessage(sv_root_func_name,null,true))
-        sv_draw_vis(sv_root_func_name);    
+      	//inititalise the masterData list
+      	sv_draw_vis(sv_root_func_name,null,true)
+      	//Draw the 'home' data values
+        sv_draw_vis(sv_root_func_name,null);    
       }));
     </script>
   </body>

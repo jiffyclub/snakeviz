@@ -165,7 +165,7 @@ var clear_and_redraw_vis = function(json) {
 // element to trigger zooming.
 var click = function(d) {
 	highlighter.removeAll();
-	callStack.updateStack(d);
+	sv_draw_vis(d.name,d.parent_name);
 };
 var findData= function(functionName, parentName){	
 	 var matchingData = masterData.filter(function(obj){
@@ -288,9 +288,8 @@ var tableClick = function(){
 		lastParentNumber=0;
 	};
 	parentName = htmlToText(parentArray[lastParentNumber]);
-	clickedItem = findData(functionName,parentName);
 	callStack.resetStack();
-	callStack.updateStack(clickedItem);
+	sv_draw_vis(functionName,parentName);
 	lastFunctionName = functionName;
 };
 

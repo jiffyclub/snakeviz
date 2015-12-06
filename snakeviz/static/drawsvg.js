@@ -327,13 +327,8 @@ resetButton.setup();
 // The handler for when the user changes the depth selection dropdown.
 var sv_selects_changed = function() {
   sv_cycle_worker();
-  currentStack = callStack.currentStack();
-  var parent_name = null;
-  if (currentStack.length > 1) {
-    parent_name = currentStack[currentStack.length - 2];
-  }
   sv_hide_error_msg();
-  sv_draw_vis(_.last(currentStack), parent_name);
+  sv_draw_vis(null,null);
 };
 d3.select(STYLE_SELECT).on('change', sv_selects_changed);
 d3.select(DEPTH_SELECT).on('change', sv_selects_changed);

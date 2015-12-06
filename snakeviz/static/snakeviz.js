@@ -237,8 +237,10 @@ var sv_cycle_worker = function() {
 
 var sv_draw_vis = function(root_name, parent_name,init) {
     sv_show_working();
-    callStack.updateStack(root_name,parent_name);
-    callStack.checkResetButtonState();
+    if (root_name != null){
+	    callStack.updateStack(root_name,parent_name);
+	    callStack.checkResetButtonState();
+    }
     var message = buildMessage(callStack.currentRoot(),callStack.currentParent(),init);
     sv_worker.postMessage(message);
     _.defer(sv_hide_working);

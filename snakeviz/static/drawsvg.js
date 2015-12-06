@@ -15,6 +15,7 @@ var SVG_DIMS={
 var LAYOUT_DICTIONARY={ 
 	     sunburst: Sunburst, 
 	     icicle: Icicle, 
+	     callgraph: CallGraph,
 	};
 
 function DrawLayout() {
@@ -121,6 +122,28 @@ Icicle.prototype.get_render_params =  function(){
 	};
 };
 Icicle.prototype.render = function(selection,params){
+     this.attr("id", function(d, i) { return "path-" + i; })
+	     .attr("x", function(d) { return d.x; })
+	     .attr("y", function(d) { return d.y; })
+	     .attr("width", function(d) { return d.dx; })
+	     .attr("height", function(d) { return d.dy; });	
+};
+
+function CallGraph(){
+	DrawLayout.call(this);	
+}
+CallGraph.prototype = Object.create(DrawLayout.prototype);
+CallGraph.prototype.get_render_params =  function(){
+	var partition = d3.layout.partition()
+		.size([SVG_DIMS.width, SVG_DIMS.height])
+		.value(function(d) { return d.size; });
+	return {
+		"minPixel":0.5, // half pixcel width
+		"svgItem": "rect",
+		"drawData": partition
+	};
+};
+CallGraph.prototype.render = function(selection,params){
      this.attr("id", function(d, i) { return "path-" + i; })
 	     .attr("x", function(d) { return d.x; })
 	     .attr("y", function(d) { return d.y; })

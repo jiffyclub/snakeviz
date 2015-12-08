@@ -1,13 +1,12 @@
 
 
 callGraphLayout = function(){
-
+	
 	var hierarchy = d3.layout.hierarchy(),
     size = [1, 1]; // width, height
-
-	function position(node, x, dx, dy) {
+	function position(node, x, dx, dy,level) {
 	  var children = node.children;
-	  node.x = x;
+	  node.x = levelPos[level]*dx;
 	  node.y = node.depth * dy;
 	  node.dx = dx;
 	  node.dy = dy-40; //TODO make spacing (-30) scale
@@ -31,12 +30,12 @@ callGraphLayout = function(){
 	    	c = children[i];
 	    	if (node.name != c.name){
 		    	//TODO calc d value
-		      position(c, x, d = 25, dy);
+		      position(c, x, d = 25, dy,level+1);
 		      x += d;
 	    	}
 	    }
 	  }
-	  //node.parent.maxX = x;
+	  levelPos[level] += 1;
 	}
 	
 	function depth(node) {
@@ -52,8 +51,10 @@ callGraphLayout = function(){
 	
 	function partition(d, i) {
 	  var nodes = hierarchy.call(this, d, i);
+	  depthTree = depth(nodes[0]);
+	  levelPos = new Array(depthTree).fill(0);
 	  // TODO make size inpyt two constant  
-	  position(nodes[0], 0, 25, size[1] / depth(nodes[0]));
+	  position(nodes[0], 0, 25, size[1] / depthTree,0);
 	  return nodes;
 	}
 	

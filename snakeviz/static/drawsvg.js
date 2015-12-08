@@ -41,12 +41,15 @@ DrawLayout.prototype.draw = function(json){
 	this.renderPre(thisVis);
 	var diagram = thisVis.data([json]).selectAll(this.params["svgItem"])
 	    .data(visibleNodes)
-	    .enter().append(this.params["svgItem"]);
-	diagram.call(this.render,this.params);
-    diagram.call(this.commonAttr);
+	    .enter();
+	var mainDiagram = diagram.append(this.params["svgItem"]);
+	mainDiagram.call(this.render,this.params);
+	mainDiagram.call(this.commonAttr);
+    this.renderPost(diagram);
 	};
 DrawLayout.prototype.renderPre = function(vis){};
 DrawLayout.prototype.render = function(){};
+DrawLayout.prototype.renderPost = function(vis){};
 DrawLayout.prototype.addContainer = function(vis){
 	return vis.append("svg:svg")
 		.attr("width", SVG_DIMS.width)
@@ -132,23 +135,35 @@ Icicle.prototype.render = function(selection,params){
 function CallGraph(){
 	DrawLayout.call(this);	
 }
+
 CallGraph.prototype = Object.create(DrawLayout.prototype);
+
 CallGraph.prototype.get_render_params =  function(){
-	var partition = d3.layout.partition()
+	var partition = callGraphLayout()
 		.size([SVG_DIMS.width, SVG_DIMS.height])
-		.value(function(d) { return d.size; });
+		.value(function(d) { return d.size; });	
 	return {
-		"minPixel":0.5, // half pixcel width
+		"minPixel": 0 , // half pixcel width
 		"svgItem": "rect",
 		"drawData": partition
 	};
 };
+
 CallGraph.prototype.render = function(selection,params){
      this.attr("id", function(d, i) { return "path-" + i; })
-	     .attr("x", function(d) { return d.x; })
-	     .attr("y", function(d) { return d.y; })
-	     .attr("width", function(d) { return d.dx; })
-	     .attr("height", function(d) { return d.dy; });	
+	     .attr("y", function(d) { return d.x; })
+	     .attr("x", function(d) { return d.y; })
+	     .attr("height", function(d) { return d.dx; })
+	     .attr("width", function(d) { return d.dy; });	   
+};
+
+CallGraph.prototype.renderPost = function(vis){
+	vis.append("line")
+	.attr("y1", function(d) { return d.x1; })
+	.attr("x1", function(d) { return d.y1; })
+	.attr("y2", function(d) { return d.x2; })
+	.attr("x2", function(d) { return d.y2; })
+	.style("stroke", "rgb(255,0,0)");
 };
 
 // Colors.

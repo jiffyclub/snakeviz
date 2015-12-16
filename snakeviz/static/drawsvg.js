@@ -143,7 +143,7 @@ CallGraph.prototype.get_render_params =  function(){
 		.size([SVG_DIMS.width, SVG_DIMS.height])
 		.value(function(d) { return d.size; });	
 	return {
-		"minPixel": 0 , // half pixcel width
+		"minPixel": 0 , 
 		"svgItem": "rect",
 		"drawData": partition
 	};

@@ -5,37 +5,36 @@ callGraphLayout = function(){
 	var hierarchy = d3.layout.hierarchy(),
     size = [1, 1]; // width, height
 	function position(node, x, dx, dy,level) {
+	  levelPos[level] = Math.max(...levelPos);
 	  var children = node.children;
-	  node.x = levelPos[level]*dx;
+	  node.x = dx * levelPos[level];
 	  node.y = node.depth * dy;
 	  node.dx = dx;
-	  node.dy = dy-40; //TODO make spacing (-30) scale
+	  node.dy = dy-dy*.25;
 	  // all lines point down from p1 on the parent to p2 on the child
 	  node.x1 = node.x + node.dx/2;
 	  node.y1 = node.y;
-	  node.px2 = node.x + node.dx/2
+	  node.px2 = node.x + node.dx/2;
 	  node.py2 = node.y + node.dy;
 	  if(node.parent){
 		  	node.x2 = node.parent.px2;
 		  	node.y2 = node.parent.py2;
 	  }
 	  if (children && (n = children.length)) {
-	    var i = -1,
-	        n,
-	        c,
-	        d;
-	    //TODO link dx to colour	  
-	    dx = node.value ? dx / node.value : 0;
-	    while (++i < n) {
-	    	c = children[i];
-	    	if (node.name != c.name){
+		  var i = -1,
+		    n,
+		    c,
+		  //TODO link col to colour	  
+		  col = node.value ? dx / node.value : 0;
+		  while (++i < n) {
+			  c = children[i];
+			  if (node.name != c.name){
 		    	//TODO calc d value
-		      position(c, x, d = 25, dy,level+1);
-		      x += d;
-	    	}
-	    }
+				  position(c, x, dx, dy,level+1);
+			  };
+		  };
 	  }
-	  levelPos[level] += 1;
+		levelPos[level] += 1;
 	}
 	
 	function depth(node) {
@@ -49,12 +48,25 @@ callGraphLayout = function(){
 	  return 1 + d;
 	}
 	
+	function height(node) {
+		  var children = node.children,
+		  	h = 1;
+		  if (children && (n = children.length)) {
+		    var i = -1,
+		        h = 0,
+		        n;
+		    while (++i < n) h += height(children[i]);
+		    h = Math.max(1,h-1);
+		  }
+		  return h;
+		}
+	
 	function partition(d, i) {
 	  var nodes = hierarchy.call(this, d, i);
 	  depthTree = depth(nodes[0]);
+	  heightTree = height(nodes[0]);
 	  levelPos = new Array(depthTree).fill(0);
-	  // TODO make size inpyt two constant  
-	  position(nodes[0], 0, 25, size[1] / depthTree,0);
+	  position(nodes[0], 0, size[1]/ heightTree, size[0] / depthTree,0);
 	  return nodes;
 	}
 	

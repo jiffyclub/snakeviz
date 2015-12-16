@@ -158,12 +158,15 @@ CallGraph.prototype.render = function(selection,params){
 };
 
 CallGraph.prototype.renderPost = function(vis){
-	vis.append("line")
-	.attr("y1", function(d) { return d.x1; })
-	.attr("x1", function(d) { return d.y1; })
-	.attr("y2", function(d) { return d.x2; })
-	.attr("x2", function(d) { return d.y2; })
-	.style("stroke", "rgb(255,0,0)");
+	var link = d3.svg.diagonal()
+			.source(function(d) { return {"x":d.x1, "y":d.y1};})
+			.target(function(d) { return {"x":d.x2, "y":d.y2};})
+			.projection(function(d) { return [d.y, d.x]; });
+	vis.append("path")
+		.attr("d", link)
+	.style("fill", "none")
+	.style("stroke", "#ccc")
+	.style("stroke-width", "");
 };
 
 // Colors.

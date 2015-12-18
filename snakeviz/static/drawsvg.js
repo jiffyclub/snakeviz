@@ -19,6 +19,7 @@ var LAYOUT_DICTIONARY={
 	};
 
 function DrawLayout() {
+	self = this;
 	this.params = this.get_render_params();
 	this.vis = this.setUp();
 };
@@ -61,11 +62,16 @@ DrawLayout.prototype.addContainer = function(vis){
         .on('mouseleave', sv_hide_info_div);
 };
 DrawLayout.prototype.commonAttr = function(){
+	console.log(this)
 	this.attr("fill-rule", "evenodd")
-	    .style("fill", color)
+	    .style("fill", self.color)
 	    .style("stroke", "#fff")
 	    .on('click', click)
-	    .call(apply_mouseover);	
+	    //.call(this.color)
+	    .call(apply_mouseover);
+};
+DrawLayout.prototype.color = function(d){
+	  return scale(d.name);
 };
 
 function Sunburst() {
@@ -169,8 +175,17 @@ CallGraph.prototype.renderPost = function(vis){
 	.style("stroke-width", "");
 };
 
+CallGraph.prototype.color = function(d){
+	console.log(d)
+	return timeScale(d.cumulative)
+}
+
 // Colors.
 var scale = d3.scale.category20c();
+var timeScale = d3.scale.linear()
+.domain([5, 1, 0])
+.range(["red", "gold", "greenyellow"]);
+
 
 // should make it so that a given function is always the same color
 var color = function(d) {

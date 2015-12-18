@@ -29,7 +29,6 @@ callGraphLayout = function(){
 		  while (++i < n) {
 			  c = children[i];
 			  if (node.name != c.name){
-		    	//TODO calc d value
 				  position(c, x, dx, dy,level+1);
 			  };
 		  };

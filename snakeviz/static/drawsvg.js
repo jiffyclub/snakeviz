@@ -1,7 +1,7 @@
 // This contains the code that renders and controls the visualization.
 
 var DIMS = {
-		"leftMargin": parseInt($('body').css('padding')) + parseInt($('body').css('margin')), 
+		"leftMargin": parseInt($('body').css('padding-left')) + parseInt($('body').css('margin-left')), 
 		"rightMargin": 60,
 		"topMargin":60,
 		"widthInfo": 200,

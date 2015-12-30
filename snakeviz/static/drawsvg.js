@@ -62,7 +62,6 @@ DrawLayout.prototype.addContainer = function(vis){
         .on('mouseleave', sv_hide_info_div);
 };
 DrawLayout.prototype.commonAttr = function(){
-	console.log(this)
 	this.attr("fill-rule", "evenodd")
 	    .style("fill", self.color)
 	    .style("stroke", "#fff")
@@ -176,14 +175,13 @@ CallGraph.prototype.renderPost = function(vis){
 };
 
 CallGraph.prototype.color = function(d){
-	console.log(d)
-	return timeScale(d.cumulative)
-}
+	return timeScale(d.total);
+};
 
 // Colors.
 var scale = d3.scale.category20c();
 var timeScale = d3.scale.linear()
-.domain([5, 1, 0])
+.domain([3, 1, 0])
 .range(["red", "gold", "greenyellow"]);
 
 

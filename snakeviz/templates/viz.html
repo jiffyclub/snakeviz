@@ -147,7 +147,9 @@
         data['name'] = root_name;
         data['display_name'] = stats[root_name]['display_name'];
         data['size'] = node_size;
-        data['cumulative'] = stats[root_name]['stats'][3];        
+        data['cumulative'] = stats[root_name]['stats'][3];
+        data['total'] = stats[root_name]['stats'][2]
+        
         if (parent_name == null) {
           // This should only happen once: for the root node.
           data['parent_name'] = root_name;

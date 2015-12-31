@@ -29,13 +29,13 @@ DrawLayout.prototype.setUp = function(){
 		.style('margin-right', 'auto')
 		.style('margin-top', DIMS["topMargin"]+"px");
 };
+
 DrawLayout.prototype.resetVis = function(){
 	d3.select('svg').remove();
 };
 
 DrawLayout.prototype.color = function(d){
-	console.log(d);
-	return this.self.colorScale(d.name);
+	  return this.colorScale(d.total);
 };
 
 DrawLayout.prototype.colorScale = d3.scale.category20c();
@@ -53,11 +53,11 @@ DrawLayout.prototype.draw = function(json){
 	    .enter();
 	var mainDiagram = diagram.append(this.params["svgItem"]);
 	mainDiagram.call(this.render,this.params);
-	mainDiagram.call(this.commonAttr);
+	mainDiagram.call(this.commonAttr.bind(this));
     this.renderPost(diagram);
 	};
 DrawLayout.prototype.renderPre = function(vis){};
-DrawLayout.prototype.render = function(){};
+DrawLayout.prototype.render = function(selection, params){};
 DrawLayout.prototype.renderPost = function(vis){};
 DrawLayout.prototype.addContainer = function(vis){
 	return vis.append("svg:svg")
@@ -69,17 +69,14 @@ DrawLayout.prototype.addContainer = function(vis){
 	    .on('mouseenter', sv_show_info_div)
         .on('mouseleave', sv_hide_info_div);
 };
-DrawLayout.prototype.commonAttr = function(){
-	this.attr("fill-rule", "evenodd")
-	    .style("fill", self.color)
-	    .style("stroke", "#fff")
-	    .on('click', click)
-	    //.call(this.color)
-	    .call(apply_mouseover);
+DrawLayout.prototype.commonAttr = function(selection){
+	selection.attr("fill-rule", "evenodd")
+		    .style("fill", this.color.bind(this))
+		    .style("stroke", "#fff")
+		    .on('click', click)
+		    .call(apply_mouseover);
 };
-DrawLayout.prototype.color = function(d){
-	  return scale(d.name);
-};
+
 
 function Sunburst() {
 	DrawLayout.call(this);	
@@ -186,18 +183,6 @@ CallGraph.prototype.colorScale = d3.scale.linear()
 								.domain([3, 1, 0])
 								.range(["red", "gold", "greenyellow"]);
 
-// Colors.
-var scale = d3.scale.category20c();
-var timeScale = d3.scale.linear()
-.domain([3, 1, 0])
-.range(["red", "gold", "greenyellow"]);
-
-
-// should make it so that a given function is always the same color
-var color = function(d) {
-  return scale(d.name);
-};
-
 var get_style_value = function(){
 	return $(STYLE_SELECT).val();
 };
@@ -299,8 +284,8 @@ var apply_mouseover = function(selection){
   });
   
   changeToHighlightColor = function(name){
-  	curItems = getAllPathsByName(name);
- 	oldColor = curPath.style('fill');
+  	curItems = getAllItemsByName(name);
+ 	oldColor = curItems.style('fill');
 	curItems.style('fill', highlightColor.toString());
   };
   

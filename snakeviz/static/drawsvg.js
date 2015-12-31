@@ -19,7 +19,7 @@ var LAYOUT_DICTIONARY={
 	};
 
 function DrawLayout() {
-	self = this;
+	this.self = this;
 	this.params = this.get_render_params();
 	this.vis = this.setUp();
 };
@@ -32,6 +32,14 @@ DrawLayout.prototype.setUp = function(){
 DrawLayout.prototype.resetVis = function(){
 	d3.select('svg').remove();
 };
+
+DrawLayout.prototype.color = function(d){
+	console.log(d);
+	return this.self.colorScale(d.name);
+};
+
+DrawLayout.prototype.colorScale = d3.scale.category20c();
+
 DrawLayout.prototype.get_render_params = function(){};
 DrawLayout.prototype.draw = function(json){
 	var pixcelLimit = this.params["minPixel"];
@@ -174,9 +182,9 @@ CallGraph.prototype.renderPost = function(vis){
 	.style("stroke-width", "");
 };
 
-CallGraph.prototype.color = function(d){
-	return timeScale(d.total);
-};
+CallGraph.prototype.colorScale = d3.scale.linear()
+								.domain([3, 1, 0])
+								.range(["red", "gold", "greenyellow"]);
 
 // Colors.
 var scale = d3.scale.category20c();
@@ -273,27 +281,37 @@ var sv_update_info_div = function(d) {
 };
 
 
-var apply_mouseover = function(selection) {
+var apply_mouseover = function(selection){ 
+	var highlightColor = d3.rgb('#ff00ff');
+	var oldColor = '';
+	var curItems = {};
 	selection.on('mouseover', function (d) {
-		// select all the nodes that represent this exact function
-		// and highlight them by darkening their color
 		var thisName = d.name;
-		var thispath = selection.filter(function(d) {
-			return d.name === thisName;});
-		var thiscolor = d3.rgb('#ff00ff');
-		thispath.style('fill', thiscolor.toString());
+		changeToHighlightColor(thisName);
 		sv_update_info_div(d);
 		sv_show_info_div();
 		highlighter.highlight(sv_item_name(thisName));
-  })
-  .on('mouseout', function(d){
-      // reset nodes to their original color
-      highlighter.remove();
-      var thisName = d.name;
-      var thispath = selection.filter(function(d) {
-          return d.name === thisName;});
-      thispath.style('fill', color(d));
+ 	});
+  
+  selection.on('mouseout', function(d){
+  	resetOrigionalColor();
+  	highlighter.remove();
   });
+  
+  changeToHighlightColor = function(name){
+  	curItems = getAllPathsByName(name);
+ 	oldColor = curPath.style('fill');
+	curItems.style('fill', highlightColor.toString());
+  };
+  
+  resetOrigionalColor = function(){
+  	curItems.style('fill', oldColor);
+  };
+  
+  getAllItemsByName = function(name){
+  	return selection.filter(function(d) {
+			return d.name === name;});
+  } ; 
 };
 
 var rowHighlighter = function(tableReference){

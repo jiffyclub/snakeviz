@@ -53,6 +53,7 @@ DrawLayout.prototype.draw = function(json){
 	    .enter();
 	var mainDiagram = diagram.append(this.params["svgItem"]);
 	this.params["dataExtent"] = d3.extent(mainDiagram.data(), function(d){ return d.total; });
+	this.params["data"] = mainDiagram.data();
 	mainDiagram.call(this.render,this.params);
 	mainDiagram.call(this.commonAttr.bind(this));
     this.renderPost(diagram);

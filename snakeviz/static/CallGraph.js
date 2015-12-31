@@ -30,6 +30,9 @@ callGraphLayout = function(){
 			  c = children[i];
 			  if (node.name != c.name){
 				  position(c, x, dx, dy,level+1);
+			  }else{
+			  	//remove any previous positional reference to the object
+			  	  position(c, null, null, null,null);
 			  };
 		  };
 	  }

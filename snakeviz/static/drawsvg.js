@@ -19,7 +19,6 @@ var LAYOUT_DICTIONARY={
 	};
 
 function DrawLayout() {
-	this.self = this;
 	this.params = this.get_render_params();
 	this.vis = this.setUp();
 };
@@ -35,12 +34,13 @@ DrawLayout.prototype.resetVis = function(){
 };
 
 DrawLayout.prototype.color = function(d){
-	  return this.colorScale(d.total);
+	  return this.colorScale(d.name);
 };
 
 DrawLayout.prototype.colorScale = d3.scale.category20c();
 
 DrawLayout.prototype.get_render_params = function(){};
+
 DrawLayout.prototype.draw = function(json){
 	var pixcelLimit = this.params["minPixel"];
 	var visibleNodes = this.params["drawData"].nodes(json).filter(function(d) {
@@ -52,10 +52,12 @@ DrawLayout.prototype.draw = function(json){
 	    .data(visibleNodes)
 	    .enter();
 	var mainDiagram = diagram.append(this.params["svgItem"]);
+	this.params["dataExtent"] = d3.extent(mainDiagram.data(), function(d){ return d.total; });
 	mainDiagram.call(this.render,this.params);
 	mainDiagram.call(this.commonAttr.bind(this));
     this.renderPost(diagram);
-	};
+};
+	
 DrawLayout.prototype.renderPre = function(vis){};
 DrawLayout.prototype.render = function(selection, params){};
 DrawLayout.prototype.renderPost = function(vis){};
@@ -179,9 +181,18 @@ CallGraph.prototype.renderPost = function(vis){
 	.style("stroke-width", "");
 };
 
-CallGraph.prototype.colorScale = d3.scale.linear()
-								.domain([3, 1, 0])
-								.range(["red", "gold", "greenyellow"]);
+CallGraph.prototype.color = function(d){
+	  return this.colorScale(d.total);
+};
+
+CallGraph.prototype.colorScale = function(value){
+	min = this.params.dataExtent[0];
+	max = this.params.dataExtent[1];
+	mid = (min + max)/2;
+	return d3.scale.linear()
+		.domain([max, mid, min])
+		.range(["red", "gold", "greenyellow"])(value);
+};
 
 var get_style_value = function(){
 	return $(STYLE_SELECT).val();

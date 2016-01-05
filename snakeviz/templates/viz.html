@@ -121,7 +121,7 @@
     </script>
 
     <!-- Web worker code for generating D3 JSON in a separate thread -->
-    <script id="heirarchy-worker" type="javascript/worker">
+    <script id="hierarchy-worker" type="javascript/worker">
       // This will all go into a web worker that will be used to generate
       // the visualization JSON while leaving the rest of the app responsive.
       //
@@ -131,7 +131,7 @@
 
       var stats = {% raw callees %};
       var sv_base_size = 1000;
-      function sv_build_heirarchy(
+      function sv_build_hierarchy(
           root_name, depth, cutoff, node_size, parent_name, call_stack) {
 
         // We track the call stack to avoid displaying recursive calls.
@@ -196,7 +196,7 @@
             }
 
             data['children'].push(
-              sv_build_heirarchy(
+              sv_build_hierarchy(
                 child_name, new_depth, cutoff, child_sizes[child_name],
                 root_name, call_stack));
           }
@@ -247,7 +247,7 @@
         var root_name = event.data['name'];
         var parent_name = event.data['parent_name'];
         self.postMessage(JSON.stringify(
-          sv_build_heirarchy(
+          sv_build_hierarchy(
             root_name, depth, cutoff, sv_base_size, parent_name)));
       };
     </script>

@@ -23,17 +23,17 @@ var sv_find_root = function sv_find_root (stats) {
 };
 
 
-// Returns the heirarchy depth value from the depth <select> element
-var sv_heirarchy_depth = function sv_heirarchy_depth() {
+// Returns the hierarchy depth value from the depth <select> element
+var sv_hierarchy_depth = function sv_hierarchy_depth() {
     return parseInt($('#sv-depth-select').val(), 10);
 };
 
 
-// Returns the heirarchy cutoff value from the cutoff <select> element
+// Returns the hierarchy cutoff value from the cutoff <select> element
 // This value is used to prune elements when building the call tree:
 // if a child's cumulative time is less than this fraction of the parent
 // then the program skips the descent into that child.
-var sv_heirarchy_cutoff = function sv_heirarchy_cutoff() {
+var sv_hierarchy_cutoff = function sv_hierarchy_cutoff() {
     return parseFloat($('#sv-cutoff-select').val());
 };
 
@@ -154,7 +154,7 @@ var sv_hide_working = function sv_hide_working() {
 var sv_make_worker = function sv_make_worker() {
     var URL = URL || window.URL || window.webkitURL;
     var blob = new Blob(
-        [$('#heirarchy-worker').text()], {'type': 'text/javascript'});
+        [$('#hierarchy-worker').text()], {'type': 'text/javascript'});
     var blobURL = URL.createObjectURL(blob);
     var sv_worker = new Worker(blobURL);
 
@@ -193,8 +193,8 @@ var sv_cycle_worker = function sv_cycle_worker() {
 var sv_draw_vis = function sv_draw_vis(root_name, parent_name) {
     sv_show_working();
     var message = {
-        'depth': sv_heirarchy_depth(),
-        'cutoff': sv_heirarchy_cutoff(),
+        'depth': sv_hierarchy_depth(),
+        'cutoff': sv_hierarchy_cutoff(),
         'name': root_name,
         'parent_name': parent_name,
         'url': window.location.origin

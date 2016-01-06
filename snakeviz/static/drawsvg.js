@@ -204,7 +204,8 @@ var apply_mouseover = function apply_mouseover (selection) {
     // and highlight them by darkening their color
     var thisname = d.name;
     var thispath = selection.filter(function(d, i) {
-        return d.name === thisname;})
+        return d.name === thisname;
+    });
     var thiscolor = d3.rgb('#ff00ff');
     thispath.style('fill', thiscolor.toString());
     sv_update_info_div(d);
@@ -283,7 +284,8 @@ var drawIcicle = function drawIcicle(json) {
         .attr("font-family", "sans-serif")
         .attr("font-size", "15px")
         .attr("fill", "black")
-        .attr("text-anchor", "middle");
+        .attr("text-anchor", "middle")
+        .attr("pointer-events", "none");
 
   // Append the function name
   labels.append("tspan")

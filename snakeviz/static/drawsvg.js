@@ -204,7 +204,8 @@ var apply_mouseover = function apply_mouseover (selection) {
     // and highlight them by darkening their color
     var thisname = d.name;
     var thispath = selection.filter(function(d, i) {
-        return d.name === thisname;})
+        return d.name === thisname;
+    });
     var thiscolor = d3.rgb('#ff00ff');
     thispath.style('fill', thiscolor.toString());
     sv_update_info_div(d);
@@ -258,6 +259,7 @@ var drawIcicle = function drawIcicle(json) {
   var y = d3.scale.linear()
       .domain([0, nodes[0].dy * $('#sv-depth-select').val()])
       .range([0, params["height"] - params["topMargin"]]);
+
   var rect = vis.data([json]).selectAll("rect")
       .data(nodes)
       .enter().append("rect")
@@ -271,6 +273,41 @@ var drawIcicle = function drawIcicle(json) {
       .attr("stroke", "#FFF")
       .on('click', click)
       .call(apply_mouseover);
+
+  var labels = vis.data([json]).selectAll("text")
+        .data(nodes)
+        .enter().append("text")
+        .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); })
+        .attr("y", function(d) { return y(d.y + (d.dy / 2.0)); })
+        .attr("width", function(d) { return x(d.dx); })
+        .attr("height", function(d) { return y(d.dy); })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "15px")
+        .attr("fill", "black")
+        .attr("text-anchor", "middle")
+        .attr("pointer-events", "none");
+
+  // Append the function name
+  labels.append("tspan")
+    .text(function(d) { return d.display_name; })
+    .attr("text-anchor", "middle")
+    .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); });
+  // Append the time
+  labels.append("tspan")
+    .text(function(d) { return d.cumulative.toPrecision(3) + " s"; })
+    .attr("text-anchor", "middle")
+    .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); })
+    .attr("dy", "1.2em");
+
+  // Remove labels that don't fit
+  d3.selectAll("text")
+    .each(function(d, a, b) {
+      // var text = d3.selectd(this);
+      var bbox = this.getBBox();
+      if (bbox.width > x(d.dx)) {
+        this.remove();
+      }
+    });
 };
 
 // Clear and redraw the visualization

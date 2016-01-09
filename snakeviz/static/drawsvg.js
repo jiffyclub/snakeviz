@@ -1,32 +1,32 @@
 // This contains the code that renders and controls the visualization.
 
 var DIMS = {
-		"leftMargin": parseInt($('body').css('padding-left')) + parseInt($('body').css('margin-left')), 
-		"rightMargin": 60,
-		"topMargin":60,
-		"widthInfo": 200,
+	"leftMargin": parseInt($('body').css('padding-left')) + parseInt($('body').css('margin-left')), 
+	"rightMargin": 60,
+	"topMargin":60,
+	"widthInfo": 200,
 };
 
 var SVG_DIMS={
-		width: window.innerWidth-DIMS["leftMargin"]-DIMS["widthInfo"]-DIMS["rightMargin"],
-		height: .75 * (window.innerHeight-DIMS["topMargin"]),
-	};
+	width: window.innerWidth-DIMS["leftMargin"]-DIMS["widthInfo"]-DIMS["rightMargin"],
+	height: .75 * (window.innerHeight-DIMS["topMargin"]),
+};
 
 var LAYOUT_DICTIONARY={ 
-	     sunburst: Sunburst, 
-	     icicle: Icicle, 
-	     callgraph: CallGraph,
-	};
+  sunburst: Sunburst, 
+  icicle: Icicle, 
+  callgraph: CallGraph,
+};
 
 function DrawLayout() {
-	this.params = this.get_render_params();
+  this.params = this.get_render_params();
 	this.vis = this.setUp();
 };
 DrawLayout.prototype.setUp = function(){
-	return  d3.select("#chart")
-		.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
-		.style('margin-right', 'auto')
-		.style('margin-top', DIMS["topMargin"]+"px");
+  return  d3.select("#chart")
+  	.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
+  	.style('margin-right', 'auto')
+	.style('margin-top', DIMS["topMargin"]+"px");
 };
 
 DrawLayout.prototype.resetVis = function(){
@@ -34,7 +34,7 @@ DrawLayout.prototype.resetVis = function(){
 };
 
 DrawLayout.prototype.color = function(d){
-	  return this.colorScale(d.name);
+  return this.colorScale(d.name);
 };
 
 DrawLayout.prototype.colorScale = d3.scale.category20c();
@@ -44,7 +44,7 @@ DrawLayout.prototype.get_render_params = function(){};
 DrawLayout.prototype.draw = function(json){
 	var pixcelLimit = this.params["minPixel"];
 	var visibleNodes = this.params["drawData"].nodes(json).filter(function(d) {
-	    return (d.dx > pixcelLimit);
+    return (d.dx > pixcelLimit);
 	});
 	var thisVis = this.addContainer(this.vis);
 	this.renderPre(thisVis);
@@ -67,17 +67,17 @@ DrawLayout.prototype.addContainer = function(vis){
 		.attr("width", SVG_DIMS.width)
 		.attr("height", SVG_DIMS.height)
 		.append("g")
-	    .attr("id", "container")
-	    .attr("transform", this.params["transform"])
-	    .on('mouseenter', sv_show_info_div)
-        .on('mouseleave', sv_hide_info_div);
+    .attr("id", "container")
+    .attr("transform", this.params["transform"])
+    .on('mouseenter', sv_show_info_div)
+    .on('mouseleave', sv_hide_info_div);
 };
 DrawLayout.prototype.commonAttr = function(selection){
 	selection.attr("fill-rule", "evenodd")
-		    .style("fill", this.color.bind(this))
-		    .style("stroke", "#fff")
-		    .on('click', click)
-		    .call(apply_mouseover);
+    .style("fill", this.color.bind(this))
+    .style("stroke", "#fff")
+    .on('click', click)
+    .call(apply_mouseover);
 };
 
 
@@ -86,32 +86,32 @@ function Sunburst() {
 };
 Sunburst.prototype = Object.create(DrawLayout.prototype);
 Sunburst.prototype.get_render_params = function(){
-		  var radius = Math.min(SVG_DIMS.width,SVG_DIMS.height) / 2;
-		  var partition = d3.layout.partition()
-		      .size([2 * Math.PI, radius * radius])
-		      .value(function(d) { return d.size; });
-		  // By default D3 makes the y size proportional to some area,
-		  // so y is a transformation from ~area to a linear scale
-		  // so that all arcs have the same radial size.
-		  var yScale = d3.scale.linear().domain([0, radius*radius]).range([0, radius]);
-		  var arc = d3.svg.arc()
-		      .startAngle(function(d) {
-		        return Math.max(0, Math.min(2 * Math.PI, d.x));
-		      })
-		      .endAngle(function(d) {
-		        return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
-		      })
-		      .innerRadius(function(d) { return yScale(d.y); })
-		      .outerRadius(function(d) { return yScale(d.y + d.dy); });
-		  return {
-		    "radius": radius,
-		    "transform": "translate(" + SVG_DIMS.width/2 + "," + radius + ")",
-		    "minPixel":0.005, // 0.005 radians = 0.29 degrees.
-		    "drawData": partition,
-		    "svgItem": "path",
-		    "arc": arc
-		  };
-		};
+  var radius = Math.min(SVG_DIMS.width,SVG_DIMS.height) / 2;
+  var partition = d3.layout.partition()
+    .size([2 * Math.PI, radius * radius])
+    .value(function(d) { return d.size; });
+  // By default D3 makes the y size proportional to some area,
+  // so y is a transformation from ~area to a linear scale
+  // so that all arcs have the same radial size.
+  var yScale = d3.scale.linear().domain([0, radius*radius]).range([0, radius]);
+  var arc = d3.svg.arc()
+    .startAngle(function(d) {
+      return Math.max(0, Math.min(2 * Math.PI, d.x));
+    })
+    .endAngle(function(d) {
+      return Math.max(0, Math.min(2 * Math.PI, d.x + d.dx));
+    })
+    .innerRadius(function(d) { return yScale(d.y); })
+    .outerRadius(function(d) { return yScale(d.y + d.dy); });
+  return {
+    "radius": radius,
+    "transform": "translate(" + SVG_DIMS.width/2 + "," + radius + ")",
+    "minPixel":0.005, // 0.005 radians = 0.29 degrees.
+    "drawData": partition,
+    "svgItem": "path",
+    "arc": arc
+    };
+};
 Sunburst.prototype.renderPre = function(vis){
 	// Bounding circle for the sunburst
 	vis.append("circle")
@@ -120,7 +120,7 @@ Sunburst.prototype.renderPre = function(vis){
 };
 Sunburst.prototype.render = function(selection,params){
 	selection.attr("id", function(d, i) { return "path-" + i; })
-		.attr("d", params["arc"]);	
+    .attr("d", params["arc"]);	
 };
 
 function Icicle(){
@@ -138,22 +138,22 @@ Icicle.prototype.get_render_params =  function(){
 	};
 };
 Icicle.prototype.render = function(selection,params){
-     this.attr("id", function(d, i) { return "path-" + i; })
-	     .attr("x", function(d) { return d.x; })
-	     .attr("y", function(d) { return d.y; })
-	     .attr("width", function(d) { return d.dx; })
-	     .attr("height", function(d) { return d.dy; });	
+  this.attr("id", function(d, i) { return "path-" + i; })
+    .attr("x", function(d) { return d.x; })
+    .attr("y", function(d) { return d.y; })
+    .attr("width", function(d) { return d.dx; })
+    .attr("height", function(d) { return d.dy; });	
 };
 
 function CallGraph(){
-	DrawLayout.call(this);	
+  DrawLayout.call(this);	
 }
 
 CallGraph.prototype = Object.create(DrawLayout.prototype);
 
 CallGraph.prototype.get_render_params =  function(){
 	var partition = callGraphLayout()
-		.size([SVG_DIMS.width, SVG_DIMS.height])
+    .size([SVG_DIMS.width, SVG_DIMS.height])
 		.value(function(d) { return d.size; });	
 	return {
 		"minPixel": 0 , 
@@ -163,31 +163,31 @@ CallGraph.prototype.get_render_params =  function(){
 };
 
 CallGraph.prototype.render = function(selection,params){
-     this.attr("id", function(d, i) { return "path-" + i; })
-	     .attr("y", function(d) { return d.x; })
-	     .attr("x", function(d) { return d.y; })
-	     .attr("height", function(d) { return d.dx; })
-	     .attr("width", function(d) { return d.dy; });	   
+  this.attr("id", function(d, i) { return "path-" + i; })
+    .attr("y", function(d) { return d.x; })
+    .attr("x", function(d) { return d.y; })
+    .attr("height", function(d) { return d.dx; })
+    .attr("width", function(d) { return d.dy; });	   
 };
 
 CallGraph.prototype.renderPost = function(vis){
 	var link = d3.svg.diagonal()
-			.source(function(d) { return {"x":d.x1, "y":d.y1};})
-			.target(function(d) { return {"x":d.x2, "y":d.y2};})
-			.projection(function(d) { return [d.y, d.x]; });
-	vis.append("path")
-		.attr("d", link)
-	.style("fill", "none")
-	.style("stroke", "#ccc")
-	.style("stroke-width", "");
+    .source(function(d) { return {"x":d.x1, "y":d.y1};})
+		.target(function(d) { return {"x":d.x2, "y":d.y2};})
+		.projection(function(d) { return [d.y, d.x]; });
+  vis.append("path")
+    .attr("d", link)
+    .style("fill", "none")
+    .style("stroke", "#ccc")
+    .style("stroke-width", "");
 };
 
 CallGraph.prototype.color = function(d){
-	  return this.colorScale(d.total);
+  return this.colorScale(d.total);
 };
 
 CallGraph.prototype.colorScale = function(value){
-	min = this.params.dataExtent[0];
+  min = this.params.dataExtent[0];
 	max = this.params.dataExtent[1];
 	mid = (min + max)/2;
 	return d3.scale.linear()
@@ -196,7 +196,7 @@ CallGraph.prototype.colorScale = function(value){
 };
 
 var get_style_value = function(){
-	return $(STYLE_SELECT).val();
+  return $(STYLE_SELECT).val();
 };
 
 var select_current_style = function(){
@@ -209,6 +209,7 @@ var select_current_style = function(){
 	};
 	return currentLayout;
 };
+
 var masterData = null;
 
 var clear_and_redraw_vis = function(json) {
@@ -227,13 +228,13 @@ var click = function(d) {
 	sv_draw_vis(d.name,d.parent_name);
 };
 var findData= function(functionName, parentName){	
-	 var matchingData = masterData.filter(function(obj){
-		return obj.name===functionName && 
-		obj.parent_name === parentName;});
-	 if (matchingData.length != 0){
-		 matchingData = matchingData[0];
-	 }
-	 return matchingData;
+  var matchingData = masterData.filter(function(obj){
+    return obj.name===functionName && 
+    obj.parent_name === parentName;});
+  if (matchingData.length != 0){
+    matchingData = matchingData[0];
+  }
+  return matchingData;
 };
 
 var sv_info_template = _.template(
@@ -283,59 +284,63 @@ var apply_mouseover = function(selection){
 	var oldColor = '';
 	var curItems = {};
 	selection.on('mouseover', function (d) {
-		var thisName = d.name;
-		changeToHighlightColor(thisName);
-		sv_update_info_div(d);
-		sv_show_info_div();
-		highlighter.highlight(sv_item_name(thisName));
+	var thisName = d.name;
+	changeToHighlightColor(thisName);
+  sv_update_info_div(d);
+	sv_show_info_div();
+	highlighter.highlight(sv_item_name(thisName));
  	});
   
   selection.on('mouseout', function(d){
-  	resetOrigionalColor();
+    resetOrigionalColor();
   	highlighter.remove();
   });
   
   changeToHighlightColor = function(name){
   	curItems = getAllItemsByName(name);
- 	oldColor = curItems.style('fill');
-	curItems.style('fill', highlightColor.toString());
+ 	  oldColor = curItems.style('fill');
+    curItems.style('fill', highlightColor.toString());
   };
   
   resetOrigionalColor = function(){
-  	curItems.style('fill', oldColor);
+    curItems.style('fill', oldColor);
   };
   
   getAllItemsByName = function(name){
   	return selection.filter(function(d) {
-			return d.name === name;});
+		  return d.name === name;});
   } ; 
 };
 
 var rowHighlighter = function(tableReference){
 	var htmlClassName = 'highlight';
 	var table = $(tableReference).DataTable();
-	this.highlight = function(rowName){
-		var rowToHighlight = table.rows().eq(0).filter( function(rowIdx){
-			return htmlToText(table.cell( rowIdx, 5 ).data()) === rowName ? true : false;
+  this.highlight = function(rowName){
+    var rowToHighlight = table.rows().eq(0).filter( function(rowIdx){
+      return htmlToText(table.cell( rowIdx, 5 ).data()) === rowName ? true : false;
 			});
-		selectRows( rowToHighlight )
-		    .addClass( htmlClassName );
+    selectRows( rowToHighlight )
+      .addClass( htmlClassName );
 		this.highlightedRows = rowToHighlight;
 		};
+		
 	this.remove = function(){
 		unhighlight( this.highlightedRows );
 	};
+	
 	this.removeAll = function(){
 		unhighlight( table.rows );
 	};
+	
 	unhighlight = function(rows){
-		selectRows(rows)
-		    .removeClass( htmlClassName );
+    selectRows(rows)
+      .removeClass( htmlClassName );
 	};
+	
 	selectRows = function(rows){
 		return table.rows( rows )
-		    .nodes()
-		    .to$();
+      .nodes()
+		  .to$();
 	};
 };
 

@@ -1,11 +1,11 @@
-
+// Much of this is based on D3s other hierarchical graphs.
 
 callGraphLayout = function(){
 	
 	var hierarchy = d3.layout.hierarchy(),
     size = [1, 1]; // width, height
 	function position(node, x, dx, dy,level) {
-	  levelPos[level] = Math.max(...levelPos);
+    levelPos[level] = Math.max(...levelPos);
 	  var children = node.children;
 	  node.x = dx * levelPos[level];
 	  node.y = node.depth * dy;
@@ -17,22 +17,20 @@ callGraphLayout = function(){
 	  node.px2 = node.x + node.dx/2;
 	  node.py2 = node.y + node.dy;
 	  if(node.parent){
-		  	node.x2 = node.parent.px2;
-		  	node.y2 = node.parent.py2;
+      node.x2 = node.parent.px2;
+      node.y2 = node.parent.py2;
 	  }
 	  if (children && (n = children.length)) {
-		  var i = -1,
-		    n,
-		    c,
-		  //TODO link col to colour	  
-		  col = node.value ? dx / node.value : 0;
+      var i = -1,
+  		    n,
+  		    c;
 		  while (++i < n) {
-			  c = children[i];
+        c = children[i];
 			  if (node.name != c.name){
 				  position(c, x, dx, dy,level+1);
 			  }else{
 			  	//remove any previous positional reference to the object
-			  	  position(c, null, null, null,null);
+          position(c, null, null, null,null);
 			  };
 		  };
 	  }
@@ -40,28 +38,28 @@ callGraphLayout = function(){
 	}
 	
 	function depth(node) {
-	  var children = node.children,
-	      d = 0;
+    var children = node.children,
+      d = 0;
 	  if (children && (n = children.length)) {
-	    var i = -1,
-	        n;
-	    while (++i < n) d = Math.max(d, depth(children[i]));
+      var i = -1,
+          n;
+      while (++i < n) d = Math.max(d, depth(children[i]));
 	  }
-	  return 1 + d;
+    return 1 + d;
 	}
 	
-	function height(node) {
-		  var children = node.children,
-		  	h = 1;
-		  if (children && (n = children.length)) {
-		    var i = -1,
-		        h = 0,
-		        n;
-		    while (++i < n) h += height(children[i]);
+  function height(node) {
+    var children = node.children,
+    h = 1;
+    if (children && (n = children.length)) {
+      var i = -1,
+          h = 0,
+          n;
+	    while (++i < n) h += height(children[i]);
 		    h = Math.max(1,h-1);
-		  }
-		  return h;
-		}
+	  }
+	  return h;
+	}
 	
 	function partition(d, i) {
 	  var nodes = hierarchy.call(this, d, i);
@@ -73,7 +71,7 @@ callGraphLayout = function(){
 	}
 	
 	partition.size = function(x) {
-	  if (!arguments.length) return size;
+    if (!arguments.length) return size;
 	  size = x;
 	  return partition;
 	};

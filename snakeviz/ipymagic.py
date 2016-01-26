@@ -1,3 +1,4 @@
+from IPython import get_ipython
 import subprocess
 import tempfile
 import time

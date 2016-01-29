@@ -8,7 +8,7 @@ var DIMS = {
 };
 
 var SVG_DIMS={
-	width: window.innerWidth-DIMS["leftMargin"]-DIMS["widthInfo"]-DIMS["rightMargin"],
+    	width: window.innerWidth-DIMS["leftMargin"]-DIMS["widthInfo"]-DIMS["rightMargin"],
 	height: .75 * (window.innerHeight-DIMS["topMargin"]),
 };
 
@@ -20,13 +20,13 @@ var LAYOUT_DICTIONARY={
 
 function DrawLayout() {
   this.params = this.get_render_params();
-	this.vis = this.setUp();
+  this.vis = this.setUp();
 };
 DrawLayout.prototype.setUp = function(){
   return  d3.select("#chart")
-  	.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
-  	.style('margin-right', 'auto')
-	.style('margin-top', DIMS["topMargin"]+"px");
+        	.style('margin-left', (DIMS["leftMargin"]+DIMS["widthInfo"])+"px")
+        	.style('margin-right', 'auto')
+        	.style('margin-top', DIMS["topMargin"]+"px");
 };
 
 DrawLayout.prototype.resetVis = function(){
@@ -42,42 +42,42 @@ DrawLayout.prototype.colorScale = d3.scale.category20c();
 DrawLayout.prototype.get_render_params = function(){};
 
 DrawLayout.prototype.draw = function(json){
-	var pixcelLimit = this.params["minPixel"];
-	var visibleNodes = this.params["drawData"].nodes(json).filter(function(d) {
+  var pixcelLimit = this.params["minPixel"];
+  var visibleNodes = this.params["drawData"].nodes(json).filter(function(d) {
     return (d.dx > pixcelLimit);
-	});
-	var thisVis = this.addContainer(this.vis);
-	this.renderPre(thisVis);
-	var diagram = thisVis.data([json]).selectAll(this.params["svgItem"])
+  });
+  var thisVis = this.addContainer(this.vis);
+  this.renderPre(thisVis);
+  var diagram = thisVis.data([json]).selectAll(this.params["svgItem"])
 	    .data(visibleNodes)
 	    .enter();
-	var mainDiagram = diagram.append(this.params["svgItem"]);
-	this.params["dataExtent"] = d3.extent(mainDiagram.data(), function(d){ return d.total; });
-	this.params["data"] = mainDiagram.data();
-	mainDiagram.call(this.render,this.params);
-	mainDiagram.call(this.commonAttr.bind(this));
-    this.renderPost(diagram);
+  var mainDiagram = diagram.append(this.params["svgItem"]);
+  this.params["dataExtent"] = d3.extent(mainDiagram.data(), function(d){ return d.total; });
+  this.params["data"] = mainDiagram.data();
+  mainDiagram.call(this.render,this.params);
+  mainDiagram.call(this.commonAttr.bind(this));
+  this.renderPost(diagram);
 };
 	
 DrawLayout.prototype.renderPre = function(vis){};
 DrawLayout.prototype.render = function(selection, params){};
 DrawLayout.prototype.renderPost = function(vis){};
 DrawLayout.prototype.addContainer = function(vis){
-	return vis.append("svg:svg")
-		.attr("width", SVG_DIMS.width)
+  return vis.append("svg:svg")
+  		.attr("width", SVG_DIMS.width)
 		.attr("height", SVG_DIMS.height)
 		.append("g")
-    .attr("id", "container")
-    .attr("transform", this.params["transform"])
-    .on('mouseenter', sv_show_info_div)
-    .on('mouseleave', sv_hide_info_div);
+		.attr("id", "container")
+		.attr("transform", this.params["transform"])
+		.on('mouseenter', sv_show_info_div)
+		.on('mouseleave', sv_hide_info_div);
 };
 DrawLayout.prototype.commonAttr = function(selection){
-	selection.attr("fill-rule", "evenodd")
-    .style("fill", this.color.bind(this))
-    .style("stroke", "#fff")
-    .on('click', click)
-    .call(apply_mouseover);
+  selection.attr("fill-rule", "evenodd")
+            .style("fill", this.color.bind(this))
+            .style("stroke", "#fff")
+            .on('click', click)
+            .call(apply_mouseover);
 };
 
 
@@ -152,14 +152,14 @@ function CallGraph(){
 CallGraph.prototype = Object.create(DrawLayout.prototype);
 
 CallGraph.prototype.get_render_params =  function(){
-	var partition = callGraphLayout()
-    .size([SVG_DIMS.width, SVG_DIMS.height])
-		.value(function(d) { return d.size; });	
-	return {
-		"minPixel": 0 , 
-		"svgItem": "rect",
-		"drawData": partition
-	};
+  var partition = callGraphLayout()
+    			.size([SVG_DIMS.width, SVG_DIMS.height])
+    			.value(function(d) { return d.size; });	
+return {
+	"minPixel": 0 , 
+	"svgItem": "rect",
+	"drawData": partition
+  	};
 };
 
 CallGraph.prototype.render = function(selection,params){
@@ -171,15 +171,15 @@ CallGraph.prototype.render = function(selection,params){
 };
 
 CallGraph.prototype.renderPost = function(vis){
-	var link = d3.svg.diagonal()
-    .source(function(d) { return {"x":d.x1, "y":d.y1};})
-		.target(function(d) { return {"x":d.x2, "y":d.y2};})
-		.projection(function(d) { return [d.y, d.x]; });
+  var link = d3.svg.diagonal()
+  	.source(function(d) { return {"x":d.x1, "y":d.y1};})
+	.target(function(d) { return {"x":d.x2, "y":d.y2};})
+	.projection(function(d) { return [d.y, d.x]; });
   vis.append("path")
-    .attr("d", link)
-    .style("fill", "none")
-    .style("stroke", "#ccc")
-    .style("stroke-width", "");
+  	.attr("d", link)
+  	.style("fill", "none")
+  	.style("stroke", "#ccc")
+  	.style("stroke-width", "");
 };
 
 CallGraph.prototype.color = function(d){
@@ -188,9 +188,9 @@ CallGraph.prototype.color = function(d){
 
 CallGraph.prototype.colorScale = function(value){
   min = this.params.dataExtent[0];
-	max = this.params.dataExtent[1];
-	mid = (min + max)/2;
-	return d3.scale.linear()
+  max = this.params.dataExtent[1];
+  mid = (min + max)/2;
+  return d3.scale.linear()
 		.domain([max, mid, min])
 		.range(["red", "gold", "greenyellow"])(value);
 };
@@ -200,14 +200,14 @@ var get_style_value = function(){
 };
 
 var select_current_style = function(){
-	style = get_style_value();
-	if (style in LAYOUT_DICTIONARY) {
-		var currentLayout = new LAYOUT_DICTIONARY[style]();
-	}
-	else{
-		throw new Error("Unknown rendering style '" + style + "'.");
-	};
-	return currentLayout;
+  style = get_style_value();
+  if (style in LAYOUT_DICTIONARY) {
+    var currentLayout = new LAYOUT_DICTIONARY[style]();
+  }
+  else{
+	throw new Error("Unknown rendering style '" + style + "'.");
+  };
+  return currentLayout;
 };
 
 var masterData = null;
@@ -217,15 +217,15 @@ var clear_and_redraw_vis = function(json) {
   layout.resetVis();
   layout.draw(json);
   if (masterData === null){
-	  masterData =  d3.layout.partition().nodes(json);
+    masterData =  d3.layout.partition().nodes(json);
   }
 };
 
 // This is the function that runs whenever the user clicks on an SVG
 // element to trigger zooming.
 var click = function(d) {
-	highlighter.removeAll();
-	sv_draw_vis(d.name,d.parent_name);
+  highlighter.removeAll();
+  sv_draw_vis(d.name,d.parent_name);
 };
 var findData= function(functionName, parentName){	
   var matchingData = masterData.filter(function(obj){
@@ -278,28 +278,37 @@ var sv_update_info_div = function(d) {
   }
 };
 
+var pathGet = function(){
+  paths = $("path")
+  paths.each(function(i,path){
+    pathD = $(this).attr('d')
+    pathElements = pathD.split(/[MC, ]/)
+  })
+}
 
 var apply_mouseover = function(selection){ 
-	var highlightColor = d3.rgb('#ff00ff');
-	var oldColor = '';
-	var curItems = {};
-	selection.on('mouseover', function (d) {
-	var thisName = d.name;
-	changeToHighlightColor(thisName);
-  sv_update_info_div(d);
-	sv_show_info_div();
-	highlighter.highlight(sv_item_name(thisName));
- 	});
+  var highlightColor = d3.rgb('#ff00ff');
+  var oldColor = '';
+  var curItems = {};
+  selection.on('mouseover', function (d) {
+    var thisName = d.name;
+    changeToHighlightColor(thisName);
+    sv_update_info_div(d);
+    sv_show_info_div();
+    highlighter.highlight(sv_item_name(thisName));
+  });
   
   selection.on('mouseout', function(d){
     resetOrigionalColor();
-  	highlighter.remove();
+    highlighter.remove();
   });
   
   changeToHighlightColor = function(name){
-  	curItems = getAllItemsByName(name);
- 	  oldColor = curItems.style('fill');
+    curItems = getAllItemsByName(name);
+    oldColor = curItems.style('fill');
     curItems.style('fill', highlightColor.toString());
+    qq= selection
+    //curItems.style('stroke','black');
   };
   
   resetOrigionalColor = function(){
@@ -307,8 +316,8 @@ var apply_mouseover = function(selection){
   };
   
   getAllItemsByName = function(name){
-  	return selection.filter(function(d) {
-		  return d.name === name;});
+    return selection.filter(function(d) {
+      return d.name === name;});
   } ; 
 };
 

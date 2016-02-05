@@ -173,8 +173,8 @@ CallGraph.prototype.render = function(selection,params){
 
 CallGraph.prototype.renderPost = function(){
   var link = d3.svg.diagonal()
-  .source(function(d) { return {"x":d.x1, "y":d.y1};})
-  .target(function(d) { return {"x":d.x2, "y":d.y2};})
+  .source(function(d) { return {"x":d.childLinkX, "y":d.childLinkY};})
+  .target(function(d) { return {"x":d.parentLinkX, "y":d.parentLinkY};})
   .projection(function(d) { return [d.y, d.x]; });
   this.append("path")
   .attr("d", link)

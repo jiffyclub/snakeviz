@@ -43,7 +43,7 @@ callGraphLayout = function(){
     node.childLinkY = replacer.childLinkY
     node.dx = 0.01;
     node.dy = 0.01;
-    if (node.children){
+    if (node.children && replacer.children){
       node.children.forEach(function(child){
         replacer.children.forEach(function(newChild){
           if (child.name === newChild.name){

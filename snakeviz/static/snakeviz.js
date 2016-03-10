@@ -11,15 +11,16 @@ var sv_find_root = function sv_find_root (stats) {
     var diff = callers.subtract(callees);
     if (diff.size !== 0) {
         // hopefully there's only one thing left...
-        return diff.toJS()[0];
+        var possible_roots = diff.toJS();
     } else {
-        // fall back on finding the thing with the most
-        // cummulative time
-        return _.max(_.keys(stats), function (s) {
-            return stats[s]['stats'][3];
-        });
+        var possible_roots = _.keys(stats);
     }
-    throw 'no root found';
+
+    // if more than one potential root found, fall back on finding the thing
+    // with the most cummulative time
+    return _.max(possible_roots, function (s) {
+        return stats[s]['stats'][3];
+    });
 };
 
 

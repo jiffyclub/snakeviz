@@ -1,3 +1,9 @@
+v0.4.1 (2016-05-02)
+===================
+
+* Labels added to icicle view (Thanks @thomasjm!)
+* Bug fix functions with no identified callers (Thanks @embray!)
+
 v0.4.0 (2015-04-03)
 ===================
 

@@ -77,10 +77,15 @@ def main(argv=sys.argv[1:]):
 
     try:
         Stats(filename)
-    except:
+    except Exception as exc:
+        extra_info = ''
+        if isinstance(exc, ValueError):
+            extra_info = 'Hint: Ensure you are running snakeviz using the same Python version as the profile!'
+
         parser.error(('the file %s is not a valid profile. ' % filename) +
                      'Generate profiles using: \n\n'
-                     '\tpython -m cProfile -o my_program.prof my_program.py\n')
+                     '\tpython -m cProfile -o my_program.prof my_program.py\n\n' + extra_info
+        )
 
     filename = quote_plus(filename)
 

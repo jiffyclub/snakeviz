@@ -5,18 +5,6 @@ SnakeViz
     :target: https://travis-ci.org/jiffyclub/snakeviz
     :alt: Build Status
 
-.. image:: https://pypip.in/version/snakeviz/badge.svg
-    :target: https://pypi.python.org/pypi/snakeviz/
-    :alt: Latest Version
-
-.. image:: https://pypip.in/py_versions/snakeviz/badge.svg
-    :target: https://pypi.python.org/pypi/snakeviz/
-    :alt: Supported Python versions
-
-.. image:: https://pypip.in/wheel/snakeviz/badge.svg
-    :target: https://pypi.python.org/pypi/snakeviz/
-    :alt: Wheel Status
-
 About
 -----
 

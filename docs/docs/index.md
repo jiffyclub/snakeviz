@@ -207,7 +207,7 @@ Please report issues on the [GitHub issue tracker][issues].
 [cProfile]: https://docs.python.org/3.4/library/profile.html#module-cProfile
 [RunSnakeRun]: http://www.vrplumber.com/programming/runsnakerun/
 [pypi]: https://pypi.python.org/pypi/snakeviz
-[pip]: http://pip-installer.org
+[pip]: https://pip.pypa.io
 [prun]: http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun
 [generating]: https://docs.python.org/3.4/library/profile.html#instant-user-s-manual
 [pstats]: https://docs.python.org/3.4/library/profile.html#pstats.Stats

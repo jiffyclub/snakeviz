@@ -156,41 +156,39 @@
         }
 
         // difference: before: node_time/parent_time > cutoff
-        if (node_time > cutoff && depth < max_depth) {
-          // figure out the child sizes
-          // we do this here because it needs to be correct before
-          // heading further into the call stack
-          var child_sizes = {};
-          var size_of_children = 0.0;
+        // figure out the child sizes
+        // we do this here because it needs to be correct before
+        // heading further into the call stack
+        var child_sizes = {};
+        var child_times = {};
+        var size_of_children = 0.0;
+        for (var child_name in stats[node_name]['children']) {
+          // the amount of time spent in a child when it was called by node_name
+          child_times[child_name] = stats[child_name]['callers'][node_name][3];
+          child_sizes[child_name] = child_times[child_name] / node_time * node_size;
+          size_of_children += child_sizes[child_name];
+        }
 
+        // if the children add up to be larger than the parent
+        // then normalize them to the parent size
+        if (size_of_children > node_size) {
           for (var child_name in stats[node_name]['children']) {
-            // the amount of time spent in a child when it was called by node_name
-            var child_time = stats[child_name]['callers'][node_name][3];
-            child_sizes[child_name] = child_time / node_time * node_size;
-            size_of_children += child_sizes[child_name];
+            child_sizes[child_name] *= (node_size / size_of_children);
           }
+        }
+        data['children'] = [];
 
-          // if the children add up to be larger than the parent
-          // then normalize them to the parent size
-          if (size_of_children > node_size) {
-            for (var child_name in stats[node_name]['children']) {
-              child_sizes[child_name] *= (node_size / size_of_children);
-            }
-          }
-          data['children'] = [];
-
+        if (depth < max_depth) {
+          // recurse
           for (var child_name in stats[node_name]['children']) {
             // Make sure we're not recursing into a function
             // that's already on the stack.
-            if (call_stack.contains(child_name)) {
-              continue;
+            if (!call_stack.contains(child_name) && child_times[child_name] > cutoff) {
+              data['children'].push(
+                sv_build_hierarchy(
+                  child_name, depth+1, max_depth, cutoff, child_sizes[child_name],
+                  node_name, call_stack));
             }
-
-            // recurse
-            data['children'].push(
-              sv_build_hierarchy(
-                child_name, depth+1, max_depth, cutoff, child_sizes[child_name],
-                node_name, call_stack));
           }
 
           if (size_of_children < node_size) {
@@ -202,7 +200,6 @@
               size: node_size - size_of_children
             });
           }
-
         }
 
         return data;

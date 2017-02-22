@@ -155,7 +155,6 @@
           var node_time = stats[node_name]['callers'][parent_name][3];
         }
 
-        // difference: before: node_time/parent_time > cutoff
         // figure out the child sizes
         // we do this here because it needs to be correct before
         // heading further into the call stack
@@ -172,6 +171,7 @@
         // if the children add up to be larger than the parent
         // then normalize them to the parent size
         if (size_of_children > node_size) {
+          // FIXME why would this ever happen?
           for (var child_name in stats[node_name]['children']) {
             child_sizes[child_name] *= (node_size / size_of_children);
           }

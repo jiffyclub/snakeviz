@@ -183,7 +183,9 @@
           for (var child_name in stats[node_name]['children']) {
             // Make sure we're not recursing into a function
             // that's already on the stack.
-            if (!call_stack.contains(child_name) && child_times[child_name] > cutoff) {
+            if (!call_stack.contains(child_name) &&
+                child_times[child_name]/node_time > cutoff
+                ) {
               data['children'].push(
                 sv_build_hierarchy(
                   child_name, depth+1, max_depth, cutoff, child_sizes[child_name],

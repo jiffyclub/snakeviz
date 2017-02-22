@@ -132,93 +132,77 @@
       var stats = {% raw callees %};
       var sv_base_size = 1000;
       function sv_build_hierarchy(
-          root_name, depth, cutoff, node_size, parent_name, call_stack) {
+          node_name, depth, max_depth, cutoff, node_size, parent_name, call_stack) {
 
         // We track the call stack to avoid displaying recursive calls.
         if (call_stack == null) {
-          var call_stack = Immutable.Set([root_name]);
+          var call_stack = Immutable.Set([node_name]);
         } else {
-          var call_stack = call_stack.add(root_name);
+          var call_stack = call_stack.add(node_name);
         }
 
         var data = {};
-        data['name'] = root_name;
-        data['display_name'] = stats[root_name]['display_name'];
+        data['name'] = node_name;
+        data['display_name'] = stats[node_name]['display_name'];
         data['size'] = node_size;
-        data['cumulative'] = stats[root_name]['stats'][3];
+        data['cumulative'] = stats[node_name]['stats'][3];
         if (parent_name == null) {
           // This should only happen once: for the root node.
-          data['parent_name'] = root_name;
-          var parent_time = data['cumulative'];
+          var node_time = data['cumulative'];
         } else {
           data['parent_name'] = parent_name;
-          // the amount of time spent in root_name when it was called by parent_time
-          var parent_time = stats[root_name]['callers'][parent_name][3];
+          // the amount of time spent in node_name when it was called by parent
+          var node_time = stats[node_name]['callers'][parent_name][3];
         }
 
-        if (depth !== 0 && _.size(stats[root_name]['children']) !== 0) {
+        // difference: before: node_time/parent_time > cutoff
+        if (node_time > cutoff && depth < max_depth) {
           // figure out the child sizes
           // we do this here because it needs to be correct before
           // heading further into the call stack
           var child_sizes = {};
-          var size_of_children = 0;
+          var size_of_children = 0.0;
 
-          for (var child_name in stats[root_name]['children']) {
-            // the amount of time spent in a child when it was called by root_name
-            var child_time = stats[child_name]['callers'][root_name][3];
-            child_sizes[child_name] = child_time / parent_time * node_size;
+          for (var child_name in stats[node_name]['children']) {
+            // the amount of time spent in a child when it was called by node_name
+            var child_time = stats[child_name]['callers'][node_name][3];
+            child_sizes[child_name] = child_time / node_time * node_size;
             size_of_children += child_sizes[child_name];
           }
 
           // if the children add up to be larger than the parent
           // then normalize them to the parent size
           if (size_of_children > node_size) {
-            for (var child_name in stats[root_name]['children']) {
+            for (var child_name in stats[node_name]['children']) {
               child_sizes[child_name] *= (node_size / size_of_children);
             }
           }
-
           data['children'] = [];
 
-          for (var child_name in stats[root_name]['children']) {
+          for (var child_name in stats[node_name]['children']) {
             // Make sure we're not recursing into a function
             // that's already on the stack.
             if (call_stack.contains(child_name)) {
               continue;
             }
 
-            // If this child is so small that it's less than some cutoff
-            // size of its parent we'll add this child but go no deeper.
-            var child_time = stats[child_name]['callers'][root_name][3];
-            var new_depth = depth - 1;
-            if (child_time / parent_time < cutoff) {
-              new_depth = 0;
-            }
-
+            // recurse
             data['children'].push(
               sv_build_hierarchy(
-                child_name, new_depth, cutoff, child_sizes[child_name],
-                root_name, call_stack));
+                child_name, depth+1, max_depth, cutoff, child_sizes[child_name],
+                node_name, call_stack));
           }
 
           if (size_of_children < node_size) {
-            // make a child representing the internal time of this function
-            var time_in_children = _.reduce(
-              stats[root_name]['children'],
-              function (sum, child) {
-                return sum + child[3];
-              },
-              0
-            );
             data['children'].push({
-              name: root_name,
+              name: node_name,
               display_name: data['display_name'],
               parent_name: data['parent_name'],
-              cumulative: stats[root_name]['stats'][3],
-              size: Math.max(
-                0, (parent_time - time_in_children) / parent_time * node_size)
+              cumulative: stats[node_name]['stats'][3],
+              size: node_size - size_of_children
             });
           }
+
         }
 
         return data;
@@ -242,13 +226,14 @@
             throw 'Could not load JS libraries in worker.';
           }
         }
-        var depth = event.data['depth'];
+        var depth = 0;
+        var max_depth = event.data['depth'];
         var cutoff = event.data['cutoff'];
-        var root_name = event.data['name'];
+        var node_name = event.data['name'];
         var parent_name = event.data['parent_name'];
         self.postMessage(JSON.stringify(
           sv_build_hierarchy(
-            root_name, depth, cutoff, sv_base_size, parent_name)));
+            node_name, depth, max_depth, cutoff, sv_base_size, parent_name)));
       };
     </script>
 

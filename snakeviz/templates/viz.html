@@ -179,7 +179,7 @@
           }
         }
 
-        if (depth < max_depth) {
+        if (depth < max_depth && !_.isEmpty(child_sizes)) {
           data['children'] = [];
           // recurse
           for (var child_name in stats[node_name]['children']) {

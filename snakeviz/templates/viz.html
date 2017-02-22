@@ -176,13 +176,13 @@
             child_sizes[child_name] *= (node_size / size_of_children);
           }
         }
-        data['children'] = [];
 
         if (depth < max_depth) {
+          data['children'] = [];
           // recurse
           for (var child_name in stats[node_name]['children']) {
-            // Make sure we're not recursing into a function
-            // that's already on the stack.
+            // Make sure we're not recursing into a function that's already
+            // on the stack.
             if (!call_stack.contains(child_name) &&
                 child_times[child_name]/node_time > cutoff
                 ) {

@@ -7,7 +7,7 @@ var get_sunburst_render_params = function get_sunburst_render_params() {
   var radius = width / 2;
   var partition = d3.layout.partition()
       .size([2 * Math.PI, radius * radius])
-      .value(function(d) { return d.size; });
+      .value(function(d) { return d.time; });
   // By default D3 makes the y size proportional to some area,
   // so y is a transformation from ~area to a linear scale
   // so that all arcs have the same radial size.
@@ -38,7 +38,7 @@ var get_icicle_render_params = function get_icicle_render_params() {
   var topMargin = 60;
   var partition = d3.layout.partition()
       .size([width - leftMargin, height - topMargin])
-      .value(function(d) { return d.size; });
+      .value(function(d) { return d.time; });
   return {
     "width": width,
     "height": height,

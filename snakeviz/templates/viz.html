@@ -179,6 +179,10 @@
             }
           }
 
+          // D3, the plotting framework, only accounts for times in the leaf
+          // nodes. Hence, if the node_time exceeds the total time in its
+          // children, we need to add another child node to account for the the
+          // time spent in node itself.
           if (total_children_time < node_time) {
             data['children'].push({
               name: node_name,

@@ -150,23 +150,21 @@
         data['parent_name'] = parent_name;
 
         if (depth < max_depth && !_.isEmpty(stats[node_name]['children'])) {
-          // figure out the child times
-          // we do this here because it needs to be correct before
-          // heading further into the call stack
+          // Normalize the child times.
+          // Unfortunately, stats[child_name]['callers'][node_name][3] doesn't
+          // give us the time that child spend under node in this instance, but
+          // in all instances across the call tree. Yikes!
+          // This may lead to unexpected behavior, e.g., the child times add up
+          // to more than the node time. A normalization is necessary.
           var child_times = {};
-          var time_of_children = 0.0;
+          var total_children_time = 0.0;
           for (var child_name in stats[node_name]['children']) {
-            // the amount of time spent in a child when it was called by node_name
             child_times[child_name] = stats[child_name]['callers'][node_name][3];
-            time_of_children += child_times[child_name];
+            total_children_time += child_times[child_name];
           }
-
-          // if the children add up to be larger than the parent
-          // then normalize them to the parent time
-          if (time_of_children > node_time) {
-            // FIXME why would this ever happen?
+          if (total_children_time > node_time) {
             for (var child_name in stats[node_name]['children']) {
-              child_times[child_name] *= (node_time / time_of_children);
+              child_times[child_name] *= (node_time / total_children_time);
             }
           }
 
@@ -181,13 +179,13 @@
             }
           }
 
-          if (time_of_children < node_time) {
+          if (total_children_time < node_time) {
             data['children'].push({
               name: node_name,
               display_name: data['display_name'],
               parent_name: data['parent_name'],
               cumulative: stats[node_name]['stats'][3],
-              time: node_time - time_of_children
+              time: node_time - total_children_time
             });
           }
         }

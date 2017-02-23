@@ -148,38 +148,39 @@
         data['display_name'] = stats[node_name]['display_name'];
         data['size'] = node_size;
         data['cumulative'] = stats[node_name]['stats'][3];
-        if (parent_name == null) {
-          // This should only happen once: for the root node.
-          var node_time = data['cumulative'];
-        } else {
-          data['parent_name'] = parent_name;
-          // the amount of time spent in node_name when it was called by parent
-          var node_time = stats[node_name]['callers'][parent_name][3];
-        }
 
-        // figure out the child sizes
-        // we do this here because it needs to be correct before
-        // heading further into the call stack
-        var child_sizes = {};
-        var child_times = {};
-        var size_of_children = 0.0;
-        for (var child_name in stats[node_name]['children']) {
-          // the amount of time spent in a child when it was called by node_name
-          child_times[child_name] = stats[child_name]['callers'][node_name][3];
-          child_sizes[child_name] = child_times[child_name] / node_time * node_size;
-          size_of_children += child_sizes[child_name];
-        }
-
-        // if the children add up to be larger than the parent
-        // then normalize them to the parent size
-        if (size_of_children > node_size) {
-          // FIXME why would this ever happen?
-          for (var child_name in stats[node_name]['children']) {
-            child_sizes[child_name] *= (node_size / size_of_children);
+        if (depth < max_depth && !_.isEmpty(stats[node_name]['children'])) {
+          if (parent_name == null) {
+            // This should only happen once: for the root node.
+            var node_time = data['cumulative'];
+          } else {
+            data['parent_name'] = parent_name;
+            // the amount of time spent in node_name when it was called by parent
+            var node_time = stats[node_name]['callers'][parent_name][3];
           }
-        }
 
-        if (depth < max_depth && !_.isEmpty(child_sizes)) {
+          // figure out the child sizes
+          // we do this here because it needs to be correct before
+          // heading further into the call stack
+          var child_sizes = {};
+          var child_times = {};
+          var size_of_children = 0.0;
+          for (var child_name in stats[node_name]['children']) {
+            // the amount of time spent in a child when it was called by node_name
+            child_times[child_name] = stats[child_name]['callers'][node_name][3];
+            child_sizes[child_name] = child_times[child_name] / node_time * node_size;
+            size_of_children += child_sizes[child_name];
+          }
+
+          // if the children add up to be larger than the parent
+          // then normalize them to the parent size
+          if (size_of_children > node_size) {
+            // FIXME why would this ever happen?
+            for (var child_name in stats[node_name]['children']) {
+              child_sizes[child_name] *= (node_size / size_of_children);
+            }
+          }
+
           data['children'] = [];
           // recurse
           for (var child_name in stats[node_name]['children']) {

@@ -135,10 +135,10 @@
 
         // We track the call stack to avoid displaying recursive calls.
         if (call_stack == null) {
-          var call_stack = Immutable.Set();
+          call_stack = Immutable.Set();
         }
         if (call_stack.contains(node_name)) {
-          return;
+          return {};
         }
         call_stack.add(node_name);
 
@@ -150,6 +150,15 @@
         data['parent_name'] = parent_name;
 
         if (depth < max_depth && !_.isEmpty(stats[node_name]['children'])) {
+          // Cut off children with the same name. Not sure why they are here
+          // anways.
+          child_names = {};
+          for (var child_name in stats[node_name]['children']) {
+            if (child_name !== node_name) {
+              child_names[child_name] = stats[node_name]['children'][child_name];
+            }
+          }
+
           // Normalize the child times.
           // Unfortunately, stats[child_name]['callers'][node_name][3] doesn't
           // give us the time that child spend under node in this instance, but
@@ -158,19 +167,19 @@
           // to more than the node time. A normalization is necessary.
           var child_times = {};
           var total_children_time = 0.0;
-          for (var child_name in stats[node_name]['children']) {
+          for (var child_name in child_names) {
             child_times[child_name] = stats[child_name]['callers'][node_name][3];
             total_children_time += child_times[child_name];
           }
           if (total_children_time > node_time) {
-            for (var child_name in stats[node_name]['children']) {
+            for (var child_name in child_names) {
               child_times[child_name] *= (node_time / total_children_time);
             }
           }
 
           data['children'] = [];
           // recurse
-          for (var child_name in stats[node_name]['children']) {
+          for (var child_name in child_names) {
             if (child_times[child_name]/node_time > cutoff) {
               data['children'].push(
                 sv_build_hierarchy(

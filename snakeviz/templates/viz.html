@@ -133,12 +133,13 @@
       function sv_build_hierarchy(
           node_name, depth, max_depth, cutoff, node_time, parent_name) {
 
-        var data = {};
-        data['name'] = node_name;
-        data['display_name'] = stats[node_name]['display_name'];
-        data['time'] = node_time;
-        data['cumulative'] = stats[node_name]['stats'][3];
-        data['parent_name'] = parent_name;
+        var data = {
+          name: node_name,
+          display_name: stats[node_name]['display_name'],
+          time: node_time,
+          cumulative: stats[node_name]['stats'][3],
+          parent_name: parent_name
+        };
 
         if (depth < max_depth && !_.isEmpty(stats[node_name]['children'])) {
           // Cut off children with the same name. If a function indeed calls

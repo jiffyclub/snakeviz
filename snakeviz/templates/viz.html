@@ -131,16 +131,7 @@
 
       var stats = {% raw callees %};
       function sv_build_hierarchy(
-          node_name, depth, max_depth, cutoff, node_time, parent_name, call_stack) {
-
-        // We track the call stack to avoid displaying recursive calls.
-        if (call_stack == null) {
-          call_stack = Immutable.Set();
-        }
-        if (call_stack.contains(node_name)) {
-          return {};
-        }
-        call_stack.add(node_name);
+          node_name, depth, max_depth, cutoff, node_time, parent_name) {
 
         var data = {};
         data['name'] = node_name;
@@ -150,8 +141,14 @@
         data['parent_name'] = parent_name;
 
         if (depth < max_depth && !_.isEmpty(stats[node_name]['children'])) {
-          // Cut off children with the same name. Not sure why they are here
-          // anways.
+          // Cut off children with the same name. If a function indeed calls
+          // itself, then this is handled in the
+          //
+          //   if (total_children_time < node_time)
+          //
+          // conditional below.
+          // Another option would be to rename the node below (node_name +
+          // "internal" or similar) and allow for recursion.
           child_names = {};
           for (var child_name in stats[node_name]['children']) {
             if (child_name !== node_name) {
@@ -183,8 +180,9 @@
             if (child_times[child_name]/node_time > cutoff) {
               data['children'].push(
                 sv_build_hierarchy(
-                  child_name, depth+1, max_depth, cutoff, child_times[child_name],
-                  node_name, call_stack));
+                  child_name, depth+1, max_depth, cutoff,
+                  child_times[child_name], node_name
+                  ));
             }
           }
 
@@ -232,7 +230,8 @@
         var node_time = stats[node_name]['stats'][3];
         self.postMessage(JSON.stringify(
           sv_build_hierarchy(
-            node_name, depth, max_depth, cutoff, node_time, parent_name)));
+            node_name, depth, max_depth, cutoff, node_time, parent_name
+            )));
       };
     </script>
 

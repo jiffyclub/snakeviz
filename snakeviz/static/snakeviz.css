@@ -44,6 +44,12 @@ button:disabled:hover {
   top: -10px;
 }
 
+input[type=number] {
+  font-family: monospace;
+  font-size: 20px;
+  background: white;
+}
+
 select {
   font-family: monospace;
   font-size: 20px;

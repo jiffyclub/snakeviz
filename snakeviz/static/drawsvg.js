@@ -257,7 +257,7 @@ var drawIcicle = function drawIcicle(json) {
       .domain([0, nodes[0].dx])
       .range([0, params["width"] - params["leftMargin"]]);
   var y = d3.scale.linear()
-      .domain([0, nodes[0].dy * $('#sv-depth-select').val()])
+      .domain([0, nodes[0].dy * $('#sv-depth-input').val()])
       .range([0, params["height"] - params["topMargin"]]);
 
   var rect = vis.data([json]).selectAll("rect")
@@ -350,5 +350,5 @@ var sv_selects_changed = function sv_selects_changed() {
   sv_draw_vis(_.last(sv_call_stack), parent_name);
 };
 d3.select('#sv-style-select').on('change', sv_selects_changed);
-d3.select('#sv-depth-select').on('change', sv_selects_changed);
-d3.select('#sv-cutoff-select').on('change', sv_selects_changed);
+d3.select('#sv-depth-input').on('input', sv_selects_changed);
+d3.select('#sv-cutoff-input').on('input', sv_selects_changed);

@@ -100,7 +100,7 @@
       // Make the stats table
       var table_data = {% raw table_rows %};
       $(document).ready(function() {
-        $('#pstats-table').dataTable({
+        var table = $('#pstats-table').dataTable({
           'data': table_data,
           'columns': [
             {'title': 'ncalls', 'type': 'num', 'searchable': 'false',
@@ -116,6 +116,14 @@
           ],
           'order': [1, 'desc'],
           'paging': false
+        }).api();
+        $('#pstats-table tbody').on('click', 'tr', function() {
+          var name = table.row(this).data()[6];
+          sv_root_func_name = name;
+          sv_draw_vis(name);
+          sv_call_stack = [name];
+          sv_update_call_stack_list();
+          d3.select('#resetbutton').property('disabled', 'True');
         });
       });
     </script>

@@ -131,7 +131,15 @@
 
       var stats = {% raw callees %};
       function sv_build_hierarchy(
-          node_name, depth, max_depth, cutoff, node_time, parent_name) {
+          node_name, depth, max_depth, cutoff, node_time, parent_name, call_stack) {
+
+        // track visited functions so we can avoid infinitely displaying
+        // instances of recursion
+        if (_.isUndefined(call_stack)) {
+          var call_stack = Immutable.Set([node_name])
+        } else {
+          var call_stack = call_stack.add(node_name);
+        };
 
         var data = {
           name: node_name,
@@ -142,17 +150,10 @@
         };
 
         if (depth < max_depth && !_.isEmpty(stats[node_name]['children'])) {
-          // Cut off children with the same name. If a function indeed calls
-          // itself, then this is handled in the
-          //
-          //   if (total_children_time < node_time)
-          //
-          // conditional below.
-          // Another option would be to rename the node below (node_name +
-          // "internal" or similar) and allow for recursion.
           child_names = {};
           for (var child_name in stats[node_name]['children']) {
-            if (child_name !== node_name) {
+            // Cut off children that have already been visited (recursion)
+            if (!call_stack.contains(child_name)) {
               child_names[child_name] = stats[node_name]['children'][child_name];
             }
           }
@@ -182,7 +183,7 @@
               data['children'].push(
                 sv_build_hierarchy(
                   child_name, depth+1, max_depth, cutoff,
-                  child_times[child_name], node_name
+                  child_times[child_name], node_name, call_stack
                   ));
             }
           }

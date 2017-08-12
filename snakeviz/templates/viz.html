@@ -92,7 +92,7 @@
     <script src="/static/vendor/jquery-1.11.1.min.js"></script>
     <script src="/static/vendor/d3.min.js"></script>
     <script src="/static/vendor/jquery.dataTables.min.js"></script>
-    <script src="/static/vendor/lodash.compat.min.js"></script>
+    <script src="/static/vendor/lodash.min.js"></script>
     <script src="/static/vendor/immutable.min.js"></script>
 
     <!-- SnakeViz JS -->
@@ -210,15 +210,15 @@
         // Try loading JS from CDN in case snakeviz server is off
         try {
           importScripts(
-            "https://cdnjs.cloudflare.com/ajax/libs/immutable/3.3.0/immutable.min.js",
-            "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.compat.min.js");
+            "https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.1/immutable.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js");
         }
         // If the user is offline try loading from the SnakeViz server
         catch (e) {
           try {
             importScripts(
               event.data['url'] + "/static/vendor/immutable.min.js",
-              event.data['url'] + "/static/vendor/lodash.compat.min.js");
+              event.data['url'] + "/static/vendor/lodash.min.js");
           }
           catch (e) {
             throw 'Could not load JS libraries in worker.';

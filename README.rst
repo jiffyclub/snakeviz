@@ -5,6 +5,18 @@ SnakeViz
     :target: https://travis-ci.org/jiffyclub/snakeviz
     :alt: Build Status
 
+.. image:: https://img.shields.io/pypi/v/snakeviz.svg
+    :target: https://pypi.python.org/pypi/snakeviz/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/pyversions/snakeviz.svg
+    :target: https://pypi.python.org/pypi/snakeviz/
+    :alt: Supported Python versions
+
+.. image:: https://img.shields.io/pypi/format/snakeviz.svg
+    :target: https://pypi.python.org/pypi/snakeviz/
+    :alt: Wheel Status
+
 About
 -----
 

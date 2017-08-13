@@ -1,3 +1,9 @@
+v0.5.0 (2017-08-12)
+===================
+
+* Improvements to section proportioning (Thanks @nschloe in #79!)
+* Drop official Python 2.6 support
+
 v0.4.1 (2016-05-02)
 ===================
 

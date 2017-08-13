@@ -18,7 +18,7 @@ var sv_find_root = function sv_find_root (stats) {
 
     // if more than one potential root found, fall back on finding the thing
     // with the most cummulative time
-    return _.max(possible_roots, function (s) {
+    return _.maxBy(possible_roots, function (s) {
         return stats[s]['stats'][3];
     });
 };

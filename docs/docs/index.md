@@ -3,7 +3,10 @@
 SnakeViz is a browser based graphical viewer for the output of Python's
 [cProfile][] module.
 It was originally inspired by [RunSnakeRun][].
-SnakeViz works on Python 2.6, 2.7, and Python 3.
+SnakeViz works on Python 2.7 and Python 3.
+SnakeViz itself is still likely to work on Python 2.6,
+but official support has been dropped now that [Tornado][] no longer
+supports Python 2.6.
 
 ## Installation
 
@@ -206,6 +209,7 @@ Please report issues on the [GitHub issue tracker][issues].
 
 [cProfile]: https://docs.python.org/3.4/library/profile.html#module-cProfile
 [RunSnakeRun]: http://www.vrplumber.com/programming/runsnakerun/
+[Tornado]: http://www.tornadoweb.org/
 [pypi]: https://pypi.python.org/pypi/snakeviz
 [pip]: https://pip.pypa.io
 [prun]: http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun

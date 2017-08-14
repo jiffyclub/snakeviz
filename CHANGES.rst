@@ -1,4 +1,4 @@
-v0.5.0 (2017-08-12)
+v0.4.2 (2017-08-13)
 ===================
 
 * Improvements to section proportioning (Thanks @nschloe in #79!)

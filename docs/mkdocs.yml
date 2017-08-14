@@ -8,4 +8,4 @@ site_author: Matt Davis (jiffyclub)
 site_favicon: favicon.ico
 theme: readable
 markdown_extensions:
-    - smartypants
+    - smarty

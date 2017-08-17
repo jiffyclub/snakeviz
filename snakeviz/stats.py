@@ -20,6 +20,7 @@ def table_rows(stats):
     for k, v in stats.stats.items():
         flf = xhtml_escape('{0}:{1}({2})'.format(
             os.path.basename(k[0]), k[1], k[2]))
+        name = '{0}:{1}({2})'.format(*k)
 
         if v[0] == v[1]:
             calls = str(v[0])
@@ -35,7 +36,7 @@ def table_rows(stats):
 
         rows.append(
             [[calls, v[1]], tot_time, tot_time_per,
-             cum_time, cum_time_per, flf])
+             cum_time, cum_time_per, flf, name])
 
     return rows
 

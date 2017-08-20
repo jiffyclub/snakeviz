@@ -124,6 +124,10 @@
           sv_call_stack = [name];
           sv_update_call_stack_list();
           d3.select('#resetbutton').property('disabled', 'True');
+        }).on('mouseenter', 'tr', function () {
+          $(this).children('td').addClass('data-table-hover');
+        }).on('mouseleave', 'tr', function () {
+          $(this).children('td').removeClass('data-table-hover');
         });
       });
     </script>

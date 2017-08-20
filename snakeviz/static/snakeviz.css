@@ -156,6 +156,9 @@ select {
   background: #a52112;
 }
 
+.data-table-hover {
+  background: #C9F0F2;
+}
 
 /* Spinner CSS from http://tobiasahlin.com/spinkit/ */
 .spinner {

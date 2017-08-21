@@ -16,7 +16,10 @@
     <h1 id="snakeviz-text">SnakeViz</h1>
 
     <!-- reset button -->
-    <button id="resetbutton" disabled="True">Reset</button>
+    <span id="resetbuttons">
+      <button id="resetbutton-root" disabled="True">Reset Root</button>
+      <button id="resetbutton-zoom" disabled="True">Reset Zoom</button>
+    </span>
 
     <!-- style select -->
     <label id='sv-style-label'>Style:
@@ -123,7 +126,8 @@
           sv_draw_vis(name);
           sv_call_stack = [name];
           sv_update_call_stack_list();
-          d3.select('#resetbutton').property('disabled', 'True');
+          $('#resetbutton-zoom').prop('disabled', true);
+          $('#resetbutton-root').prop('disabled', false);
         }).on('mouseenter', 'tr', function () {
           $(this).children('td').addClass('data-table-hover');
         }).on('mouseleave', 'tr', function () {
@@ -261,6 +265,7 @@
         sv_json_cache = {};
         sv_worker = sv_make_worker();
         sv_root_func_name = sv_find_root(profile_data);
+        sv_root_func_name__cached = sv_root_func_name;
         sv_call_stack = [sv_root_func_name];
         sv_total_time = profile_data[sv_root_func_name]['stats'][3];
       }));

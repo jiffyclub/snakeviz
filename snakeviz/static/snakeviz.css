@@ -32,7 +32,7 @@ button:disabled:hover {
   background: #5CBDED;
 }
 
-#resetbutton {
+#resetbuttons {
   position: absolute;
   top: 60px;
 }

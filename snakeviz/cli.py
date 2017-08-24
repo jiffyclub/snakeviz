@@ -139,3 +139,7 @@ def main(argv=sys.argv[1:]):
         print('\nBye!')
 
     return 0
+
+
+if __name__ == '__main__':
+    main()

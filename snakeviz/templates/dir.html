@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" .>
+    <title>{{profile_name.split('/')[-1].split('.')[0]}}</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/static/snakeviz.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="/static/vendor/jquery.dataTables.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <h1 id="snakeviz-text">SnakeViz</h1>
+
+    <!-- Entries table -->
+    <div id="table_div">
+      <table cellpadding="0" cellspacing="0" border="0" class="display" id="pstats-table">
+      </table>
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- Vendor JS -->
+    <script src="/static/vendor/jquery-3.2.1.min.js"></script>
+    <script src="/static/vendor/d3.v3.min.js"></script>
+    <script src="/static/vendor/jquery.dataTables.min.js"></script>
+    <script src="/static/vendor/lodash.min.js"></script>
+    <script src="/static/vendor/immutable.min.js"></script>
+
+    <!-- SnakeViz JS -->
+    <script>
+      // Make the stats table
+      var table_data = {% raw table_rows %};
+      $(document).ready(function() {
+        $('#pstats-table').dataTable({
+          'data': table_data,
+          'columns': [
+            {'title': 'filename',
+             'render': function(data, type, row, meta){
+                 if(type === "display") {
+                    data = '<a href="' + data[1] + '">' + data[0] + '</a>';
+                 }
+                 return data;
+             }}
+          ],
+          'order': [0, 'asc'],
+          'paging': false
+        });
+      });
+    </script>
+
+    <!-- Load SnakeViz JS Files -->
+    <script src='/static/snakeviz.js'></script>
+    <script src='/static/drawsvg.js'></script>
+
+    <!-- Do initial setup stuff -->
+
+  </body>
+</html>

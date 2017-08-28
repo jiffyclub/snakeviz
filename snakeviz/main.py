@@ -39,7 +39,7 @@ class VizHandler(tornado.web.RequestHandler):
 
     def _list_dir(self, path):
         entries = os.listdir(path)
-        dir_entries = []
+        dir_entries = [[['..', '..']]]
         for name in entries:
             fullname = os.path.join(path, name)
             displayname = linkname = name

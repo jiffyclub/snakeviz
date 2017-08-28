@@ -139,9 +139,9 @@ var click = function click(d) {
   // Activate the reset button if we aren't already at the root node
   // And deactivate it if this is the root node
   if (new_root !== sv_root_func_name) {
-    d3.select('#resetbutton').node().removeAttribute('disabled');
+    $('#resetbutton-zoom').prop('disabled', false);
   } else {
-    d3.select('#resetbutton').property('disabled', 'True');
+    $('#resetbutton-zoom').prop('disabled', true);
   }
 };
 
@@ -334,9 +334,18 @@ var resetVis = function resetViz() {
   sv_call_stack = [sv_root_func_name];
   sv_update_call_stack_list();
 
-  d3.select('#resetbutton').property('disabled', 'True');
+  $('#resetbutton-zoom').prop('disabled', true);
 };
-d3.select('#resetbutton').on('click', resetVis);
+$('#resetbutton-zoom').on('click', resetVis);
+
+
+var resetRoot = function resetRoot() {
+  // originally set in the setup code in viz.html
+  sv_root_func_name = sv_root_func_name__cached;
+  resetVis();
+  $('#resetbutton-root').prop('disabled', true);
+};
+$('#resetbutton-root').on('click', resetRoot);
 
 
 // The handler for when the user changes the depth selection dropdown.

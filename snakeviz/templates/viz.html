@@ -16,7 +16,10 @@
     <h1 id="snakeviz-text">SnakeViz</h1>
 
     <!-- reset button -->
-    <button id="resetbutton" disabled="True">Reset</button>
+    <span id="resetbuttons">
+      <button id="resetbutton-root" disabled="True">Reset Root</button>
+      <button id="resetbutton-zoom" disabled="True">Reset Zoom</button>
+    </span>
 
     <!-- style select -->
     <label id='sv-style-label'>Style:
@@ -100,7 +103,7 @@
       // Make the stats table
       var table_data = {% raw table_rows %};
       $(document).ready(function() {
-        $('#pstats-table').dataTable({
+        var table = $('#pstats-table').dataTable({
           'data': table_data,
           'columns': [
             {'title': 'ncalls', 'type': 'num', 'searchable': 'false',
@@ -116,6 +119,19 @@
           ],
           'order': [1, 'desc'],
           'paging': false
+        }).api();
+        $('#pstats-table tbody').on('click', 'tr', function() {
+          var name = table.row(this).data()[6];
+          sv_root_func_name = name;
+          sv_draw_vis(name);
+          sv_call_stack = [name];
+          sv_update_call_stack_list();
+          $('#resetbutton-zoom').prop('disabled', true);
+          $('#resetbutton-root').prop('disabled', false);
+        }).on('mouseenter', 'tr', function () {
+          $(this).children('td').addClass('data-table-hover');
+        }).on('mouseleave', 'tr', function () {
+          $(this).children('td').removeClass('data-table-hover');
         });
       });
     </script>
@@ -249,6 +265,7 @@
         sv_json_cache = {};
         sv_worker = sv_make_worker();
         sv_root_func_name = sv_find_root(profile_data);
+        sv_root_func_name__cached = sv_root_func_name;
         sv_call_stack = [sv_root_func_name];
         sv_total_time = profile_data[sv_root_func_name]['stats'][3];
       }));

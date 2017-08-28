@@ -89,9 +89,9 @@ var sv_call_stack_list = function sv_call_stack_list(call_stack) {
                 sv_call_stack = sv_call_stack.slice(0, index+1);
                 sv_update_call_stack_list();
                 if (name !== sv_root_func_name) {
-                    d3.select('#resetbutton').node().removeAttribute('disabled');
+                    $('#resetbutton-zoom').prop('disabled', false);
                 } else {
-                    d3.select('#resetbutton').property('disabled', 'True');
+                    $('#resetbutton-zoom').prop('disabled', true);
                 }
             }));
         })()

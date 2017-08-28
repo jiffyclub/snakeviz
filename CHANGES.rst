@@ -1,3 +1,9 @@
+v0.5.0
+===================
+
+* Allow modifying root node of visualization by clicking on table rows
+  (Thanks @bmerry in #90!)
+
 v0.4.2 (2017-08-13)
 ===================
 

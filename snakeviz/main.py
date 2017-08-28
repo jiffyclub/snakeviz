@@ -26,8 +26,8 @@ class VizHandler(tornado.web.RequestHandler):
         profile_name = unquote_plus(profile_name)
         abspath = os.path.abspath(profile_name)
         if os.path.isdir(abspath):
-            if not self.request.path.endswith(os.path.sep):
-                return self.redirect(self.request.path + os.path.sep)
+            if not self.request.path.endswith('/'):
+                return self.redirect(self.request.path + '/')
             return self._list_dir(abspath)
         try:
             s = Stats(profile_name)

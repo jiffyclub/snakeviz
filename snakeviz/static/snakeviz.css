@@ -38,10 +38,14 @@ button:disabled:hover {
 }
 
 #snakeviz-text {
+  position: absolute;
+  top: -20px;
+}
+
+#snakeviz-text > a {
   color: #cccccc;
   font-family: monospace;
-  position: absolute;
-  top: -10px;
+  text-decoration: none;
 }
 
 select {

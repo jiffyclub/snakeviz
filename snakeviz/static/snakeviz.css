@@ -48,6 +48,15 @@ button:disabled:hover {
   text-decoration: none;
 }
 
+.sv-footer {
+  text-align: right;
+}
+
+.footer-link {
+  color: #cccccc;
+  font-family: monospace;
+}
+
 select {
   font-family: monospace;
   font-size: 20px;

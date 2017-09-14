@@ -4,7 +4,7 @@ This module contains the command line interface for snakeviz.
 """
 from __future__ import print_function
 
-import optparse
+import argparse
 import os
 import random
 import socket
@@ -34,38 +34,47 @@ def random_ports(port, n):
         yield max(1, port + random.randint(-2*n, 2*n))
 
 
-def main(argv=sys.argv[1:]):
-    parser = optparse.OptionParser(
-        usage='%prog [options] filename'
-    )
-    parser.add_option('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
-                      help='hostname to bind to (default: 127.0.0.1')
+class SVArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        message = message + '\n\n' + self.format_help()
+        args = {'prog': self.prog, 'message': message}
+        self.exit(2, '%(prog)s: error: %(message)s' % args)
 
-    parser.add_option('-p', '--port', type='int', metavar='PORT', default=8080,
-                      help='port to bind to; if this port is already in use a '
-                           'free port will be selected automatically '
-                           '(default: %default)')
 
-    parser.add_option('-b', '--browser', metavar='PATH',
-                      help='name of webbrowser to launch as described in '
-                           'the documentation of Python\'s webbrowser module: '
-                           'https://docs.python.org/3/library/webbrowser.html')
+def build_parser():
+    parser = SVArgumentParser(
+        description='Start SnakeViz to view a Python profile.')
 
-    parser.add_option('-s', '--server', action="store_true", dest="server",
-                      default=False,
-                      help='start SnakeViz in server-only mode--'
-                           'no attempt will be to open a browser')
+    parser.add_argument('filename', help='Python profile to view')
 
-    options, args = parser.parse_args(argv)
+    parser.add_argument('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
+                        help='hostname to bind to (default: %(default)s)')
 
-    if len(args) != 1:
-        parser.error('please provide the path to a profiler output file to '
-                     'open')
+    parser.add_argument('-p', '--port', type=int, metavar='PORT', default=8080,
+                        help='port to bind to; if this port is already in use a '
+                             'free port will be selected automatically '
+                             '(default: %(default)s)')
 
-    if options.browser and options.server:
+    parser.add_argument('-b', '--browser', metavar='BROWSER_PATH',
+                        help='name of webbrowser to launch as described in '
+                             'the documentation of Python\'s webbrowser module: '
+                             'https://docs.python.org/3/library/webbrowser.html')
+
+    parser.add_argument('-s', '--server', action="store_true", default=False,
+                        help='start SnakeViz in server-only mode--'
+                             'no attempt will be made to open a browser')
+
+    return parser
+
+
+def main(argv=None):
+    parser = build_parser()
+    args = parser.parse_args(argv)
+
+    if args.browser and args.server:
         parser.error("options --browser and --server are mutually exclusive")
 
-    filename = os.path.abspath(args[0])
+    filename = os.path.abspath(args.filename)
     if not os.path.exists(filename):
         parser.error('the file %s does not exist' % filename)
 
@@ -84,8 +93,8 @@ def main(argv=sys.argv[1:]):
 
     filename = quote_plus(filename)
 
-    hostname = options.hostname
-    port = options.port
+    hostname = args.hostname
+    port = args.port
 
     if not 0 <= port <= 65535:
         parser.error('invalid port number %d: use a port between 0 and 65535'
@@ -118,9 +127,9 @@ def main(argv=sys.argv[1:]):
            (hostname, port)))
     print(url)
 
-    if not options.server:
+    if not args.server:
         try:
-            browser = webbrowser.get(options.browser)
+            browser = webbrowser.get(args.browser)
         except webbrowser.Error as e:
             parser.error('no web browser found: %s' % e)
 

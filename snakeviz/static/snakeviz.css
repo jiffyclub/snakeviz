@@ -37,6 +37,10 @@ button:disabled:hover {
   top: 60px;
 }
 
+.button-div {
+  margin-bottom: 10px;
+}
+
 #snakeviz-text {
   position: absolute;
   top: -20px;
@@ -67,19 +71,35 @@ select {
 #sv-style-label {
   font-family: monospace;
   position: absolute;
-  top: 120px;
+  top: 180px;
 }
 
 #sv-depth-label {
   font-family: monospace;
   position: absolute;
-  top: 160px;
+  top: 220px;
 }
 
 #sv-cutoff-label {
   font-family: monospace;
   position: absolute;
-  top: 200px;
+  top: 260px;
+}
+
+#sv-info-div {
+  position: absolute;
+  top: 300px;
+  display: none;
+  overflow: hidden;
+}
+
+.sv-info-label {
+  font-weight: bold;
+}
+
+.sv-info-item {
+  font-family: monospace;
+  word-wrap: break-word;
 }
 
 #sv-call-stack {
@@ -110,22 +130,6 @@ select {
 
 #sv-call-stack-list div span {
   display: table-cell;
-}
-
-#sv-info-div {
-  position: absolute;
-  top: 240px;
-  display: none;
-  overflow: hidden;
-}
-
-.sv-info-label {
-  font-weight: bold;
-}
-
-.sv-info-item {
-  font-family: monospace;
-  word-wrap: break-word;
 }
 
 #sv-error-div {

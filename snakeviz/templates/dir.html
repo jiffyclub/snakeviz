@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" .>
-    <title>{{profile_name.split('/')[-1].split('.')[0]}}</title>
+    <title>{{dir_name.split('/')[-1]}}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -13,31 +13,35 @@
   </head>
 
   <body>
-    <h1 id="snakeviz-text">SnakeViz</h1>
+    <h1 id="snakeviz-text">
+      <a href="https://jiffyclub.github.io/snakeviz/">SnakeViz</a>
+    </h1>
 
     <!-- Entries table -->
-    <div id="table_div">
+    <div class="dir-listing">
       <table cellpadding="0" cellspacing="0" border="0" class="display" id="pstats-table">
       </table>
     </div>
+
+    <!-- footer -->
+    <footer class="sv-footer">
+      <a class="footer-link" href="https://jiffyclub.github.io/snakeviz/">SnakeViz Docs</a>
+    </footer>
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <!-- Vendor JS -->
     <script src="/static/vendor/jquery-3.2.1.min.js"></script>
-    <script src="/static/vendor/d3.v3.min.js"></script>
     <script src="/static/vendor/jquery.dataTables.min.js"></script>
-    <script src="/static/vendor/lodash.min.js"></script>
-    <script src="/static/vendor/immutable.min.js"></script>
 
     <!-- SnakeViz JS -->
     <script>
       // Make the stats table
-      var table_data = {% raw table_rows %};
+      var dir_entries = {% raw dir_entries %};
       $(document).ready(function() {
         $('#pstats-table').dataTable({
-          'data': table_data,
+          'data': dir_entries,
           'columns': [
             {'title': 'filename',
              'render': function(data, type, row, meta){
@@ -52,12 +56,6 @@
         });
       });
     </script>
-
-    <!-- Load SnakeViz JS Files -->
-    <script src='/static/snakeviz.js'></script>
-    <script src='/static/drawsvg.js'></script>
-
-    <!-- Do initial setup stuff -->
 
   </body>
 </html>

@@ -4,9 +4,9 @@ import os.path
 from pstats import Stats
 
 try:
-    from urllib.parse import unquote_plus
+    from urllib.parse import quote_plus, unquote_plus
 except ImportError:
-    from urllib import unquote_plus
+    from urllib import quote_plus, unquote_plus
 
 import tornado.ioloop
 import tornado.web
@@ -24,34 +24,43 @@ settings = {
 class VizHandler(tornado.web.RequestHandler):
     def get(self, profile_name):
         profile_name = unquote_plus(profile_name)
+
         abspath = os.path.abspath(profile_name)
         if os.path.isdir(abspath):
-            if not self.request.path.endswith('/'):
-                return self.redirect(self.request.path + '/')
-            return self._list_dir(abspath)
-        try:
-            s = Stats(profile_name)
-        except:
-            raise RuntimeError('Could not read %s.' % profile_name)
-        self.render(
-            'viz.html', profile_name=profile_name,
-            table_rows=table_rows(s), callees=json_stats(s))
+            self._list_dir(abspath)
+        else:
+            try:
+                s = Stats(profile_name)
+            except:
+                raise RuntimeError('Could not read %s.' % profile_name)
+            self.render(
+                'viz.html', profile_name=profile_name,
+                table_rows=table_rows(s), callees=json_stats(s))
 
     def _list_dir(self, path):
+        """
+        Show a directory listing.
+
+        """
         entries = os.listdir(path)
-        dir_entries = [[['..', '..']]]
+        dir_entries = [
+            [['..', quote_plus(os.path.normpath(os.path.join(path, '..')))]]]
         for name in entries:
+            if name.startswith('.'):
+                # skip invisible files/directories
+                continue
             fullname = os.path.join(path, name)
             displayname = linkname = name
             # Append / for directories or @ for symbolic links
             if os.path.isdir(fullname):
-                displayname = name + "/"
-                linkname = name + "/"
+                displayname += '/'
             if os.path.islink(fullname):
-                displayname = name + "@"
-            dir_entries.append([[displayname, linkname]])
+                displayname += '@'
+            dir_entries.append(
+                [[displayname, quote_plus(os.path.join(path, linkname))]])
+
         self.render(
-            'dir.html', profile_name=path, table_rows=dir_entries)
+            'dir.html', dir_name=path, dir_entries=dir_entries)
 
 handlers = [(r'/snakeviz/(.*)', VizHandler)]
 

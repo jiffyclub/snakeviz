@@ -27,7 +27,7 @@ def snakeviz(fname, port=None):
 
     p = Popen(shlex.split(args))
     # give server time to start up
-    time.sleep(1)
+    time.sleep(3)
     yield
     p.terminate()
 
@@ -51,13 +51,30 @@ def port(request):
     return request.param
 
 
-def test_snakeviz(prof, port):
-    url = 'http://localhost:{0}/snakeviz/{1}'.format(
+def snakeviz_url(path, port):
+    return 'http://localhost:{0}/snakeviz/{1}'.format(
         port or 8080,  # default port for snakeviz
-        quote_plus(prof))
+        quote_plus(path))
+
+
+def test_snakeviz_profile(prof, port):
+    url = snakeviz_url(prof, port)
 
     with snakeviz(prof, port=port):
         result = requests.get(url)
 
     result.raise_for_status()
     assert 'SnakeViz' in result.text
+
+
+def test_snakeviz_dir(tmpdir, port):
+    tmpdir.join('file.txt').write('contents')
+    tmpdir.mkdir('subdir')
+    url = snakeviz_url(str(tmpdir), port)
+
+    with snakeviz(str(tmpdir), port=port):
+        result = requests.get(url)
+    result.raise_for_status()
+
+    assert 'file.txt' in result.text
+    assert 'subdir/' in result.text

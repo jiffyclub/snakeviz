@@ -76,20 +76,21 @@ def main(argv=None):
 
     filename = os.path.abspath(args.filename)
     if not os.path.exists(filename):
-        parser.error('the file %s does not exist' % filename)
+        parser.error('the path %s does not exist' % filename)
 
-    try:
-        open(filename)
-    except IOError as e:
-        parser.error('the file %s could not be opened: %s'
-                     % (filename, str(e)))
+    if not os.path.isdir(filename):
+        try:
+            open(filename)
+        except IOError as e:
+            parser.error('the file %s could not be opened: %s'
+                         % (filename, str(e)))
 
-    try:
-        Stats(filename)
-    except:
-        parser.error(('the file %s is not a valid profile. ' % filename) +
-                     'Generate profiles using: \n\n'
-                     '\tpython -m cProfile -o my_program.prof my_program.py\n')
+        try:
+            Stats(filename)
+        except:
+            parser.error(('the file %s is not a valid profile. ' % filename) +
+                         'Generate profiles using: \n\n'
+                         '\tpython -m cProfile -o my_program.prof my_program.py\n')
 
     filename = quote_plus(filename)
 

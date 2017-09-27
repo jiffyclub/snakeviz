@@ -1,6 +1,7 @@
 v0.5.0
 ===================
 
+* Render directory contents (Thanks @pankajp in #95!)
 * Allow modifying root node of visualization by clicking on table rows
   (Thanks @bmerry in #90!)
 * Allow running snakeviz via ``python -m snakeviz.cli``

@@ -33,8 +33,8 @@ class VizHandler(tornado.web.RequestHandler):
             display_name = 'Multiple profiles' if len(individual_profiles)>1 else individual_profiles[0]
             try:
                 s = Stats(*individual_profiles)  # Merge one or more profiles
-            except Exception,e:
-                raise RuntimeError('Error getting stats for %s: %s' % individual_profiles, str(e))
+            except Exception as e:
+                raise RuntimeError('Error getting stats for %s: %s' % (individual_profiles, str(e)))
             self.render(
                 'viz.html', display_name=display_name,
                 table_rows=table_rows(s), callees=json_stats(s))

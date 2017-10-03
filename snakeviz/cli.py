@@ -43,9 +43,9 @@ class SVArgumentParser(argparse.ArgumentParser):
 
 def build_parser():
     parser = SVArgumentParser(
-        description='Start SnakeViz to view a Python profile.')
+        description='Start SnakeViz to view a Python profile. If multiple profiles are provided, they are merged and loaded as one.')
 
-    parser.add_argument('filename', help='Python profile to view')
+    parser.add_argument('profile', nargs='+', help='Python profile(s) to view, or directory containing profiles')
 
     parser.add_argument('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
                         help='hostname to bind to (default: %(default)s)')
@@ -74,25 +74,30 @@ def main(argv=None):
     if args.browser and args.server:
         parser.error("options --browser and --server are mutually exclusive")
 
-    filename = os.path.abspath(args.filename)
-    if not os.path.exists(filename):
-        parser.error('the path %s does not exist' % filename)
+    paths = [os.path.abspath(p) for p in args.profile]
+    for p in paths:
+        if not os.path.exists(p):
+            parser.error('path %s does not exist' % p)
 
-    if not os.path.isdir(filename):
-        try:
-            open(filename)
-        except IOError as e:
-            parser.error('the file %s could not be opened: %s'
-                         % (filename, str(e)))
+    # A single directory is allowed
+    if len(paths) == 1 and os.path.isdir(paths[0]):
+        pass # OK
+    else:
+        for p in paths:
+            if os.path.isdir(p):
+                parser.error('May only specify a single directory: "%s" is a directory' % p)
+            try:
+                Stats(p)
+            except IOError as e:
+                parser.error('the file %s could not be opened: %s'
+                             % (filename, str(e)))
+            except:
+                parser.error(('the file %s is not a valid profile. ' % p) +
+                             'Generate profiles using: \n\n'
+                             '\tpython -m cProfile -o my_program.prof my_program.py\n')
 
-        try:
-            Stats(filename)
-        except:
-            parser.error(('the file %s is not a valid profile. ' % filename) +
-                         'Generate profiles using: \n\n'
-                         '\tpython -m cProfile -o my_program.prof my_program.py\n')
-
-    filename = quote_plus(filename)
+    paths='&'.join(paths)
+    paths = quote_plus(paths)
 
     hostname = args.hostname
     port = args.port
@@ -123,7 +128,7 @@ def main(argv=None):
         print('No available port found.')
         return 1
 
-    url = "http://{0}:{1}/snakeviz/{2}".format(hostname, port, filename)
+    url = "http://{0}:{1}/snakeviz/{2}".format(hostname, port, paths)
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))
     print(url)

@@ -86,4 +86,6 @@ def test_version():
     vcall = sp.Popen(
         ['snakeviz', '--version'], stdout=sp.PIPE, stderr=sp.PIPE)
     out, err = vcall.communicate()
-    assert version.version in out.decode('utf-8')
+    # in Python <= 3.3 this comes out on stderr, otherwise on stdout
+    assert version.version in out.decode('utf-8') or \
+        version.version in err.decode('utf-8')

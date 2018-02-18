@@ -4,9 +4,9 @@ import os.path
 from pstats import Stats
 
 try:
-    from urllib.parse import quote_plus, unquote_plus
+    from urllib.parse import quote_plus
 except ImportError:
-    from urllib import quote_plus, unquote_plus
+    from urllib import quote_plus
 
 import tornado.ioloop
 import tornado.web
@@ -23,8 +23,6 @@ settings = {
 
 class VizHandler(tornado.web.RequestHandler):
     def get(self, profile_name):
-        profile_name = unquote_plus(profile_name)
-
         abspath = os.path.abspath(profile_name)
         if os.path.isdir(abspath):
             self._list_dir(abspath)

@@ -1,3 +1,7 @@
+
+# Created by https://www.gitignore.io/api/python
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -41,6 +45,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+.pytest_cache/
 nosetests.xml
 coverage.xml
 *.cover
@@ -49,12 +54,6 @@ coverage.xml
 # Translations
 *.mo
 *.pot
-
-# Django stuff:
-*.log
-.static_storage/
-.media/
-local_settings.py
 
 # Flask stuff:
 instance/
@@ -76,7 +75,7 @@ target/
 .python-version
 
 # celery beat schedule file
-celerybeat-schedule
+celerybeat-schedule.*
 
 # SageMath parsed files
 *.sage.py
@@ -102,6 +101,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+# End of https://www.gitignore.io/api/python
 
 # Generated files
 snakeviz/version.py

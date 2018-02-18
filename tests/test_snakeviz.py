@@ -2,10 +2,10 @@ import cProfile
 import os
 import glob
 import shlex
+import subprocess as sp
 import tempfile
 import time
 from contextlib import contextmanager
-from subprocess import Popen
 
 try:
     from urllib.parse import quote_plus
@@ -14,6 +14,8 @@ except ImportError:
 
 import pytest
 import requests
+
+from snakeviz import version
 
 
 @contextmanager
@@ -25,7 +27,7 @@ def snakeviz(fname, port=None):
 
     args += ' ' + fname
 
-    p = Popen(shlex.split(args))
+    p = sp.Popen(shlex.split(args))
     # give server time to start up
     time.sleep(3)
     yield
@@ -78,3 +80,9 @@ def test_snakeviz_dir(tmpdir, port):
 
     assert 'file.txt' in result.text
     assert 'subdir/' in result.text
+
+
+def test_version():
+    version_str = sp.run(
+        ['snakeviz', '--version'], check=True, stdout=sp.PIPE).stdout
+    assert version.version in version_str.decode('utf-8')

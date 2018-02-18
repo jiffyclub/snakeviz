@@ -18,6 +18,8 @@ try:
 except ImportError:
     from urllib import quote_plus
 
+from . import version
+
 
 # As seen in IPython:
 # https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
@@ -46,6 +48,9 @@ def build_parser():
         description='Start SnakeViz to view a Python profile.')
 
     parser.add_argument('filename', help='Python profile to view')
+
+    parser.add_argument('-v', '--version', action='version',
+                        version=('%(prog)s ' + version.version))
 
     parser.add_argument('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
                         help='hostname to bind to (default: %(default)s)')

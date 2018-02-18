@@ -83,6 +83,7 @@ def test_snakeviz_dir(tmpdir, port):
 
 
 def test_version():
-    version_str = sp.run(
-        ['snakeviz', '--version'], check=True, stdout=sp.PIPE).stdout
-    assert version.version in version_str.decode('utf-8')
+    vcall = sp.Popen(
+        ['snakeviz', '--version'], stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = vcall.communicate()
+    assert version.version in out.decode('utf-8')

@@ -26,7 +26,7 @@ var sv_find_root = function sv_find_root (stats) {
 
 // Returns the hierarchy depth value from the depth <select> element
 var sv_hierarchy_depth = function sv_hierarchy_depth() {
-    return parseInt($('#sv-depth-select').val(), 10);
+    return parseInt($('#sv-depth-input').val(), 10);
 };
 
 
@@ -35,7 +35,12 @@ var sv_hierarchy_depth = function sv_hierarchy_depth() {
 // if a child's cumulative time is less than this fraction of the parent
 // then the program skips the descent into that child.
 var sv_hierarchy_cutoff = function sv_hierarchy_cutoff() {
-    return parseFloat($('#sv-cutoff-select').val());
+    var val = parseInt($('#sv-cutoff-input').val());
+    if (val >= 10){
+      return 0;
+    } else {
+      return 1/val;
+    };
 };
 
 

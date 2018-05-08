@@ -37,20 +37,12 @@
 
     <!-- depth select -->
     <label id='sv-depth-label'>Depth:
-      <select name="sv-depth" id="sv-depth-select">
-        {% for i in [3, 5, 10, 15, 20] %}
-          <option value="{{i}}" {% if i == 5 %}selected{% end %}>{{i}}</option>
-        {% end %}
-      </select>
+      <input name="sv-depth" id="sv-depth-input" value="5" type="number" min="1" max="50" step="1">
     </label>
 
     <!-- cutoff select -->
-    <label id='sv-cutoff-label'>Cutoff:
-      <select name="sv-cutoff" id="sv-cutoff-select">
-        <option value="0.001" selected>1 &frasl; 1000</option>
-        <option value="0.01">1 &frasl; 100</option>
-        <option value="0">None</option>
-      </select>
+    <label id='sv-cutoff-label'>1/Cutoff:
+      <input name="sv-cutoff" id="sv-cutoff-input" value="5" type="number" min="1" max="100" step="1">
     </label>
 
     <!-- information div -->

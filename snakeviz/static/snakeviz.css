@@ -61,6 +61,12 @@ button:disabled:hover {
   font-family: monospace;
 }
 
+input[type=number] {
+  font-family: monospace;
+  font-size: 20px;
+  background: white;
+}
+
 select {
   font-family: monospace;
   font-size: 20px;

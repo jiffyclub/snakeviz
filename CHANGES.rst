@@ -1,4 +1,4 @@
-v0.5.0
+v1.0.0
 ===================
 
 * Change default visualization style to icicle
@@ -7,6 +7,10 @@ v0.5.0
   (Thanks @bmerry in #90!)
 * Allow running snakeviz via ``python -m snakeviz.cli``
   (Thanks @pankajp in #94!)
+* Allow running snakeviz via ``python -m snakeviz``
+  (Thanks @orlp in #108!)
+* Change default visualization depth to 10
+  (Thanks @takluyver in #114!)
 
 v0.4.2 (2017-08-13)
 ===================

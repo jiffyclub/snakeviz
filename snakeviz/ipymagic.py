@@ -9,8 +9,8 @@ __all__ = ['load_ipython_extension']
 
 
 JUPYTER_HTML_TEMPLATE = """
-<iframe id='{uuid}' frameborder=0 seamless width='100%%' height='1000'></iframe>
-<script>$("#{uuid}").attr({{src:"http://"+document.location.hostname+":{port}{path}"}})</script>
+<iframe id='snakeviz-{uuid}' frameborder=0 seamless width='100%' height='1000'></iframe>
+<script>$("#snakeviz-{uuid}").attr({{src:"http://"+document.location.hostname+":{port}{path}"}})</script>
 """
 
 
@@ -36,12 +36,7 @@ def snakeviz_magic(line, cell=None):
 
     # start up a Snakeviz server
     if _check_ipynb():
-        port = str(_find_free_port())
-        sv = subprocess.Popen(['snakeviz', "-s", "-H", "0.0.0.0", "-p", port, filename])
-        time.sleep(0.5)
-        path = "/snakeviz/%s" % urllib.parse.quote_plus(filename)
-        # data = requests.get(url).content
-        display(HTML(JUPYTER_HTML_TEMPLATE.format(port=port, path=path, uuid=uuid.uuid1())))
+        sv = open_snakeviz_and_display_in_notebook(filename)
     else:
         sv = subprocess.Popen(['snakeviz', filename])
     # give time for the Snakeviz page to load then shut down the server
@@ -59,9 +54,34 @@ def _check_ipynb():
     return "connection_file" in cfg["IPKernelApp"]
 
 
-def _find_free_port():
-    import socket
-    from contextlib import closing
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
-        return s.getsockname()[1]
+def open_snakeviz_and_display_in_notebook(filename):
+
+    def _find_free_port():
+        import socket
+        from contextlib import closing
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            s.bind(('', 0))
+            return s.getsockname()[1]
+
+    port = str(_find_free_port())
+
+    def _start_and_wait_when_ready():
+        import os
+        environ = os.environ.copy()
+        environ["PYTHONUNBUFFERED"] = "TRUE"
+        sv = subprocess.Popen(['snakeviz', "-s", "-H", "0.0.0.0", "-p", port, filename],
+                              stdout=subprocess.PIPE, universal_newlines=True, env=environ)
+        # import datetime
+        # now = datetime.datetime.now()
+        while True:
+            line = sv.stdout.readline()
+            if line.strip().startswith("snakeviz web server started"):
+                break
+        # print("wait", (datetime.datetime.now() - now).total_seconds())
+        return sv
+
+    sv = _start_and_wait_when_ready()
+    path = "/snakeviz/%s" % urllib.parse.quote_plus(filename)
+    # data = requests.get(url).content
+    display(HTML(JUPYTER_HTML_TEMPLATE.format(port=port, path=path, uuid=uuid.uuid1())))
+    return sv

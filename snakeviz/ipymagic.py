@@ -4,9 +4,6 @@ import time
 import uuid
 import urllib
 
-from IPython.core.magic import Magics, magics_class, line_cell_magic
-from IPython.display import display, HTML
-
 __all__ = ['load_ipython_extension']
 
 
@@ -16,56 +13,65 @@ JUPYTER_HTML_TEMPLATE = """
 """
 
 
-@magics_class
-class SnakevizMagic(Magics):
+# Users may be using snakeviz in an environment where IPython is not
+# installed, this try/except makes sure that snakeviz is operational
+# in that case.
+try:
+    from IPython.core.magic import Magics, magics_class, line_cell_magic
+    from IPython.display import display, HTML
+except ImportError:
+    pass
+else:
+    @magics_class
+    class SnakevizMagic(Magics):
 
-    @line_cell_magic
-    def snakeviz(self, line, cell=None):
-        """
-        Profile code and display the profile in Snakeviz.
-        Works as a line or cell magic.
+        @line_cell_magic
+        def snakeviz(self, line, cell=None):
+            """
+            Profile code and display the profile in Snakeviz.
+            Works as a line or cell magic.
 
-        Usage, in line mode:
-          %snakeviz [options] statement
+            Usage, in line mode:
+            %snakeviz [options] statement
 
-        Usage, in cell mode:
-          %%snakeviz [options] [statement]
-          code...
-          code...
+            Usage, in cell mode:
+            %%snakeviz [options] [statement]
+            code...
+            code...
 
-        Options:
+            Options:
 
-        -e/--embed
-          If running the snakeviz magic in the Jupyter Notebook,
-          use this flag to embed the snakeviz visualization within
-          the notebook instead of trying to open a new tab.
+            -e/--embed
+            If running the snakeviz magic in the Jupyter Notebook,
+            use this flag to embed the snakeviz visualization within
+            the notebook instead of trying to open a new tab.
 
-        """
-        # get location for saved profile
-        filename = tempfile.NamedTemporaryFile().name
+            """
+            # get location for saved profile
+            filename = tempfile.NamedTemporaryFile().name
 
-        # parse options
-        opts, line = self.parse_options(line, 'e', 'embed', posix=False)
+            # parse options
+            opts, line = self.parse_options(line, 'e', 'embed', posix=False)
 
-        # call signature for prun
-        line = '-q -D ' + filename + ' ' + line
+            # call signature for prun
+            line = '-q -D ' + filename + ' ' + line
 
-        # generate the stats file using IPython's prun magic
-        ip = get_ipython()
+            # generate the stats file using IPython's prun magic
+            ip = get_ipython()
 
-        if cell:
-            ip.run_cell_magic('prun', line, cell)
-        else:
-            ip.run_line_magic('prun', line)
+            if cell:
+                ip.run_cell_magic('prun', line, cell)
+            else:
+                ip.run_line_magic('prun', line)
 
-        # start up a Snakeviz server
-        if _check_ipynb() and ('e' in opts or 'embed' in opts):
-            sv = open_snakeviz_and_display_in_notebook(filename)
-        else:
-            sv = subprocess.Popen(['snakeviz', filename])
-        # give time for the Snakeviz page to load then shut down the server
-        time.sleep(3)
-        sv.terminate()
+            # start up a Snakeviz server
+            if _check_ipynb() and ('e' in opts or 'embed' in opts):
+                sv = open_snakeviz_and_display_in_notebook(filename)
+            else:
+                sv = subprocess.Popen(['snakeviz', filename])
+            # give time for the Snakeviz page to load then shut down the server
+            time.sleep(3)
+            sv.terminate()
 
 
 def load_ipython_extension(ipython):

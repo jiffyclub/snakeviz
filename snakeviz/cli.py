@@ -14,9 +14,9 @@ import webbrowser
 from pstats import Stats
 
 try:
-    from urllib.parse import quote_plus
+    from urllib.parse import quote
 except ImportError:
-    from urllib import quote_plus
+    from urllib import quote
 
 from . import version
 
@@ -97,7 +97,7 @@ def main(argv=None):
                          'Generate profiles using: \n\n'
                          '\tpython -m cProfile -o my_program.prof my_program.py\n')
 
-    filename = quote_plus(filename)
+    filename = quote(filename, safe='')
 
     hostname = args.hostname
     port = args.port

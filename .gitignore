@@ -110,3 +110,6 @@ snakeviz/version.py
 
 #mkdocs build dir
 docs/site
+
+# Editor files
+.vscode

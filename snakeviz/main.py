@@ -4,9 +4,9 @@ import os.path
 from pstats import Stats
 
 try:
-    from urllib.parse import quote_plus
+    from urllib.parse import quote
 except ImportError:
-    from urllib import quote_plus
+    from urllib import quote
 
 import tornado.ioloop
 import tornado.web
@@ -41,8 +41,10 @@ class VizHandler(tornado.web.RequestHandler):
 
         """
         entries = os.listdir(path)
-        dir_entries = [
-            [['..', quote_plus(os.path.normpath(os.path.join(path, '..')))]]]
+        dir_entries = [[[
+            '..',
+            quote(os.path.normpath(os.path.join(path, '..')), safe='')
+        ]]]
         for name in entries:
             if name.startswith('.'):
                 # skip invisible files/directories
@@ -55,10 +57,11 @@ class VizHandler(tornado.web.RequestHandler):
             if os.path.islink(fullname):
                 displayname += '@'
             dir_entries.append(
-                [[displayname, quote_plus(os.path.join(path, linkname))]])
+                [[displayname, quote(os.path.join(path, linkname), safe='')]])
 
         self.render(
             'dir.html', dir_name=path, dir_entries=dir_entries)
+
 
 handlers = [(r'/snakeviz/(.*)', VizHandler)]
 

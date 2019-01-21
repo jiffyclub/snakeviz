@@ -2,7 +2,11 @@ import subprocess
 import tempfile
 import time
 import uuid
-import urllib
+
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
 
 __all__ = ['load_ipython_extension']
 
@@ -45,6 +49,11 @@ else:
             If running the snakeviz magic in the Jupyter Notebook,
             use this flag to embed the snakeviz visualization within
             the notebook instead of trying to open a new tab.
+
+            Note that this will briefly open a server with host 0.0.0.0,
+            which in some situations may present a slight security risk as
+            0.0.0.0 means that the server will be available on all network
+            interfaces (if they are not blocked by something like a firewall).
 
             """
             # get location for saved profile
@@ -105,7 +114,7 @@ def open_snakeviz_and_display_in_notebook(filename):
         environ = os.environ.copy()
         environ["PYTHONUNBUFFERED"] = "TRUE"
         sv = subprocess.Popen(
-            ['snakeviz', "-s", "-p", port, filename],
+            ['snakeviz', "-s", "-H", "0.0.0.0", "-p", port, filename],
             stdout=subprocess.PIPE, universal_newlines=True, env=environ)
         while True:
             line = sv.stdout.readline()
@@ -114,7 +123,7 @@ def open_snakeviz_and_display_in_notebook(filename):
         return sv
 
     sv = _start_and_wait_when_ready()
-    path = "/snakeviz/%s" % urllib.parse.quote_plus(filename)
+    path = "/snakeviz/%s" % quote(filename, safe='')
     display(HTML(JUPYTER_HTML_TEMPLATE.format(
         port=port, path=path, uuid=uuid.uuid1())))
     return sv

@@ -8,9 +8,9 @@ import time
 from contextlib import contextmanager
 
 try:
-    from urllib.parse import quote_plus
+    from urllib.parse import quote
 except ImportError:
-    from urllib import quote_plus
+    from urllib import quote
 
 import pytest
 import requests
@@ -56,7 +56,7 @@ def port(request):
 def snakeviz_url(path, port):
     return 'http://localhost:{0}/snakeviz/{1}'.format(
         port or 8080,  # default port for snakeviz
-        quote_plus(path))
+        quote(path))
 
 
 def test_snakeviz_profile(prof, port):

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import subprocess
 import tempfile
 import time
@@ -45,10 +47,10 @@ else:
 
             Options:
 
-            -e/--embed
+            -t/--new-tab
             If running the snakeviz magic in the Jupyter Notebook,
-            use this flag to embed the snakeviz visualization within
-            the notebook instead of trying to open a new tab.
+            use this flag to open snakeviz visualization in a new tab
+            instead of embedded within the notebook.
 
             Note that this will briefly open a server with host 0.0.0.0,
             which in some situations may present a slight security risk as
@@ -60,7 +62,7 @@ else:
             filename = tempfile.NamedTemporaryFile().name
 
             # parse options
-            opts, line = self.parse_options(line, 'e', 'embed', posix=False)
+            opts, line = self.parse_options(line, 't', 'new-tab', posix=False)
 
             # call signature for prun
             line = '-q -D ' + filename + ' ' + line
@@ -74,9 +76,11 @@ else:
                 ip.run_line_magic('prun', line)
 
             # start up a Snakeviz server
-            if _check_ipynb() and ('e' in opts or 'embed' in opts):
+            if _check_ipynb() and not ('t' in opts or 'new-tab' in opts):
+                print('Embedding SnakeViz in the notebook...')
                 sv = open_snakeviz_and_display_in_notebook(filename)
             else:
+                print('Opening SnakeViz in a new tab...')
                 sv = subprocess.Popen(['snakeviz', filename])
             # give time for the Snakeviz page to load then shut down the server
             time.sleep(3)

@@ -1,38 +1,133 @@
+from __future__ import print_function
+
 import subprocess
 import tempfile
 import time
+import uuid
+
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote
 
 __all__ = ['load_ipython_extension']
 
 
-def snakeviz_magic(line, cell=None):
-    """
-    Profile code and display the profile in Snakeviz.
-    Works as a line or cell magic.
+JUPYTER_HTML_TEMPLATE = """
+<iframe id='snakeviz-{uuid}' frameborder=0 seamless width='100%' height='1000'></iframe>
+<script>$("#snakeviz-{uuid}").attr({{src:"http://"+document.location.hostname+":{port}{path}"}})</script>
+"""
 
-    """
-    # get location for saved profile
-    filename = tempfile.NamedTemporaryFile().name
 
-    # call signature for prun
-    line = '-q -D ' + filename + ' ' + line
+# Users may be using snakeviz in an environment where IPython is not
+# installed, this try/except makes sure that snakeviz is operational
+# in that case.
+try:
+    from IPython.core.magic import Magics, magics_class, line_cell_magic
+    from IPython.display import display, HTML
+except ImportError:
+    pass
+else:
+    @magics_class
+    class SnakevizMagic(Magics):
 
-    # generate the stats file using IPython's prun magic
-    ip = get_ipython()
+        @line_cell_magic
+        def snakeviz(self, line, cell=None):
+            """
+            Profile code and display the profile in Snakeviz.
+            Works as a line or cell magic.
 
-    if cell:
-        ip.run_cell_magic('prun', line, cell)
-    else:
-        ip.run_line_magic('prun', line)
+            Usage, in line mode:
+            %snakeviz [options] statement
 
-    # start up a Snakeviz server
-    sv = subprocess.Popen(['snakeviz', filename])
+            Usage, in cell mode:
+            %%snakeviz [options] [statement]
+            code...
+            code...
 
-    # give time for the Snakeviz page to load then shut down the server
-    time.sleep(3)
-    sv.terminate()
+            Options:
+
+            -t/--new-tab
+            If running the snakeviz magic in the Jupyter Notebook,
+            use this flag to open snakeviz visualization in a new tab
+            instead of embedded within the notebook.
+
+            Note that this will briefly open a server with host 0.0.0.0,
+            which in some situations may present a slight security risk as
+            0.0.0.0 means that the server will be available on all network
+            interfaces (if they are not blocked by something like a firewall).
+
+            """
+            # get location for saved profile
+            filename = tempfile.NamedTemporaryFile().name
+
+            # parse options
+            opts, line = self.parse_options(line, 't', 'new-tab', posix=False)
+
+            # call signature for prun
+            line = '-q -D ' + filename + ' ' + line
+
+            # generate the stats file using IPython's prun magic
+            ip = get_ipython()
+
+            if cell:
+                ip.run_cell_magic('prun', line, cell)
+            else:
+                ip.run_line_magic('prun', line)
+
+            # start up a Snakeviz server
+            if _check_ipynb() and not ('t' in opts or 'new-tab' in opts):
+                print('Embedding SnakeViz in the notebook...')
+                sv = open_snakeviz_and_display_in_notebook(filename)
+            else:
+                print('Opening SnakeViz in a new tab...')
+                sv = subprocess.Popen(['snakeviz', filename])
+            # give time for the Snakeviz page to load then shut down the server
+            time.sleep(3)
+            sv.terminate()
 
 
 def load_ipython_extension(ipython):
-    ipython.register_magic_function(snakeviz_magic, magic_kind='line_cell',
-                                    magic_name='snakeviz')
+    """Called when user runs %load_ext snakeviz"""
+    ipython.register_magics(SnakevizMagic)
+
+
+def _check_ipynb():
+    """
+    Returns True if IPython is running as the backend for a
+    Jupyter Notebook.
+
+    """
+    cfg = get_ipython().config
+    return "connection_file" in cfg["IPKernelApp"]
+
+
+def open_snakeviz_and_display_in_notebook(filename):
+
+    def _find_free_port():
+        import socket
+        from contextlib import closing
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            s.bind(('', 0))
+            return s.getsockname()[1]
+
+    port = str(_find_free_port())
+
+    def _start_and_wait_when_ready():
+        import os
+        environ = os.environ.copy()
+        environ["PYTHONUNBUFFERED"] = "TRUE"
+        sv = subprocess.Popen(
+            ['snakeviz', "-s", "-H", "0.0.0.0", "-p", port, filename],
+            stdout=subprocess.PIPE, universal_newlines=True, env=environ)
+        while True:
+            line = sv.stdout.readline()
+            if line.strip().startswith("snakeviz web server started"):
+                break
+        return sv
+
+    sv = _start_and_wait_when_ready()
+    path = "/snakeviz/%s" % quote(filename, safe='')
+    display(HTML(JUPYTER_HTML_TEMPLATE.format(
+        port=port, path=path, uuid=uuid.uuid1())))
+    return sv

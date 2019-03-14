@@ -1,3 +1,12 @@
+v2.0.0
+===================
+
+* ``%snakeviz`` IPython magic command now embeds the snakeviz visualization
+  within a Jupyter Notebook when invoked from the notebook. This is the
+  default behavior when it's used within a Notebook.
+  (Thanks @yjmade via #110!)
+* Improved error message when ``pstats.Stats`` can't load a profile.
+
 v1.0.0
 ===================
 

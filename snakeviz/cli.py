@@ -92,10 +92,12 @@ def main(argv=None):
 
         try:
             Stats(filename)
-        except:
-            parser.error(('the file %s is not a valid profile. ' % filename) +
+        except Exception:
+            parser.error(('The file %s is not a valid profile. ' % filename) +
                          'Generate profiles using: \n\n'
-                         '\tpython -m cProfile -o my_program.prof my_program.py\n')
+                         '\tpython -m cProfile -o my_program.prof my_program.py\n\n'
+                         'Note that snakeviz must be run under the same '
+                         'version of Python as was used to create the profile.\n')
 
     filename = quote(filename, safe='')
 

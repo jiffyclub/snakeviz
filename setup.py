@@ -12,7 +12,7 @@ import os
 
 
 NAME = 'snakeviz'
-VERSION = '1.1.dev'
+VERSION = '2.0.0'
 
 
 # Create a simple version.py module; less trouble than hard-coding the version

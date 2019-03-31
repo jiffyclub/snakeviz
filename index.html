@@ -8,124 +8,84 @@
 ">
         <meta name="author" content="Matt Davis (jiffyclub)">
         <link rel="canonical" href="https://jiffyclub.github.io/snakeviz/">
-        <link rel="shortcut icon" href="favicon.ico">
-        
-
-	<title>SnakeViz</title>
-
-        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link rel="stylesheet" href="./css/highlight.css">
-        <link href="./css/base.css" rel="stylesheet">
-
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>SnakeViz</title>
+        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/mono-blue.min.css">
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
             <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-        
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
-    <body>
+    <body class="homepage">
 
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
+            <div class="container">
 
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href=".">SnakeViz</a>
+                </div>
 
-            <!-- Main title -->
-            <a class="navbar-brand" href=".">SnakeViz</a>
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li>
+                                <a href="https://github.com/jiffyclub/snakeviz/edit/master/docs/index.md"><i class="fa fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-            <!-- Main navigation -->
-            <ul class="nav navbar-nav">
-            
-            
-                <li class="active">
-                    <a href=".">Home</a>
-                </li>
-            
-            
-            </ul>
-
-            <!-- Search, Navigation and Repo links -->
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
-                        <i class="fa fa-search"></i> Search
-                    </a>
-                </li>
-                <li class="disabled">
-                    <a rel="next" >
-                        <i class="fa fa-arrow-left"></i> Previous
-                    </a>
-                </li>
-                <li class="disabled">
-                    <a rel="prev" >
-                        Next <i class="fa fa-arrow-right"></i>
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="https://github.com/jiffyclub/snakeviz/">
-                        
-                            <i class="fa fa-github"></i>
-                        
-                        GitHub
-                    </a>
-                </li>
-                
-            </ul>
-        </div>
-    </div>
-</div>
 
         <div class="container">
-            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
-    
         <li class="main active"><a href="#snakeviz">SnakeViz</a></li>
-        
             <li><a href="#installation">Installation</a></li>
-        
             <li><a href="#starting-snakeviz">Starting SnakeViz</a></li>
-        
             <li><a href="#generating-profiles">Generating Profiles</a></li>
-        
             <li><a href="#interpreting-results">Interpreting Results</a></li>
-        
             <li><a href="#controls">Controls</a></li>
-        
             <li><a href="#notes">Notes</a></li>
-        
             <li><a href="#contact">Contact</a></li>
-        
-    
     </ul>
 </div></div>
-            <div class="col-md-9" role="main">
+                <div class="col-md-9" role="main">
 
 <h1 id="snakeviz">SnakeViz</h1>
 <p>SnakeViz is a browser based graphical viewer for the output of Python&rsquo;s
-<a href="https://docs.python.org/3.4/library/profile.html#module-cProfile">cProfile</a> module.
+<a href="https://docs.python.org/3/library/profile.html#module-cProfile">cProfile</a> module and an alternative to using the standard library
+<a href="https://docs.python.org/3/library/profile.html#module-pstats">pstats module</a>.
 It was originally inspired by <a href="http://www.vrplumber.com/programming/runsnakerun/">RunSnakeRun</a>.
 SnakeViz works on Python 2.7 and Python 3.
 SnakeViz itself is still likely to work on Python 2.6,
 but official support has been dropped now that <a href="http://www.tornadoweb.org/">Tornado</a> no longer
 supports Python 2.6.</p>
 <h2 id="installation">Installation</h2>
-<p>SnakeViz is available <a href="https://pypi.python.org/pypi/snakeviz">on PyPI</a>. Install with <a href="https://pip.pypa.io">pip</a>:</p>
+<p>SnakeViz is available <a href="https://pypi.org/project/snakeviz/">on PyPI</a>. Install with <a href="https://pip.pypa.io">pip</a>:</p>
 <pre><code>pip install snakeviz
 </code></pre>
 
@@ -144,7 +104,8 @@ First load the magics:</p>
 <pre><code>%load_ext snakeviz
 </code></pre>
 
-<p>Then use the <code>%snakeviz</code> and <code>%%snakeviz</code> magics to profile and view
+<p>Then use the <code>%snakeviz</code> (for a single line of code) and
+<code>%%snakeviz</code> (for multiple lines of code) magics to profile and view
 individual lines or entire blocks of code:</p>
 <pre><code>% snakeviz glob.glob('*.txt')
 </code></pre>
@@ -156,17 +117,25 @@ for file in files:
         print(hashlib.md5(f.read().encode('utf-8')).hexdigest())
 </code></pre>
 
+<p>When used within a a Jupyter Notebook the <code>%snakeviz</code> magics
+embed the visualization result within the notebook by default.
+The <code>--new-tab</code> or <code>-t</code> options can be passed to the magic to instead make
+SnakeViz open in a new browser tab.
+Opening in a new browser tab is the default behavior when the
+<code>%snakeviz</code> magics are used outside of notebooks.</p>
 <p>Note: Using the IPython <code>%snakeviz</code> magics requires internet access.
 If you are working offline, use <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun">prun</a> to save a profile file
 and then start SnakeViz from the command line.</p>
 <h2 id="generating-profiles">Generating Profiles</h2>
 <h3 id="cprofile">cProfile</h3>
-<p>You can use the <a href="https://docs.python.org/3.4/library/profile.html#module-cProfile">cProfile</a> module at the command line to create a
+<p>You can use the <a href="https://docs.python.org/3/library/profile.html#module-cProfile">cProfile</a> module at the command line to create a
 profile file for a script:</p>
 <pre><code>python -m cProfile -o program.prof my_program.py
 </code></pre>
 
-<p>See the <a href="https://docs.python.org/3.4/library/profile.html#instant-user-s-manual">user&rsquo;s manual</a> for more info and other options.</p>
+<p>See the <a href="https://docs.python.org/3/library/profile.html#instant-user-s-manual">user&rsquo;s manual</a> for more info and other options.</p>
+<p>(Note that SnakeViz <strong>does not</strong> work with profiles generated by the
+<code>profile</code> module.)</p>
 <h3 id="ipython_1">IPython</h3>
 <p>You can also generate profile files of specific code using
 IPython&rsquo;s <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun">prun</a> magic using the <code>-D</code> flag:</p>
@@ -176,26 +145,42 @@ IPython&rsquo;s <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.
 <p><code>prun</code> has both line and cell magics available,
 see the <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun">IPython docs</a> for more information.</p>
 <h2 id="interpreting-results">Interpreting Results</h2>
-<h3 id="sunburst">Sunburst</h3>
-<p><img alt="Example Sunburst" src="./img/sunburst.png" title="Example sunburst." /></p>
-<p>SnakeViz displays profiles as a sunburst in which functions are represented
-as arcs.
-A root function is a circle at the middle, with functions it calls around,
-then the functions those functions call, and so on.
-The amount of time spent inside a function is represented by
-the angular width of the arc.
-An arc that wraps most of the way around the circle represents a function
-that is taking up most of the time of its calling function, while a
-skinny arc represents a function that is using hardly any time at all.</p>
-<p>Functions don&rsquo;t just spend time calling other functions, they also have their
+<p>SnakeViz has two visualization styles, icicle (the default) and sunburst.
+In both the fraction of time spent in a function is represented by the
+extent of a visualization element, either the width of a rectangle or
+the angular extent of an arc.
+You can switch between the two styles using the &ldquo;Style&rdquo; dropdown.
+(See more below under <a href="#controls">Controls</a>.)</p>
+<p>Functions don&rsquo;t only spend time calling other functions, they also have their
 own internal time. SnakeViz shows this by putting a special child on each node
 that represents internal time. Only functions that call other functions will
 have this, functions with no calls are entirely internal time.</p>
+<h3 id="icicle">Icicle</h3>
+<p><img alt="Example Icicle" src="img/icicle.png" title="Example icicle profile visualization." /></p>
+<p>In the icicle visualization style functions are represented by rectangles.
+A root function is the top-most rectangle, with functions it calls below it,
+then the functions those call below them, and so on.
+The amount of time spent inside a function is represented by the width
+of the rectangle.
+A rectangle that stretches across most of the visualization represents
+a function that is taking up most of the time of its calling function,
+while a skinny rectangle represents a function that is using hardly
+any time at all.</p>
+<h3 id="sunburst">Sunburst</h3>
+<p><img alt="Example Sunburst" src="img/sunburst.png" title="Example sunburst profile visualization." /></p>
+<p>In the sunburst visualization style functions are represented as arcs.
+A root function is a circle at the middle, with functions it calls around,
+then the functions those functions call, and so on.
+The amount of time spent inside a function is represented by
+the angular extent of the arc (how far around the circle it goes).
+An arc that wraps most of the way around the circle represents a function
+that is taking up most of the time of its calling function, while a
+skinny arc represents a function that is using hardly any time at all.</p>
 <h3 id="function-info">Function Info</h3>
-<p>Placing your cursor over an arc will highlight that arc and any other
-visible instances of the same function call.
+<p>Placing your cursor over a rectangle or arc will highlight that function
+and any other visible instances of the same function call.
 It will also display a list of information to the left of the sunburst.</p>
-<p><img alt="Function info and highlighting" src="./img/func_info.png" title="Function info." /></p>
+<p><img alt="Function info and highlighting" src="img/func_info.png" title="Function info." /></p>
 <p>The displayed information includes:</p>
 <ul>
 <li><strong>Name:</strong> function name</li>
@@ -208,29 +193,29 @@ It will also display a list of information to the left of the sunburst.</p>
 <p>Note: For some built-in functions the file name, line number, and
 directory will be &lsquo;~&rsquo;, 0, and blank, respectively.</p>
 <h3 id="zooming-and-call-stack">Zooming and Call Stack</h3>
-<p>Clicking on an arc will zoom the visualization, making that function
+<p>Clicking on a function will zoom the visualization, making that function
 the new root and allowing you to magnify different parts of the profile.
-Clicking the center of the sunburst will zoom out one level and clicking
-the &ldquo;Reset&rdquo; button will return the visualization to its most zoomed-out
-state.</p>
-<p><img alt="Call stack example." src="./img/call_stack.png" title="Call stack example." /></p>
-<p>To the right of the sunburst is a &ldquo;Call Stack&rdquo; button.
+Clicking the top bar of the icicle visualization or the center of the sunburst
+will zoom out one level and clicking the &ldquo;Reset Zoom&rdquo; button will return the
+visualization to its most zoomed-out state.</p>
+<p><img alt="Call stack example." src="img/call_stack.png" title="Call stack example." /></p>
+<p>To the right of the vizualization is a &ldquo;Call Stack&rdquo; button.
 Clicking this will expand a list that shows all the functions
-leading up to the current root of the sunburst, with the root function
+leading up to the current root of the vizualization, with the root function
 at the bottom of the list.
 The call stack can be useful for orienting yourself when you&rsquo;ve zoomed
 into the profile.
 Click the &ldquo;Call Stack&rdquo; button again to hide the list.</p>
 <h3 id="stats-table">Stats Table</h3>
-<p>Below the sunburst visualization is a table of profile data similar to the
-one you&rsquo;d see working with Python&rsquo;s built-in <a href="https://docs.python.org/3.4/library/profile.html#module-cProfile">cProfile</a> and <a href="https://docs.python.org/3.4/library/profile.html#pstats.Stats">pstats</a>
+<p>Below the visualization is a table of profile data similar to the
+one you&rsquo;d see working with Python&rsquo;s built-in <a href="https://docs.python.org/3/library/profile.html#module-cProfile">cProfile</a> and <a href="https://docs.python.org/3/library/profile.html#module-pstats">pstats</a>
 modules.</p>
-<p><img alt="Profile stats table" src="./img/stats_table.png" title="Stats table example." /></p>
+<p><img alt="Profile stats table" src="img/stats_table.png" title="Stats table example." /></p>
 <p>The table contains one row per unique function called.
 Calls to the same function from different places are all grouped into
 one row.
 The columns are the same as described in the
-<a href="https://docs.python.org/3.4/library/profile.html#instant-user-s-manual">cProfile user&rsquo;s manual</a>:</p>
+<a href="https://docs.python.org/3/library/profile.html#instant-user-s-manual">cProfile user&rsquo;s manual</a>:</p>
 <ul>
 <li><strong>ncalls:</strong> Total number of calls to the function.
     If there are two numbers, that means the function recursed and
@@ -246,18 +231,36 @@ The columns are the same as described in the
 </ul>
 <p>The columns of the table are all sortable and the search box can be used
 to filter the table based on the <strong>filename:lineno(function)</strong> column.</p>
+<p>Clicking on a function in the table will make that function the root
+of the visualization.
+Clicking the &ldquo;Reset Root&rdquo; button to the left of the visualization will
+reset the vizualization to its original root function as determined when
+SnakeViz was started.</p>
 <h2 id="controls">Controls</h2>
-<p>SnakeViz has two controls that affect the visualization:
-&ldquo;depth&rdquo; and &ldquo;cutoff&rdquo;.
-&ldquo;Depth&rdquo; controls how deep into the call stack the application goes when
-building the graph.
+<p>SnakeViz has multiple controls that affect the visualization.
+(And clicking the &ldquo;SnakeViz&rdquo; text will bring you to these docs.)</p>
+<p><img alt="Visualization Controls" src="img/controls.png" title="Controls" /></p>
+<h3 id="reset-zoom">Reset Zoom</h3>
+<p>If you&rsquo;ve zoomed into a profile by clicking on the visualization, clicking
+the &ldquo;Reset Zoom&rdquo; button will reset the visualization to the currently
+selected root function.</p>
+<h3 id="reset-root">Reset Root</h3>
+<p>If you&rsquo;ve changed the root function by clicking on the <a href="#stats-table">stats table</a>,
+clicking the &ldquo;Reset Root&rdquo; button will reset the visualization to the root
+function determined when SnakeViz first started.</p>
+<h3 id="style">Style</h3>
+<p>Use the &ldquo;Style&rdquo; dropdown to switch between the <a href="#icicle">icicle</a> and
+<a href="#sunburst">sunburst</a> visualization styles.</p>
+<h3 id="depth">Depth</h3>
+<p>The &ldquo;Depth&rdquo; dropdown controls how deep into the call stack SnakeViz
+goes when building the visualization.
 Anything below this depth will not be shown until you zoom in by
 clicking on a new function deeper in the call stack.
 Increasing the displayed depth will show more of your profile at once,
 but it can take longer to build and display the graph.</p>
-<p><img alt="Visualization Controls" src="./img/controls.png" title="Controls" /></p>
-<p>&ldquo;Cutoff&rdquo; controls the display of functions that take up very little
-of their parents&rsquo; cumulative time.
+<h3 id="cutoff">Cutoff</h3>
+<p>The &ldquo;Cutoff&rdquo; dropdown controls the display of functions that take up very l
+ittle of their parents&rsquo; cumulative time.
 If a function&rsquo;s cumulative time divided by its parent&rsquo;s cumulative time
 is less than the currently set cutoff, then that function will be displayed
 but none of its sub-functions will be.
@@ -280,40 +283,83 @@ Please report issues on the <a href="https://github.com/jiffyclub/snakeviz/issue
 
         <footer class="col-md-12">
             <hr>
-            
-            <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
-
-        <script src="./js/jquery-1.10.2.min.js"></script>
-        <script src="./js/bootstrap-3.0.3.min.js"></script>
-        <script src="./js/highlight.pack.js"></script>
-        <script>var base_url = '.';</script>
-        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
-        <script src="./js/base.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
-                    <div class="modal-body">
-                        <p>
-                            From here you can search these documents. Enter
-                            your search terms below.
-                        </p>
-                        <form role="form">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
-                            </div>
-                        </form>
-                        <div id="mkdocs-search-results"></div>
-                    </div>
-                    <div class="modal-footer">
-                    </div>
-                </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
             </div>
         </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
     </body>
 </html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2019-03-31 21:56:02
+-->

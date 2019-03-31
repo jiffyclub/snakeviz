@@ -2,6 +2,26 @@ body {
     padding-top: 70px;
 }
 
+ul.nav .main {
+    font-weight: bold;
+}
+
+.col-md-3 {
+    padding-left: 0;
+}
+
+.col-md-9 {
+    padding-bottom: 100px;
+}
+
+.source-links {
+    float: right;
+}
+
+.col-md-9 img {
+    max-width: 100%;
+}
+
 /*
  * The code below adds some padding to the top of the current anchor target so
  * that, when navigating to it, the header isn't hidden by the navbar at the
@@ -22,7 +42,7 @@ body {
     animation: 0s 1s forwards collapse-anchor-padding-1;
 }
 
-body.clicky :target::before {
+.clicky :target::before {
     animation-name: collapse-anchor-padding-2;
 }
 
@@ -40,26 +60,6 @@ body.clicky :target::before {
     }
 }
 
-ul.nav li.main {
-    font-weight: bold;
-}
-
-div.col-md-3 {
-    padding-left: 0;
-}
-
-div.col-md-9 {
-    padding-bottom: 100px;
-}
-
-div.source-links {
-    float: right;
-}
-
-div.col-md-9 img {
-    max-width: 100%;
-}
-
 code {
     padding: 1px 3px;
     background: #f5f5f5;
@@ -72,12 +72,98 @@ pre code {
     border: none;
 }
 
-a > code {
+a code {
     color: #4582ec;
 }
 
-a > code:hover, a > code:focus {
+a:hover code, a:focus code {
     color: #134fb8;
+}
+
+kbd {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #fff;
+    background-color: #333;
+    border-radius: 3px;
+    -webkit-box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+}
+
+footer {
+    margin-top: 30px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 200;
+}
+
+.modal-dialog {
+    margin-top: 65px;
+}
+
+/* Style the admonitions. */
+
+.admonition {
+    margin-bottom: 22px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.admonition > .admonition-title {
+    margin: 0;
+    padding: 10px 15px;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+    background-color: #f5f5f5;
+    font-family: "Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+.admonition > * {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.admonition > *:not(.admonition-title):first-of-type,
+.admonition > .admonition-title + * {
+    margin-top: 15px;
+}
+
+.admonition > *:last-child {
+    margin-bottom: 15px;
+}
+
+/* Style each kind of admonition. */
+
+.admonition.note, .admonition.note > .admonition-title {
+    border-color: #5bc0de;
+}
+
+.admonition.note > .admonition-title {
+    color: #fff;
+    background-color: #5bc0de;
+}
+
+.admonition.warning, .admonition.warning > .admonition-title {
+    border-color: #f0ad4e;
+}
+
+.admonition.warning > .admonition-title {
+    color: #fff;
+    background-color: #f0ad4e;
+}
+
+.admonition.danger, .admonition.danger > .admonition-title {
+    border-color: #d9534f;
+}
+
+.admonition.danger > .admonition-title {
+    color: #fff;
+    background-color: #d9534f;
 }
 
 /*

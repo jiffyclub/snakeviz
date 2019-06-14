@@ -1,6 +1,7 @@
 site_name: SnakeViz
 site_url: https://jiffyclub.github.io/snakeviz/
 repo_url: https://github.com/jiffyclub/snakeviz/
+edit_uri: ""
 site_description: >
     SnakeViz is a browser based graphical viewer for the output of
     Python's cProfile module.

@@ -260,12 +260,19 @@ but can speed up the building and rendering of the visualization.
 ## Notes
 
 - SnakeViz currently only works with files produced by `cProfile`,
-    it will not work with files from the `profile` module.
+  it will not work with files from the `profile` module.
 - SnakeViz will sometimes be unable to create a visualization and will
-    show an error.
-    This is usually because the visualization is too complex.
-    You can make a simpler graph by increasing the cutoff, reducing the depth,
-    or profiling a smaller subsection of your code.
+  show an error.
+  This is usually because the visualization is too complex.
+  You can make a simpler graph by increasing the cutoff, reducing the depth,
+  or profiling a smaller subsection of your code.
+- `cProfile`'s data does not always allow a full reconstruction of where time
+  was spent in a program, especially when functions are called multiple
+  times from different parts of the code. When that happens SnakeViz can only
+  show the total amount of time spent in a function, not the amount spent
+  there when called by a specific caller.
+  [This issue](https://github.com/jiffyclub/snakeviz/issues/112) details
+  this limitation.
 
 ## Contact
 

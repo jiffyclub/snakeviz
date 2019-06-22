@@ -1,3 +1,11 @@
+v2.0.1
+===================
+
+* Fixes to SnakeViz embedding so that it doesn't assume jQuery is available
+  when configuring the SnakeViz iframe.
+* Add a set of default ports attempted when starting SnakeViz for
+  embedding within Jupyter (Thanks @andyljones in #125!).
+
 v2.0.0
 ===================
 

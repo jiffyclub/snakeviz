@@ -1,10 +1,10 @@
 from __future__ import print_function
 
+import errno
 import subprocess
 import tempfile
 import time
 import uuid
-import errno
 
 try:
     from urllib.parse import quote

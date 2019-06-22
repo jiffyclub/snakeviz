@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import time
 import uuid
+import errno
 
 try:
     from urllib.parse import quote
@@ -108,8 +109,18 @@ def open_snakeviz_and_display_in_notebook(filename):
         from contextlib import closing
 
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-            s.bind(("", 0))
-            return s.getsockname()[1]
+            # Try a default range of five ports, then use whatever's free.
+            ports = list(range(8080, 8085)) + [0]
+            for port in ports:
+                try:
+                    s.bind(("", port))
+                except socket.error as e:
+                    if e.errno == errno.EADDRINUSE:
+                        pass
+                    else:
+                        raise
+                else:
+                    return s.getsockname()[1]
 
     port = str(_find_free_port())
 

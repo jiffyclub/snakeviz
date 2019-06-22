@@ -10,12 +10,12 @@ try:
 except ImportError:
     from urllib import quote
 
-__all__ = ['load_ipython_extension']
+__all__ = ["load_ipython_extension"]
 
 
 JUPYTER_HTML_TEMPLATE = """
 <iframe id='snakeviz-{uuid}' frameborder=0 seamless width='100%' height='1000'></iframe>
-<script>$("#snakeviz-{uuid}").attr({{src:"http://"+document.location.hostname+":{port}{path}"}})</script>
+<script>document.getElementById("snakeviz-{uuid}").setAttribute("src", "http://" + document.location.hostname + ":{port}{path}")</script>
 """
 
 
@@ -28,9 +28,9 @@ try:
 except ImportError:
     pass
 else:
+
     @magics_class
     class SnakevizMagic(Magics):
-
         @line_cell_magic
         def snakeviz(self, line, cell=None):
             """
@@ -62,26 +62,26 @@ else:
             filename = tempfile.NamedTemporaryFile().name
 
             # parse options
-            opts, line = self.parse_options(line, 't', 'new-tab', posix=False)
+            opts, line = self.parse_options(line, "t", "new-tab", posix=False)
 
             # call signature for prun
-            line = '-q -D ' + filename + ' ' + line
+            line = "-q -D " + filename + " " + line
 
             # generate the stats file using IPython's prun magic
             ip = get_ipython()
 
             if cell:
-                ip.run_cell_magic('prun', line, cell)
+                ip.run_cell_magic("prun", line, cell)
             else:
-                ip.run_line_magic('prun', line)
+                ip.run_line_magic("prun", line)
 
             # start up a Snakeviz server
-            if _check_ipynb() and not ('t' in opts or 'new-tab' in opts):
-                print('Embedding SnakeViz in the notebook...')
+            if _check_ipynb() and not ("t" in opts or "new-tab" in opts):
+                print("Embedding SnakeViz in this document...")
                 sv = open_snakeviz_and_display_in_notebook(filename)
             else:
-                print('Opening SnakeViz in a new tab...')
-                sv = subprocess.Popen(['snakeviz', filename])
+                print("Opening SnakeViz in a new tab...")
+                sv = subprocess.Popen(["snakeviz", filename])
             # give time for the Snakeviz page to load then shut down the server
             time.sleep(3)
             sv.terminate()
@@ -103,23 +103,27 @@ def _check_ipynb():
 
 
 def open_snakeviz_and_display_in_notebook(filename):
-
     def _find_free_port():
         import socket
         from contextlib import closing
+
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-            s.bind(('', 0))
+            s.bind(("", 0))
             return s.getsockname()[1]
 
     port = str(_find_free_port())
 
     def _start_and_wait_when_ready():
         import os
+
         environ = os.environ.copy()
         environ["PYTHONUNBUFFERED"] = "TRUE"
         sv = subprocess.Popen(
-            ['snakeviz', "-s", "-H", "0.0.0.0", "-p", port, filename],
-            stdout=subprocess.PIPE, universal_newlines=True, env=environ)
+            ["snakeviz", "-s", "-H", "0.0.0.0", "-p", port, filename],
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+            env=environ,
+        )
         while True:
             line = sv.stdout.readline()
             if line.strip().startswith("snakeviz web server started"):
@@ -127,7 +131,12 @@ def open_snakeviz_and_display_in_notebook(filename):
         return sv
 
     sv = _start_and_wait_when_ready()
-    path = "/snakeviz/%s" % quote(filename, safe='')
-    display(HTML(JUPYTER_HTML_TEMPLATE.format(
-        port=port, path=path, uuid=uuid.uuid1())))
+    path = "/snakeviz/%s" % quote(filename, safe="")
+    display(
+        HTML(
+            JUPYTER_HTML_TEMPLATE.format(
+                port=port, path=path, uuid=uuid.uuid1()
+            )
+        )
+    )
     return sv

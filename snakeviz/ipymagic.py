@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import errno
 import subprocess
+import sys
 import tempfile
 import time
 import uuid
@@ -82,7 +83,9 @@ else:
                 sv = open_snakeviz_and_display_in_notebook(filename)
             else:
                 print("Opening SnakeViz in a new tab...")
-                sv = subprocess.Popen(["snakeviz", filename])
+                sv = subprocess.Popen(
+                    [sys.executable, "-m", "snakeviz", filename]
+                )
             # give time for the Snakeviz page to load then shut down the server
             time.sleep(3)
             sv.terminate()
@@ -130,7 +133,17 @@ def open_snakeviz_and_display_in_notebook(filename):
         environ = os.environ.copy()
         environ["PYTHONUNBUFFERED"] = "TRUE"
         sv = subprocess.Popen(
-            ["snakeviz", "-s", "-H", "0.0.0.0", "-p", port, filename],
+            [
+                sys.executable,
+                "-m",
+                "snakeviz",
+                "-s",
+                "-H",
+                "0.0.0.0",
+                "-p",
+                port,
+                filename,
+            ],
             stdout=subprocess.PIPE,
             universal_newlines=True,
             env=environ,

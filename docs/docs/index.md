@@ -30,6 +30,11 @@ snakeviz program.prof
 
 Run `snakeviz --help` to see available options.
 
+Note that you can provide a directory as the argument to `snakeviz`
+and it will launch a file browser interface from which you can select
+profiles to view or other directories to list.
+For example: `snakeviz path/to/directory`.
+
 ### IPython
 
 SnakeViz includes IPython line and cell magics for going straight

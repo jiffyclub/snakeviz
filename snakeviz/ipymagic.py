@@ -112,6 +112,12 @@ def open_snakeviz_and_display_in_notebook(filename):
         from contextlib import closing
 
         with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            # snakeviz frequently gets called many times in a short period.
+            # This line tells the kernel it's okay to reuse TIME-WAIT sockets,
+            # which means snakeviz will use the same socket on successive runs,
+            # which makes life with snakeviz-over-SSH much easier.
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
             # Try a default range of five ports, then use whatever's free.
             ports = list(range(8080, 8085)) + [0]
             for port in ports:

@@ -64,7 +64,7 @@ else:
             filename = tempfile.NamedTemporaryFile().name
 
             # parse options
-            opts, line = self.parse_options(line, "t", "new-tab", posix=False)
+            opts, line = self.parse_options(line, "tp:H:", "new-tab", posix=False)
 
             # call signature for prun
             line = "-q -D " + filename + " " + line
@@ -80,7 +80,7 @@ else:
             # start up a Snakeviz server
             if _check_ipynb() and not ("t" in opts or "new-tab" in opts):
                 print("Embedding SnakeViz in this document...")
-                sv = open_snakeviz_and_display_in_notebook(filename)
+                sv = open_snakeviz_and_display_in_notebook(filename,opts)
             else:
                 print("Opening SnakeViz in a new tab...")
                 sv = subprocess.Popen(
@@ -106,7 +106,7 @@ def _check_ipynb():
     return "connection_file" in cfg["IPKernelApp"]
 
 
-def open_snakeviz_and_display_in_notebook(filename):
+def open_snakeviz_and_display_in_notebook(filename,opts):
     def _find_free_port():
         import socket
         from contextlib import closing
@@ -125,8 +125,8 @@ def open_snakeviz_and_display_in_notebook(filename):
                 else:
                     return s.getsockname()[1]
 
-    port = str(_find_free_port())
-
+    port = opts["p"] if "p" in opts else str(_find_free_port())
+    H = opts["H"] if "H" in opts else "0.0.0.0"
     def _start_and_wait_when_ready():
         import os
 
@@ -139,7 +139,7 @@ def open_snakeviz_and_display_in_notebook(filename):
                 "snakeviz",
                 "-s",
                 "-H",
-                "0.0.0.0",
+                H,
                 "-p",
                 port,
                 filename,

@@ -11,7 +11,7 @@ except ImportError:
 import os
 
 
-NAME = 'snakeviz'
+NAME = 'snakeviz_study'
 VERSION = '2.1.dev'
 
 

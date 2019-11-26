@@ -34,7 +34,7 @@ else:
     @magics_class
     class SnakevizMagic(Magics):
         @line_cell_magic
-        def snakeviz(self, line, cell=None):
+        def snakeviz_study(self, line, cell=None):
             """
             Profile code and display the profile in Snakeviz.
             Works as a line or cell magic.

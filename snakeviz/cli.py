@@ -111,7 +111,7 @@ def main(argv=None):
 
     # Before starting tornado set the eventloop policy for windows and python 3.8 compatibility
     # https://github.com/tornadoweb/tornado/issues/2608
-    if sys.platform == 'win32:
+    if sys.platform == 'win32':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     
     # Go ahead and import the tornado app and start it; we do an inline import

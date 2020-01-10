@@ -4,6 +4,7 @@ This module contains the command line interface for snakeviz.
 """
 from __future__ import print_function
 
+import asyncio
 import argparse
 import os
 import random
@@ -108,9 +109,15 @@ def main(argv=None):
         parser.error('invalid port number %d: use a port between 0 and 65535'
                      % port)
 
+    # Before starting tornado set the eventloop policy for windows and python 3.8 compatibility
+    # https://github.com/tornadoweb/tornado/issues/2608
+    if sys.platform == 'win32:
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    
     # Go ahead and import the tornado app and start it; we do an inline import
     # here to avoid the extra overhead when just running the cli for --help and
     # the like
+    
     from .main import app
     import tornado.ioloop
 

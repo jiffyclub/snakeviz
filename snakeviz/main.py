@@ -2,6 +2,7 @@
 
 import os.path
 from pstats import Stats
+import json
 
 try:
     from urllib.parse import quote
@@ -60,7 +61,7 @@ class VizHandler(tornado.web.RequestHandler):
                 [[displayname, quote(os.path.join(path, linkname), safe='')]])
 
         self.render(
-            'dir.html', dir_name=path, dir_entries=dir_entries)
+            'dir.html', dir_name=path, dir_entries=json.dumps(dir_entries))
 
 
 handlers = [(r'/snakeviz/(.*)', VizHandler)]

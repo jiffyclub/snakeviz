@@ -1,3 +1,11 @@
+v2.1.0
+===================
+
+* Fix SnakeViz for Windows and Python 3.8 (thanks @daniel-butler in #139).
+* Adds helpful title text to the stats table (thanks @PeterJCLaw in #142).
+* Fixes a Python 2.7 compatibility issue with directory listing
+  (thanks @joranbeasley in #144).
+
 v2.0.1
 ===================
 

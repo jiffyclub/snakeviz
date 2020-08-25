@@ -77,13 +77,13 @@ select {
 #sv-depth-label {
   font-family: monospace;
   position: absolute;
-  top: 220px;
+  top: 240px;
 }
 
 #sv-cutoff-label {
   font-family: monospace;
   position: absolute;
-  top: 260px;
+  top: 320px;
 }
 
 #sv-info-div {

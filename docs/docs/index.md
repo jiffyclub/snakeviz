@@ -50,7 +50,7 @@ Then use the `%snakeviz` (for a single line of code) and
 individual lines or entire blocks of code:
 
 ```
-% snakeviz glob.glob('*.txt')
+%snakeviz glob.glob('*.txt')
 ```
 
 ```

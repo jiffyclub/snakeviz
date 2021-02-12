@@ -273,6 +273,9 @@ but can speed up the building and rendering of the visualization.
   there when called by a specific caller.
   [This issue](https://github.com/jiffyclub/snakeviz/issues/112) details
   this limitation.
+- To use SnakeViz inside a docker container you will need to expose
+  the ports 8080:8085 from the container to your host. This allows the host web
+  browser to see the container SnakeViz server.  
 
 ## Contact
 

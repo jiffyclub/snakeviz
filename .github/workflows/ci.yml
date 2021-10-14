@@ -18,17 +18,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
-        exclude:
+        include:
           - os: macos-latest
-            python-version: 3.5
+            python-version: "2.7"
           - os: macos-latest
-            python-version: 3.6
-          - os: macos-latest
-            python-version: 3.7
-          - os: macos-latest
-            python-version: 3.8
+            python-version: "3.9"
 
     steps:
     - name: Checkout code

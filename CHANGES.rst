@@ -1,3 +1,9 @@
+v2.1.1
+===================
+
+* Improved styling for snakeviz dropdowns (thanks @dannysepler in #166)
+* Improved performance of the icicle chart (thanks @dannysepler in #165)
+
 v2.1.0
 ===================
 

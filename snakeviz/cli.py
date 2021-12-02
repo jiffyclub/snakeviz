@@ -14,9 +14,9 @@ import webbrowser
 from pstats import Stats
 
 try:
-    from urllib.parse import quote
+    from urllib.parse import quote, quote_plus
 except ImportError:
-    from urllib import quote
+    from urllib import quote, quote_plus
 
 from . import version
 
@@ -79,6 +79,25 @@ def main(argv=None):
     if args.browser and args.server:
         parser.error("options --browser and --server are mutually exclusive")
 
+    filename = os.path.abspath(args.profile[0])
+    if not os.path.isdir(filename):
+        try:
+            open(filename)
+        except IOError as e:
+            parser.error('the file %s could not be opened: %s'
+                         % (filename, str(e)))
+
+        try:
+            Stats(filename)
+        except Exception:
+            parser.error(('The file %s is not a valid profile. ' % filename) +
+                         'Generate profiles using: \n\n'
+                         '\tpython -m cProfile -o my_program.prof my_program.py\n\n'
+                         'Note that snakeviz must be run under the same '
+                         'version of Python as was used to create the profile.\n')
+
+    filename = quote(filename, safe='')
+
     paths = [os.path.abspath(p) for p in args.profile]
     for p in paths:
         if not os.path.exists(p):
@@ -104,24 +123,6 @@ def main(argv=None):
     paths='&'.join(paths)
     paths = quote_plus(paths)
             
-    if not os.path.isdir(filename):
-        try:
-            open(filename)
-        except IOError as e:
-            parser.error('the file %s could not be opened: %s'
-                         % (filename, str(e)))
-
-        try:
-            Stats(filename)
-        except Exception:
-            parser.error(('The file %s is not a valid profile. ' % filename) +
-                         'Generate profiles using: \n\n'
-                         '\tpython -m cProfile -o my_program.prof my_program.py\n\n'
-                         'Note that snakeviz must be run under the same '
-                         'version of Python as was used to create the profile.\n')
-
-    filename = quote(filename, safe='')
-
     hostname = args.hostname
     port = args.port
 

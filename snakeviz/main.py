@@ -23,17 +23,21 @@ settings = {
 
 
 class VizHandler(tornado.web.RequestHandler):
-    def get(self, profile_name):
-        abspath = os.path.abspath(profile_name)
-        if os.path.isdir(abspath):
-            self._list_dir(abspath)
+    def get(self, profiles):
+        profiles = unquote_plus(profiles)
+        individual_profiles = profiles.split('&')
+
+        # abspath = os.path.abspath(profile_name)  Already absolute from client
+        if len(individual_profiles) == 1 and os.path.isdir(individual_profiles[0]):
+            self._list_dir(individual_profiles[0])
         else:
+            display_name = 'Multiple profiles' if len(individual_profiles)>1 else individual_profiles[0]
             try:
-                s = Stats(profile_name)
-            except:
-                raise RuntimeError('Could not read %s.' % profile_name)
+                s = Stats(*individual_profiles)  # Merge one or more profiles
+            except Exception as e:
+                raise RuntimeError('Error getting stats for %s: %s' % (individual_profiles, str(e)))
             self.render(
-                'viz.html', profile_name=profile_name,
+                'viz.html', display_name=display_name,
                 table_rows=table_rows(s), callees=json_stats(s))
 
     def _list_dir(self, path):

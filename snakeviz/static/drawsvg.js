@@ -243,7 +243,6 @@ var drawSunburst = function drawSunburst(json) {
     .attr("d", params["arc"])
     .attr("fill-rule", "evenodd")
     .style("fill", color)
-    .style("stroke", "#fff")
     .on('click', click)
     .call(apply_mouseover);
 };
@@ -270,7 +269,6 @@ var drawIcicle = function drawIcicle(json) {
       .attr("height", function(d) { return y(d.dy); })
       .attr("fill-rule", "evenodd")
       .attr("fill", color)
-      .attr("stroke", "#FFF")
       .on('click', click)
       .call(apply_mouseover);
 

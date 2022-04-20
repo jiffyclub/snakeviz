@@ -56,7 +56,7 @@ setup(
                      'static/images/*.png',
                      'templates/*.html']
     },
-    install_requires=['tornado>=2.0'],
+    install_requires=['tornado>=2.0', 'requests>=2.25.1'],
     entry_points={
         'console_scripts': ['snakeviz = snakeviz.cli:main']
     }

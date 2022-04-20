@@ -1,11 +1,13 @@
 from __future__ import print_function
 
 import errno
+import os
 import subprocess
 import sys
 import tempfile
 import time
-import uuid
+import re
+import html
 
 try:
     from urllib.parse import quote
@@ -14,12 +16,7 @@ except ImportError:
 
 __all__ = ["load_ipython_extension"]
 
-
-JUPYTER_HTML_TEMPLATE = """
-<iframe id='snakeviz-{uuid}' frameborder=0 seamless width='100%' height='1000'></iframe>
-<script>document.getElementById("snakeviz-{uuid}").setAttribute("src", "http://" + document.location.hostname + ":{port}{path}")</script>
-"""
-
+HTML_TEMPLATE = "<iframe srcdoc=\"{html_escaped}\" frameborder=0 seamless width='100%' height='1000'></iframe>"
 
 # Users may be using snakeviz in an environment where IPython is not
 # installed, this try/except makes sure that snakeviz is operational
@@ -54,6 +51,10 @@ else:
             use this flag to open snakeviz visualization in a new tab
             instead of embedded within the notebook.
 
+            -p
+            Use this flag to make snakeviz use an existing profile output
+            rather than generating a new one.
+
             Note that this will briefly open a server with host 0.0.0.0,
             which in some situations may present a slight security risk as
             0.0.0.0 means that the server will be available on all network
@@ -61,21 +62,27 @@ else:
 
             """
             # get location for saved profile
+
             filename = tempfile.NamedTemporaryFile().name
 
             # parse options
-            opts, line = self.parse_options(line, "t", "new-tab", posix=False)
+            opts, line = self.parse_options(line, "tp:", "new-tab", posix=False)
 
-            # call signature for prun
-            line = "-q -D " + filename + " " + line
-
-            # generate the stats file using IPython's prun magic
-            ip = get_ipython()
-
-            if cell:
-                ip.run_cell_magic("prun", line, cell)
+            if 'p' in opts:
+                filename = opts['p']
+                if not os.path.exists(filename):
+                    raise ValueError(f'Profile file not found: {filename}')
             else:
-                ip.run_line_magic("prun", line)
+                # call signature for prun
+                line = "-q -D " + filename + " " + line
+
+                # generate the stats file using IPython's prun magic
+                ip = get_ipython()  # noqa
+
+                if cell:
+                    ip.run_cell_magic("prun", line, cell)
+                else:
+                    ip.run_line_magic("prun", line)
 
             # start up a Snakeviz server
             if _check_ipynb() and not ("t" in opts or "new-tab" in opts):
@@ -83,9 +90,7 @@ else:
                 sv = open_snakeviz_and_display_in_notebook(filename)
             else:
                 print("Opening SnakeViz in a new tab...")
-                sv = subprocess.Popen(
-                    [sys.executable, "-m", "snakeviz", filename]
-                )
+                sv = subprocess.Popen([sys.executable, "-m", "snakeviz", filename])
             # give time for the Snakeviz page to load then shut down the server
             time.sleep(3)
             sv.terminate()
@@ -102,7 +107,7 @@ def _check_ipynb():
     Jupyter Notebook.
 
     """
-    cfg = get_ipython().config
+    cfg = get_ipython().config  # noqa
     return "connection_file" in cfg["IPKernelApp"]
 
 
@@ -145,7 +150,7 @@ def open_snakeviz_and_display_in_notebook(filename):
                 "snakeviz",
                 "-s",
                 "-H",
-                "0.0.0.0",
+                "localhost",
                 "-p",
                 port,
                 filename,
@@ -161,12 +166,22 @@ def open_snakeviz_and_display_in_notebook(filename):
         return sv
 
     sv = _start_and_wait_when_ready()
-    path = "/snakeviz/%s" % quote(filename, safe="")
-    display(
-        HTML(
-            JUPYTER_HTML_TEMPLATE.format(
-                port=port, path=path, uuid=uuid.uuid1()
-            )
-        )
+    path = "snakeviz/%s" % quote(filename, safe="")
+
+    import requests
+
+    r = requests.get(f"http://localhost:{port}/{path}")
+
+    html_ = r.text
+
+    # this bit based on https://gist.github.com/jiffyclub/6b5e0f0f05ab487ff607
+    RESTR = r'(?<!] \+ ")/static/'
+    REPLACE_WITH = (
+        "https://cdn.jsdelivr.net/gh/jiffyclub/snakeviz@2.1.0/snakeviz/static/"
     )
+    html_cdn = re.sub(RESTR, REPLACE_WITH, html_)
+
+    html_escaped = html.escape(html_cdn)
+
+    display(HTML(HTML_TEMPLATE.format(html_escaped=html_escaped)))
     return sv

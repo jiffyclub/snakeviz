@@ -28,7 +28,7 @@
     </span>
 
     <!-- style select -->
-    <label id='sv-style-label'>Style:
+    <label id='sv-style-label'>Style:&nbsp;
       <select name="sv-style" id="sv-style-select">
         <option value="icicle" selected>Icicle</option>
         <option value="sunburst">Sunburst</option>
@@ -36,7 +36,7 @@
     </label>
 
     <!-- depth select -->
-    <label id='sv-depth-label'>Depth:
+    <label id='sv-depth-label'>Depth:&nbsp;
       <select name="sv-depth" id="sv-depth-select">
         {% for i in [3, 5, 10, 15, 20] %}
           <option value="{{i}}" {% if i == 10 %}selected{% end %}>{{i}}</option>

@@ -301,13 +301,8 @@ var drawIcicle = function drawIcicle(json) {
 
   // Remove labels that don't fit
   d3.selectAll("text")
-    .each(function(d, a, b) {
-      // var text = d3.selectd(this);
-      var bbox = this.getBBox();
-      if (bbox.width > x(d.dx)) {
-        this.remove();
-      }
-    });
+    .filter(function(d) { return this.getBBox().width > x(d.dx); })
+    .remove();
 };
 
 // Clear and redraw the visualization

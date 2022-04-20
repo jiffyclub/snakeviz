@@ -1,8 +1,8 @@
 SnakeViz
 ========
 
-.. image:: https://travis-ci.org/jiffyclub/snakeviz.svg?branch=master
-    :target: https://travis-ci.org/jiffyclub/snakeviz
+.. image:: https://github.com/jiffyclub/snakeviz/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/jiffyclub/snakeviz/actions/workflows/ci.yml
     :alt: Build Status
 
 .. image:: https://img.shields.io/pypi/v/snakeviz.svg

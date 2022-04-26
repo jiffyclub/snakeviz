@@ -17,15 +17,15 @@ __all__ = ["load_ipython_extension"]
 
 JUPYTER_HTML_TEMPLATE = """
 <iframe id='snakeviz-{uuid}' frameborder=0 seamless width='100%' height='1000'></iframe>
-<script>document.getElementById("snakeviz-{uuid}").setAttribute("src", "http://" + document.location.hostname + ":{port}{path}")</script>
+<script>document.getElementById("snakeviz-{uuid}").setAttribute("src", "http://{host}:{port}{path}")</script>
 """
-
+DEFAULT_HOST = "\" + document.location.hostname + \""
 
 # Users may be using snakeviz in an environment where IPython is not
 # installed, this try/except makes sure that snakeviz is operational
 # in that case.
 try:
-    from IPython.core.magic import Magics, magics_class, line_cell_magic
+    from IPython.core.magic import Magics, magics_class, line_cell_magic, line_magic
     from IPython.display import display, HTML
 except ImportError:
     pass
@@ -33,6 +33,12 @@ else:
 
     @magics_class
     class SnakevizMagic(Magics):
+
+        def __init__(self, shell=None, **kwargs):
+            super().__init__(shell=shell, **kwargs)
+            self._host = None
+            self._port = None
+
         @line_cell_magic
         def snakeviz(self, line, cell=None):
             """
@@ -80,7 +86,7 @@ else:
             # start up a Snakeviz server
             if _check_ipynb() and not ("t" in opts or "new-tab" in opts):
                 print("Embedding SnakeViz in this document...")
-                sv = open_snakeviz_and_display_in_notebook(filename)
+                sv = open_snakeviz_and_display_in_notebook(filename, self._host, self._port)
             else:
                 print("Opening SnakeViz in a new tab...")
                 sv = subprocess.Popen(
@@ -90,6 +96,33 @@ else:
             time.sleep(3)
             sv.terminate()
 
+        @line_magic
+        def snakeviz_config(self, line):
+            """
+            Configure the port and host name for snakeviz.
+
+            This line magic takes two options, -h or -p (or alternatively the
+            long forms --host and --post) for configuring the host and port,
+            respectively, of the snakeviz server that is spun up when the
+            snakeviz magic is called.
+
+            The host is the url that will be used by the browser to connect
+            to the server, and the port is the port used by the server and
+            which will be supplied by the browser when it connects to the
+            server.
+            """
+            opts, line = self.parse_options(line, "h:p:", "host=", "port=")
+            for opt in opts:
+                if opt in ("h", "host"):
+                    self._host = opts[opt]
+                elif opt in ("p", "port"):
+                    self._port = opts[opt]
+                else:
+                    raise ValueError("Unsupported option {opt}.".format(opt))
+            host = self._host or DEFAULT_HOST
+            port = self._port or "dynamically chosen"
+            print("Snakeviz configured with host {host} and port {port}".format(host=host,
+                                                                                port=port))
 
 def load_ipython_extension(ipython):
     """Called when user runs %load_ext snakeviz"""
@@ -106,7 +139,7 @@ def _check_ipynb():
     return "connection_file" in cfg["IPKernelApp"]
 
 
-def open_snakeviz_and_display_in_notebook(filename):
+def open_snakeviz_and_display_in_notebook(filename, override_host=None, override_port=None):
     def _find_free_port():
         import socket
         from contextlib import closing
@@ -131,7 +164,7 @@ def open_snakeviz_and_display_in_notebook(filename):
                 else:
                     return s.getsockname()[1]
 
-    port = str(_find_free_port())
+    port = override_port or str(_find_free_port())
 
     def _start_and_wait_when_ready():
         import os
@@ -162,10 +195,12 @@ def open_snakeviz_and_display_in_notebook(filename):
 
     sv = _start_and_wait_when_ready()
     path = "/snakeviz/%s" % quote(filename, safe="")
+    host = override_host or DEFAULT_HOST
+    print(display)
     display(
         HTML(
             JUPYTER_HTML_TEMPLATE.format(
-                port=port, path=path, uuid=uuid.uuid1()
+                port=port, path=path, uuid=uuid.uuid1(), host=host
             )
         )
     )

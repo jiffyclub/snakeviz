@@ -72,6 +72,19 @@ Note: Using the IPython `%snakeviz` magics requires internet access.
 If you are working offline, use [prun][] to save a profile file
 and then start SnakeViz from the command line.
 
+The snakeviz server that is set up can also be configured for
+remote access. You can configure the host and port of this 
+server using
+
+```python
+%snakeviz_config -h localhost -p 8900
+```
+
+A use for this is in running Jupyter in one server, but 
+browsing to this from another location. Typically, one does this 
+by port forwarding using ssh, in this case one can forward the
+specified port to enable snakeviz in the browser.
+
 ## Generating Profiles
 
 ### cProfile

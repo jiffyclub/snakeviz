@@ -47,7 +47,7 @@ def build_parser():
     parser = SVArgumentParser(
         description='Start SnakeViz to view a Python profile.')
 
-    parser.add_argument('filename', help='Python profile to view')
+    parser.add_argument('filename', nargs='?', help='Python profile to view')
 
     parser.add_argument('-v', '--version', action='version',
                         version=('%(prog)s ' + version.version))
@@ -79,25 +79,26 @@ def main(argv=None):
     if args.browser and args.server:
         parser.error("options --browser and --server are mutually exclusive")
 
-    filename = os.path.abspath(args.filename)
-    if not os.path.exists(filename):
-        parser.error('the path %s does not exist' % filename)
+    filename = os.path.abspath(args.filename) if args.filename is not None else ''
+    if filename:
+        if not os.path.exists(filename):
+            parser.error('the path %s does not exist' % filename)
 
-    if not os.path.isdir(filename):
-        try:
-            open(filename)
-        except IOError as e:
-            parser.error('the file %s could not be opened: %s'
-                         % (filename, str(e)))
+        if not os.path.isdir(filename):
+            try:
+                open(filename)
+            except IOError as e:
+                parser.error('the file %s could not be opened: %s'
+                            % (filename, str(e)))
 
-        try:
-            Stats(filename)
-        except Exception:
-            parser.error(('The file %s is not a valid profile. ' % filename) +
-                         'Generate profiles using: \n\n'
-                         '\tpython -m cProfile -o my_program.prof my_program.py\n\n'
-                         'Note that snakeviz must be run under the same '
-                         'version of Python as was used to create the profile.\n')
+            try:
+                Stats(filename)
+            except Exception:
+                parser.error(('The file %s is not a valid profile. ' % filename) +
+                            'Generate profiles using: \n\n'
+                            '\tpython -m cProfile -o my_program.prof my_program.py\n\n'
+                            'Note that snakeviz must be run under the same '
+                            'version of Python as was used to create the profile.\n')
 
     filename = quote(filename, safe='')
 

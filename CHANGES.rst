@@ -1,3 +1,9 @@
+v2.1.2
+===================
+
+* Add dark theme (thanks @martinbagic in #173)
+* Add python-requires metadata (thanks @matthewfeickert in #188)
+
 v2.1.1
 ===================
 

@@ -7,7 +7,7 @@ import os
 
 
 NAME = 'snakeviz'
-VERSION = '2.2.dev.0'
+VERSION = '2.1.2'
 
 
 # Create a simple version.py module; less trouble than hard-coding the version
@@ -56,7 +56,7 @@ setup(
                      'static/images/*.png',
                      'templates/*.html']
     },
-    python_requires = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
     install_requires=['tornado>=2.0'],
     entry_points={
         'console_scripts': ['snakeviz = snakeviz.cli:main']

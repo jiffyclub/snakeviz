@@ -1,3 +1,9 @@
+:root {
+  --dark-theme-white: rgb(200, 200, 200);
+  --dark-theme-gray: #444;
+  --dark-theme-black: #1c1c1c;
+}
+
 body {
   padding: 20px;
 }
@@ -225,4 +231,85 @@ select {
 
 .dir-listing {
   margin-top: 20px;
+}
+
+g#container rect, g#container path {
+  stroke: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: var(--dark-theme-black);
+    color: var(--dark-theme-white);
+  }
+
+  g#container rect, g#container path {
+    stroke: var(--dark-theme-black);
+  }
+
+  #sv-call-stack-list {
+    background: var(--dark-theme-gray);
+  }
+
+  #sv-style-select, #sv-depth-select, #sv-cutoff-select {
+    background: var(--dark-theme-gray);
+    color: var(--dark-theme-white)
+  }
+
+  #sv-style-label {
+    color: var(--dark-theme-white)
+  }
+
+  button {
+    background: var(--dark-theme-gray);
+    border-color: var(--dark-theme-white);
+    color: var(--dark-theme-white);
+  }
+
+  button:hover {
+    background: #555;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    color: rgb(110, 110, 110);
+    border-color: rgb(110, 110, 110);
+  }
+
+  button:disabled:hover {
+    background: #555;
+    cursor: default;
+  }
+
+  #table_div label {
+    color: var(--dark-theme-white);
+  }
+
+  #table_div input {
+    background-color: #666;
+    color: var(--dark-theme-white);
+  }
+
+  #table_div tr {
+    background-color: var(--dark-theme-black);
+  }
+
+  #table_div td.data-table-hover {
+    background-color: #222;
+  }
+
+  #table_div td.sorting_1 {
+    background-color: #282828;
+  }
+
+  #table_div th.sorting {
+    background-color: #333;
+
+  }
+
+  #table_div th.sorting_desc, #table_div th.sorting_asc {
+    background-color: var(--dark-theme-gray);
+
+  }
+
 }

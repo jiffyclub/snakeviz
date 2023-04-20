@@ -18,7 +18,7 @@ try:
 except ImportError:
     from urllib import quote
 
-from . import version
+from snakeviz import VERSION
 
 
 # As seen in IPython:
@@ -50,7 +50,7 @@ def build_parser():
     parser.add_argument('filename', help='Python profile to view')
 
     parser.add_argument('-v', '--version', action='version',
-                        version=('%(prog)s ' + version.version))
+                        version=('%(prog)s ' + VERSION))
 
     parser.add_argument('-H', '--hostname', metavar='ADDR', default='127.0.0.1',
                         help='hostname to bind to (default: %(default)s)')

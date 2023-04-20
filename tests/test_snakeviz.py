@@ -15,7 +15,7 @@ except ImportError:
 import pytest
 import requests
 
-from snakeviz import version
+from snakeviz import VERSION
 
 
 @contextmanager
@@ -87,5 +87,5 @@ def test_version():
         ['snakeviz', '--version'], stdout=sp.PIPE, stderr=sp.PIPE)
     out, err = vcall.communicate()
     # in Python <= 3.3 this comes out on stderr, otherwise on stdout
-    assert version.version in out.decode('utf-8') or \
-        version.version in err.decode('utf-8')
+    assert VERSION in out.decode('utf-8') or \
+        VERSION in err.decode('utf-8')

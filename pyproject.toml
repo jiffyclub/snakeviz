@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=43"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "snakeviz"
+authors = [
+    {name = "Matt Davis", email = "jiffyclub@gmail.com"},
+]
+description = "A web-based viewer for Python profiler output"
+readme = "README.rst"
+license = { file = "LICENSE.txt" }
+requires-python = ">=3.7"
+dependencies = ["tornado>=2.0"]
+dynamic = ["version"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: JavaScript",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development"
+]
+
+[project.scripts]
+snakeviz = "snakeviz.cli:main"
+
+[project.urls]
+homepage = "https://jiffyclub.github.io/snakeviz/"
+repository = "https://github.com/jiffyclub/snakeviz.git"
+changelog = "https://github.com/jiffyclub/snakeviz/blob/master/CHANGES.rst"
+
+[tool.setuptools.dynamic]
+version = {attr = "snakeviz.VERSION"}

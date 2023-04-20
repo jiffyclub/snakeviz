@@ -105,9 +105,6 @@ venv.bak/
 
 # End of https://www.gitignore.io/api/python
 
-# Generated files
-snakeviz/version.py
-
 #mkdocs build dir
 docs/site
 

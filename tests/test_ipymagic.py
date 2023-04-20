@@ -22,7 +22,7 @@ def test_snakeviz_magic_browser_default(shell):
         with mock.patch.object(snakeviz.ipymagic, "display") as mock_display:
             shell.run_line_magic("snakeviz", "print()")
             assert mock_display.called
-            html = mock_display.call_args.args[0]._repr_html_()
+            html = mock_display.call_args[0][0]._repr_html_()
             assert "\" + document.location.hostname + \"" in html
 
 
@@ -43,7 +43,7 @@ def test_snakeviz_config(config_str, test_str, shell):
         with mock.patch.object(snakeviz.ipymagic, "display") as mock_display:
             shell.run_line_magic("snakeviz", "print()")
             assert mock_display.called
-            html = mock_display.call_args.args[0]._repr_html_()
+            html = mock_display.call_args[0][0]._repr_html_()
             assert test_str in html
 
 

@@ -1,3 +1,10 @@
+v2.2.0
+===================
+
+* Add configuration options for the %snakeviz magic
+  (thanks @dabacon in #174)
+* Drop explicit support for EOL Pythons
+
 v2.1.2
 ===================
 

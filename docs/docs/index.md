@@ -13,7 +13,7 @@ but official support has been dropped now Python 2 is EOL.
 SnakeViz is available [on PyPI][pypi]. Install with [pip][]:
 
 ```
-pip install snakeviz
+python -m pip install snakeviz
 ```
 
 ## Starting SnakeViz

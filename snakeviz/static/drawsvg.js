@@ -292,7 +292,7 @@ var drawIcicle = function drawIcicle(json) {
     .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); });
   // Append the time
   labels.append("tspan")
-    .text(function(d) { return d.cumulative.toPrecision(3) + " s"; })
+    .text(function(d) { return d.time.toPrecision(3) + " s"; })
     .attr("text-anchor", "middle")
     .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); })
     .attr("dy", "1.2em");

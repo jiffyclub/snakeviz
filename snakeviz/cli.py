@@ -99,8 +99,6 @@ def main(argv=None):
                          'Note that snakeviz must be run under the same '
                          'version of Python as was used to create the profile.\n')
 
-    filename = quote(filename, safe='')
-
     hostname = args.hostname
     port = args.port
 
@@ -121,6 +119,8 @@ def main(argv=None):
     from .main import app
     import tornado.ioloop
 
+    app.set_allowed_paths([filename])
+
     # As seen in IPython:
     # https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
     # See the IPython license at:
@@ -137,6 +137,7 @@ def main(argv=None):
         print('No available port found.')
         return 1
 
+    filename = quote(filename, safe='')
     url = "http://{0}:{1}/snakeviz/{2}".format(hostname, port, filename)
     print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port)))

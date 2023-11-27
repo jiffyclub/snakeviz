@@ -6,7 +6,6 @@ This module contains the command line interface for snakeviz.
 import argparse
 import os
 import random
-import socket
 import sys
 import threading
 import webbrowser
@@ -123,7 +122,7 @@ def main(argv=None):
     for p in random_ports(port, 10):
         try:
             app.listen(p, address=hostname)
-        except OSError as e:
+        except OSError:
             print(f'Port {p} in use, trying another.')
         else:
             port = p

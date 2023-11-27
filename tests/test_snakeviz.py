@@ -21,7 +21,7 @@ from snakeviz import VERSION
 @contextmanager
 def snakeviz(fname, port=None):
     if port:
-        args = 'snakeviz -s --port {0}'.format(port)
+        args = f'snakeviz -s --port {port}'
     else:
         args = 'snakeviz -s'
 
@@ -54,7 +54,7 @@ def port(request):
 
 
 def snakeviz_url(path, port):
-    return 'http://localhost:{0}/snakeviz/{1}'.format(
+    return 'http://localhost:{}/snakeviz/{}'.format(
         port or 8080,  # default port for snakeviz
         quote(path))
 

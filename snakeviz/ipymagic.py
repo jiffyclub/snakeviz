@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import errno
 import subprocess
 import sys
@@ -156,7 +154,7 @@ def open_snakeviz_and_display_in_notebook(filename, override_host=None, override
             for port in ports:
                 try:
                     s.bind(("", port))
-                except socket.error as e:
+                except OSError as e:
                     if e.errno == errno.EADDRINUSE:
                         pass
                     else:

@@ -11,11 +11,7 @@ import sys
 import threading
 import webbrowser
 from pstats import Stats
-
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib import quote
+from urllib.parse import quote
 
 from snakeviz import VERSION
 

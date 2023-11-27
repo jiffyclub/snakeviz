@@ -4,11 +4,7 @@ import sys
 import tempfile
 import time
 import uuid
-
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib import quote
+from urllib.parse import quote
 
 __all__ = ["load_ipython_extension"]
 

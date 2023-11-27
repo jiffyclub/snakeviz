@@ -3,11 +3,7 @@
 import os.path
 from pstats import Stats
 import json
-
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib import quote
+from urllib.parse import quote
 
 import tornado.ioloop
 import tornado.web

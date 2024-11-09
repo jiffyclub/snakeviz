@@ -1,3 +1,3 @@
 from .ipymagic import *
 
-VERSION = version = __version__ = '2.3.dev.0'
+VERSION = version = __version__ = '2.2.2'

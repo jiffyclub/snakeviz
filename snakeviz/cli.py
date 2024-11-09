@@ -2,21 +2,15 @@
 This module contains the command line interface for snakeviz.
 
 """
-from __future__ import print_function
 
 import argparse
 import os
 import random
-import socket
 import sys
 import threading
 import webbrowser
 from pstats import Stats
-
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib import quote
+from urllib.parse import quote
 
 from snakeviz import VERSION
 
@@ -86,7 +80,7 @@ def main(argv=None):
     if not os.path.isdir(filename):
         try:
             open(filename)
-        except IOError as e:
+        except OSError as e:
             parser.error('the file %s could not be opened: %s'
                          % (filename, str(e)))
 
@@ -128,8 +122,8 @@ def main(argv=None):
     for p in random_ports(port, 10):
         try:
             app.listen(p, address=hostname)
-        except socket.error as e:
-            print('Port {0} in use, trying another.'.format(p))
+        except OSError:
+            print(f'Port {p} in use, trying another.')
         else:
             port = p
             break
@@ -137,9 +131,9 @@ def main(argv=None):
         print('No available port found.')
         return 1
 
-    url = "http://{0}:{1}/snakeviz/{2}".format(hostname, port, filename)
-    print(('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
-           (hostname, port)))
+    url = f"http://{hostname}:{port}/snakeviz/{filename}"
+    print('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
+           (hostname, port))
     print(url)
 
     if not args.server:

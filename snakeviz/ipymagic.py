@@ -1,16 +1,10 @@
-from __future__ import print_function
-
 import errno
 import subprocess
 import sys
 import tempfile
 import time
 import uuid
-
-try:
-    from urllib.parse import quote
-except ImportError:
-    from urllib import quote
+from urllib.parse import quote
 
 __all__ = ["load_ipython_extension"]
 
@@ -156,7 +150,7 @@ def open_snakeviz_and_display_in_notebook(filename, override_host=None, override
             for port in ports:
                 try:
                     s.bind(("", port))
-                except socket.error as e:
+                except OSError as e:
                     if e.errno == errno.EADDRINUSE:
                         pass
                     else:

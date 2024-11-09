@@ -10,7 +10,7 @@ authors = [
 description = "A web-based viewer for Python profiler output"
 readme = "README.rst"
 license = { file = "LICENSE.txt" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = ["tornado>=2.0"]
 dynamic = ["version"]
 classifiers = [
@@ -19,7 +19,6 @@ classifiers = [
     "Programming Language :: JavaScript",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",

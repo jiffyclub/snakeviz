@@ -4,7 +4,7 @@ SnakeViz is a browser based graphical viewer for the output of Python's
 [cProfile][] module and an alternative to using the standard library
 [pstats module][pstats].
 It was originally inspired by [RunSnakeRun][].
-SnakeViz works on Python 3.8+.
+SnakeViz works on Python 3.9+.
 SnakeViz v2.1.2 and older are still likely to work on Python 2.7,
 but official support has been dropped now Python 2 is EOL.
 

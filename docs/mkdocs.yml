@@ -6,6 +6,6 @@ site_description: >
     SnakeViz is a browser based graphical viewer for the output of
     Python's cProfile module.
 site_author: Matt Davis (jiffyclub)
-theme: readable
+theme: mkdocs
 markdown_extensions:
     - smarty

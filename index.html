@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,50 +10,38 @@
         <link rel="canonical" href="https://jiffyclub.github.io/snakeviz/">
         <link rel="shortcut icon" href="img/favicon.ico">
         <title>SnakeViz</title>
-        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/fontawesome.min.css" rel="stylesheet">
+        <link href="css/brands.min.css" rel="stylesheet">
+        <link href="css/solid.min.css" rel="stylesheet">
+        <link href="css/v4-font-face.min.css" rel="stylesheet">
         <link href="css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/mono-blue.min.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
-
-        <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap-3.0.3.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script> 
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
     </head>
 
     <body class="homepage">
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-
-                <!-- Collapsed navigation -->
-                <div class="navbar-header">
-                    <!-- Expander button -->
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href=".">SnakeViz</a>
-                </div>
+                <a class="navbar-brand" href=".">SnakeViz</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <!-- Expanded navigation -->
-                <div class="navbar-collapse collapse">
+                <div id="navbar-collapse" class="navbar-collapse collapse">
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li>
-                                <a href="https://github.com/jiffyclub/snakeviz/edit/master/docs/index.md"><i class="fa fa-github"></i> Edit on GitHub</a>
+                            <li class="nav-item">
+                                <a href="https://github.com/jiffyclub/snakeviz/" class="nav-link"><i class="fa-brands fa-github"></i> GitHub</a>
                             </li>
                     </ul>
                 </div>
@@ -61,62 +49,95 @@
         </div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#snakeviz">SnakeViz</a></li>
-            <li><a href="#installation">Installation</a></li>
-            <li><a href="#starting-snakeviz">Starting SnakeViz</a></li>
-            <li><a href="#generating-profiles">Generating Profiles</a></li>
-            <li><a href="#interpreting-results">Interpreting Results</a></li>
-            <li><a href="#controls">Controls</a></li>
-            <li><a href="#notes">Notes</a></li>
-            <li><a href="#contact">Contact</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#snakeviz" class="nav-link">SnakeViz</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#installation" class="nav-link">Installation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#starting-snakeviz" class="nav-link">Starting SnakeViz</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#generating-profiles" class="nav-link">Generating Profiles</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#interpreting-results" class="nav-link">Interpreting Results</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#controls" class="nav-link">Controls</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#notes" class="nav-link">Notes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#contact" class="nav-link">Contact</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="snakeviz">SnakeViz</h1>
 <p>SnakeViz is a browser based graphical viewer for the output of Python&rsquo;s
 <a href="https://docs.python.org/3/library/profile.html#module-cProfile">cProfile</a> module and an alternative to using the standard library
 <a href="https://docs.python.org/3/library/profile.html#module-pstats">pstats module</a>.
 It was originally inspired by <a href="http://www.vrplumber.com/programming/runsnakerun/">RunSnakeRun</a>.
-SnakeViz works on Python 2.7 and Python 3.
-SnakeViz itself is still likely to work on Python 2.6,
-but official support has been dropped now that <a href="http://www.tornadoweb.org/">Tornado</a> no longer
-supports Python 2.6.</p>
+SnakeViz works on Python 3.9+.
+SnakeViz v2.1.2 and older are still likely to work on Python 2.7,
+but official support has been dropped now Python 2 is EOL.</p>
 <h2 id="installation">Installation</h2>
 <p>SnakeViz is available <a href="https://pypi.org/project/snakeviz/">on PyPI</a>. Install with <a href="https://pip.pypa.io">pip</a>:</p>
-<pre><code>pip install snakeviz
+<pre><code>python -m pip install snakeviz
 </code></pre>
-
 <h2 id="starting-snakeviz">Starting SnakeViz</h2>
 <h3 id="command-line-interface">Command Line Interface</h3>
 <p>If you have generated a profile file called <code>program.prof</code> you can start
 SnakeViz from the command line:</p>
 <pre><code>snakeviz program.prof
 </code></pre>
-
 <p>Run <code>snakeviz --help</code> to see available options.</p>
+<p>Note that you can provide a directory as the argument to <code>snakeviz</code>
+and it will launch a file browser interface from which you can select
+profiles to view or other directories to list.
+For example: <code>snakeviz path/to/directory</code>.</p>
 <h3 id="ipython">IPython</h3>
 <p>SnakeViz includes IPython line and cell magics for going straight
 from code to a visualization.
 First load the magics:</p>
 <pre><code>%load_ext snakeviz
 </code></pre>
-
 <p>Then use the <code>%snakeviz</code> (for a single line of code) and
 <code>%%snakeviz</code> (for multiple lines of code) magics to profile and view
 individual lines or entire blocks of code:</p>
-<pre><code>% snakeviz glob.glob('*.txt')
+<pre><code>%snakeviz glob.glob('*.txt')
 </code></pre>
-
 <pre><code>%%snakeviz
 files = glob.glob('*.txt')
 for file in files:
     with open(file) as f:
         print(hashlib.md5(f.read().encode('utf-8')).hexdigest())
 </code></pre>
-
 <p>When used within a a Jupyter Notebook the <code>%snakeviz</code> magics
 embed the visualization result within the notebook by default.
 The <code>--new-tab</code> or <code>-t</code> options can be passed to the magic to instead make
@@ -126,13 +147,21 @@ Opening in a new browser tab is the default behavior when the
 <p>Note: Using the IPython <code>%snakeviz</code> magics requires internet access.
 If you are working offline, use <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun">prun</a> to save a profile file
 and then start SnakeViz from the command line.</p>
+<p>The snakeviz server that is set up can also be configured for
+remote access. You can configure the host and port of this 
+server using</p>
+<pre><code class="language-python">%snakeviz_config -h localhost -p 8900
+</code></pre>
+<p>A use for this is in running Jupyter in one server, but 
+browsing to this from another location. Typically, one does this 
+by port forwarding using ssh, in this case one can forward the
+specified port to enable snakeviz in the browser.</p>
 <h2 id="generating-profiles">Generating Profiles</h2>
 <h3 id="cprofile">cProfile</h3>
 <p>You can use the <a href="https://docs.python.org/3/library/profile.html#module-cProfile">cProfile</a> module at the command line to create a
 profile file for a script:</p>
 <pre><code>python -m cProfile -o program.prof my_program.py
 </code></pre>
-
 <p>See the <a href="https://docs.python.org/3/library/profile.html#instant-user-s-manual">user&rsquo;s manual</a> for more info and other options.</p>
 <p>(Note that SnakeViz <strong>does not</strong> work with profiles generated by the
 <code>profile</code> module.)</p>
@@ -141,7 +170,6 @@ profile file for a script:</p>
 IPython&rsquo;s <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun">prun</a> magic using the <code>-D</code> flag:</p>
 <pre><code>%prun -D program.prof glob.glob('*.txt')
 </code></pre>
-
 <p><code>prun</code> has both line and cell magics available,
 see the <a href="http://ipython.org/ipython-doc/2/api/generated/IPython.core.magics.execution.html#IPython.core.magics.execution.ExecutionMagics.prun">IPython docs</a> for more information.</p>
 <h2 id="interpreting-results">Interpreting Results</h2>
@@ -269,58 +297,64 @@ but can speed up the building and rendering of the visualization.</p>
 <h2 id="notes">Notes</h2>
 <ul>
 <li>SnakeViz currently only works with files produced by <code>cProfile</code>,
-    it will not work with files from the <code>profile</code> module.</li>
+  it will not work with files from the <code>profile</code> module.</li>
 <li>SnakeViz will sometimes be unable to create a visualization and will
-    show an error.
-    This is usually because the visualization is too complex.
-    You can make a simpler graph by increasing the cutoff, reducing the depth,
-    or profiling a smaller subsection of your code.</li>
+  show an error.
+  This is usually because the visualization is too complex.
+  You can make a simpler graph by increasing the cutoff, reducing the depth,
+  or profiling a smaller subsection of your code.</li>
+<li><code>cProfile</code>&rsquo;s data does not always allow a full reconstruction of where time
+  was spent in a program, especially when functions are called multiple
+  times from different parts of the code. When that happens SnakeViz can only
+  show the total amount of time spent in a function, not the amount spent
+  there when called by a specific caller.
+  <a href="https://github.com/jiffyclub/snakeviz/issues/112">This issue</a> details
+  this limitation.</li>
 </ul>
 <h2 id="contact">Contact</h2>
 <p>If you&rsquo;d like to contribute to SnakeViz you can <a href="https://github.com/jiffyclub/snakeviz">fork it on GitHub</a>.
 Please report issues on the <a href="https://github.com/jiffyclub/snakeviz/issues">GitHub issue tracker</a>.</p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
             <hr>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
+        <script src="js/bootstrap.bundle.min.js"></script>
         <script>
             var base_url = ".",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="js/base.js" defer></script>
-        <script src="search/main.js" defer></script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>
-                    From here you can search these documents. Enter
-                    your search terms below.
-                </p>
-                <form role="form">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
-                <div id="mkdocs-search-results"></div>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
             </div>
             <div class="modal-footer">
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <table class="table">
@@ -360,6 +394,6 @@ Please report issues on the <a href="https://github.com/jiffyclub/snakeviz/issue
 </html>
 
 <!--
-MkDocs version : 1.0.4
-Build Date UTC : 2019-03-31 21:56:02
+MkDocs version : 1.6.1
+Build Date UTC : 2024-11-09 22:06:39.165091+00:00
 -->

@@ -280,16 +280,23 @@ var drawIcicle = function drawIcicle(json) {
         .attr("width", function(d) { return x(d.dx); })
         .attr("height", function(d) { return y(d.dy); })
         .attr("font-family", "sans-serif")
-        .attr("font-size", "15px")
+        .attr("font-size", "12px")
         .attr("fill", "black")
         .attr("text-anchor", "middle")
         .attr("pointer-events", "none");
 
-  // Append the function name
+  // Append the function location
   labels.append("tspan")
-    .text(function(d) { return d.display_name; })
+    .text(function(d) { return d.display_name.split("(")[0]; })
     .attr("text-anchor", "middle")
-    .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); });
+    .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); })
+    .attr("dy", "-0.8em");
+  // Append the function name (without wrapping parens to save on width)
+  labels.append("tspan")
+    .text(function(d) { return d.display_name.split("(")[1].slice(0, -1); })
+    .attr("text-anchor", "middle")
+    .attr("x", function(d) { return x(d.x + (d.dx / 2.0)); })
+    .attr("dy", "1.2em");
   // Append the time
   labels.append("tspan")
     .text(function(d) { return d.cumulative.toPrecision(3) + " s"; })

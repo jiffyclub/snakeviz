@@ -37,3 +37,14 @@ changelog = "https://github.com/jiffyclub/snakeviz/blob/master/CHANGES.rst"
 
 [tool.setuptools.dynamic]
 version = {attr = "snakeviz.VERSION"}
+
+[tool.mypy]
+pretty = true
+show_error_codes = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["snakeviz.ipymagic"]
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+disallow_untyped_decorators = false

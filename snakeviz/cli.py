@@ -9,7 +9,9 @@ import random
 import sys
 import threading
 import webbrowser
+from collections.abc import Iterable, Sequence
 from pstats import Stats
+from typing import NoReturn, Optional
 from urllib.parse import quote
 
 from snakeviz import VERSION
@@ -19,7 +21,7 @@ from snakeviz import VERSION
 # https://github.com/ipython/ipython/blob/8be7f9abd97eafb493817371d70101d28640919c/IPython/html/notebookapp.py
 # See the IPython license at:
 # https://github.com/ipython/ipython/blob/master/COPYING.rst.
-def random_ports(port, n):
+def random_ports(port: int, n: int) -> Iterable[int]:
     """Generate a list of n random ports near the given port.
     The first 5 ports will be sequential, and the remaining n-5 will be
     randomly selected in the range [port-2*n, port+2*n].
@@ -31,13 +33,13 @@ def random_ports(port, n):
 
 
 class SVArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
+    def error(self, message: str) -> NoReturn:
         message = message + '\n\n' + self.format_help()
         args = {'prog': self.prog, 'message': message}
         self.exit(2, '%(prog)s: error: %(message)s' % args)
 
 
-def build_parser():
+def build_parser() -> SVArgumentParser:
     parser = SVArgumentParser(
         description='Start SnakeViz to view a Python profile.')
 
@@ -66,7 +68,7 @@ def build_parser():
     return parser
 
 
-def main(argv=None):
+def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
@@ -138,8 +140,9 @@ def main(argv=None):
 
         # Launch the browser in a separate thread to avoid blocking the
         # ioloop from starting
-        def bt():
+        def bt() -> None:
             browser.open(url, new=2)
+
         threading.Thread(target=bt).start()
 
     try:

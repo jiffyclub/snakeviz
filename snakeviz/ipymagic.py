@@ -4,6 +4,7 @@ import sys
 import tempfile
 import time
 import uuid
+from typing import Any, Literal, Optional, overload
 from urllib.parse import quote
 
 __all__ = ["load_ipython_extension"]
@@ -19,6 +20,7 @@ DEFAULT_HOST = "\" + document.location.hostname + \""
 # installed, this try/except makes sure that snakeviz is operational
 # in that case.
 try:
+    from IPython.core.interactiveshell import InteractiveShell
     from IPython.core.magic import Magics, magics_class, line_cell_magic, line_magic
     from IPython.display import display, HTML
 except ImportError:
@@ -28,13 +30,14 @@ else:
     @magics_class
     class SnakevizMagic(Magics):
 
-        def __init__(self, shell=None, **kwargs):
+        def __init__(self, shell: Optional[InteractiveShell] = None,
+                     **kwargs: Any) -> None:
             super().__init__(shell=shell, **kwargs)
             self._host = None
             self._port = None
 
         @line_cell_magic
-        def snakeviz(self, line, cell=None):
+        def snakeviz(self, line: str, cell: Optional[str] = None) -> None:
             """
             Profile code and display the profile in Snakeviz.
             Works as a line or cell magic.
@@ -70,12 +73,14 @@ else:
             line = "-q -D " + filename + " " + line
 
             # generate the stats file using IPython's prun magic
-            ip = get_ipython()
+            ip = get_ipython()  # type: ignore[name-defined]
 
             if cell:
                 ip.run_cell_magic("prun", line, cell)
             else:
                 ip.run_line_magic("prun", line)
+
+            sv: subprocess.Popen[Any]
 
             # start up a Snakeviz server
             if _check_ipynb() and not ("t" in opts or "new-tab" in opts):
@@ -91,7 +96,7 @@ else:
             sv.terminate()
 
         @line_magic
-        def snakeviz_config(self, line):
+        def snakeviz_config(self, line: str) -> None:
             """
             Configure the port and host name for snakeviz.
 
@@ -112,29 +117,33 @@ else:
                 elif opt in ("p", "port"):
                     self._port = opts[opt]
                 else:
-                    raise ValueError("Unsupported option {opt}.".format(opt))
+                    raise ValueError(f"Unsupported option {opt}.")
             host = self._host or DEFAULT_HOST
             port = self._port or "dynamically chosen"
-            print("Snakeviz configured with host {host} and port {port}".format(host=host,
-                                                                                port=port))
+            print(f"Snakeviz configured with host {host} and port {port}")
 
-def load_ipython_extension(ipython):
+
+def load_ipython_extension(ipython: InteractiveShell) -> None:
     """Called when user runs %load_ext snakeviz"""
     ipython.register_magics(SnakevizMagic)
 
 
-def _check_ipynb():
+def _check_ipynb() -> bool:
     """
     Returns True if IPython is running as the backend for a
     Jupyter Notebook.
 
     """
-    cfg = get_ipython().config
+    cfg = get_ipython().config  # type: ignore[name-defined]
     return "connection_file" in cfg["IPKernelApp"]
 
 
-def open_snakeviz_and_display_in_notebook(filename, override_host=None, override_port=None):
-    def _find_free_port():
+def open_snakeviz_and_display_in_notebook(
+        filename: str,
+        override_host: Optional[str] = None,
+        override_port: Optional[str] = None) -> subprocess.Popen[str]:
+
+    def _find_free_port() -> int:
         import socket
         from contextlib import closing
 
@@ -145,22 +154,31 @@ def open_snakeviz_and_display_in_notebook(filename, override_host=None, override
             # which makes life with snakeviz-over-SSH much easier.
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-            # Try a default range of five ports, then use whatever's free.
-            ports = list(range(8080, 8085)) + [0]
-            for port in ports:
+            @overload
+            def try_bind(port: Literal[0]) -> int: ...
+            @overload
+            def try_bind(port: int) -> Optional[int]: ...
+            def try_bind(port: int) -> Optional[int]:
                 try:
                     s.bind(("", port))
                 except OSError as e:
                     if e.errno == errno.EADDRINUSE:
-                        pass
+                        return None
                     else:
                         raise
                 else:
-                    return s.getsockname()[1]
+                    return int(s.getsockname()[1])
 
-    port = override_port or str(_find_free_port())
+            # Try a default range of five ports, then use whatever's free.
+            for port in range(8080, 8085):
+                if bound_port := try_bind(port):
+                    return bound_port
 
-    def _start_and_wait_when_ready():
+            return try_bind(0)
+
+    port = override_port or _find_free_port()
+
+    def _start_and_wait_when_ready() -> subprocess.Popen[str]:
         import os
 
         environ = os.environ.copy()
@@ -174,7 +192,7 @@ def open_snakeviz_and_display_in_notebook(filename, override_host=None, override
                 "-H",
                 "0.0.0.0",
                 "-p",
-                port,
+                str(port),
                 filename,
             ],
             stdout=subprocess.PIPE,
@@ -182,7 +200,7 @@ def open_snakeviz_and_display_in_notebook(filename, override_host=None, override
             env=environ,
         )
         while True:
-            line = sv.stdout.readline()
+            line = sv.stdout.readline() if sv.stdout else ''
             if line.strip().startswith("snakeviz web server started"):
                 break
         return sv

@@ -38,7 +38,7 @@ class VizHandler(tornado.web.RequestHandler):
                 raise RuntimeError('Could not read %s.' % profile_name)
             self.render(
                 'viz.html', profile_name=profile_name,
-                table_rows=table_rows(s), callees=json_stats(s))
+                table_rows=table_rows(s), callees=json.dumps(json_stats(s)))
 
     def _list_dir(self, path: str) -> None:
         """

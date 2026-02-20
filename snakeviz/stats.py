@@ -1,7 +1,7 @@
 import os.path
 from itertools import chain
 from pstats import Stats as _Stats
-from typing import NamedTuple, TypeAlias, TypedDict
+from typing import TypeAlias, TypedDict
 
 from tornado.escape import xhtml_escape
 
@@ -19,17 +19,10 @@ class Stats(_Stats):
     stats: StatsDict
 
 
-class TableCallStats(NamedTuple):
-    calls: tuple[str, str]
-    tot_time: str
-    tot_time_per: str
-    cum_time: str
-    cum_time_per: str
-    flf: str
-    name: str
+TableCallStats: TypeAlias = list[list[str | list[str]]]
 
 
-def table_rows(stats: Stats) -> list[TableCallStats]:
+def table_rows(stats: Stats) -> TableCallStats:
     """
     Generate a list of stats info lists for the snakeviz stats table.
 
@@ -38,7 +31,7 @@ def table_rows(stats: Stats) -> list[TableCallStats]:
     calls tot_time tot_time_per_call cum_time cum_time_per_call file_line_func
 
     """
-    rows: list[TableCallStats] = []
+    rows: TableCallStats = []
 
     for k, v in stats.stats.items():
         flf = xhtml_escape('{}:{}({})'.format(
@@ -57,9 +50,10 @@ def table_rows(stats: Stats) -> list[TableCallStats]:
         tot_time_per = fmt(v[2] / v[0]) if v[0] > 0 else '0'
         cum_time_per = fmt(v[3] / v[0]) if v[0] > 0 else '0'
 
-        rows.append(TableCallStats(
-            (calls, str(v[1])), tot_time, tot_time_per,
-            cum_time, cum_time_per, flf, name))
+        rows.append([
+            [calls, str(v[1])], tot_time, tot_time_per,
+            cum_time, cum_time_per, flf, name
+        ])
 
     return rows
 

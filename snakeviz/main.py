@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 
-import os.path
-from pstats import Stats
 import json
+import os.path
+from typing import TypedDict
 from urllib.parse import quote
 
 import tornado.ioloop
 import tornado.web
 
-from .stats import table_rows, json_stats
+from .stats import Stats, table_rows, json_stats
 
-settings = {
+
+class TornadoSettings(TypedDict, total=False):
+    static_path: str
+    template_path: str
+    debug: bool
+    gzip: bool
+
+
+settings: TornadoSettings = {
     'static_path': os.path.join(os.path.dirname(__file__), 'static'),
     'template_path': os.path.join(os.path.dirname(__file__), 'templates'),
     'debug': True,
@@ -19,7 +27,7 @@ settings = {
 
 
 class VizHandler(tornado.web.RequestHandler):
-    def get(self, profile_name):
+    def get(self, profile_name: str) -> None:
         abspath = os.path.abspath(profile_name)
         if os.path.isdir(abspath):
             self._list_dir(abspath)
@@ -32,7 +40,7 @@ class VizHandler(tornado.web.RequestHandler):
                 'viz.html', profile_name=profile_name,
                 table_rows=table_rows(s), callees=json_stats(s))
 
-    def _list_dir(self, path):
+    def _list_dir(self, path: str) -> None:
         """
         Show a directory listing.
 

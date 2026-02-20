@@ -11,7 +11,7 @@ import threading
 import webbrowser
 from collections.abc import Iterable, Sequence
 from pstats import Stats
-from typing import NoReturn
+from typing import NoReturn, Optional
 from urllib.parse import quote
 
 from snakeviz import VERSION
@@ -68,7 +68,7 @@ def build_parser() -> SVArgumentParser:
     return parser
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 

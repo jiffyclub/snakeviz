@@ -1,7 +1,8 @@
 import os.path
 from itertools import chain
 from pstats import Stats as _Stats
-from typing import TypeAlias, TypedDict
+from typing import TypedDict, Union
+from typing_extensions import TypeAlias
 
 from tornado.escape import xhtml_escape
 
@@ -19,7 +20,7 @@ class Stats(_Stats):
     stats: StatsDict
 
 
-TableCallStats: TypeAlias = list[list[str | list[str]]]
+TableCallStats: TypeAlias = list[list[Union[str, list[str]]]]
 
 
 def table_rows(stats: Stats) -> TableCallStats:

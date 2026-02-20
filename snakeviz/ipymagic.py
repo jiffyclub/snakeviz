@@ -4,7 +4,7 @@ import sys
 import tempfile
 import time
 import uuid
-from typing import Any, Literal, overload
+from typing import Any, Literal, Optional, overload
 from urllib.parse import quote
 
 __all__ = ["load_ipython_extension"]
@@ -30,14 +30,14 @@ else:
     @magics_class
     class SnakevizMagic(Magics):
 
-        def __init__(self, shell: InteractiveShell | None = None,
+        def __init__(self, shell: Optional[InteractiveShell] = None,
                      **kwargs: Any) -> None:
             super().__init__(shell=shell, **kwargs)
             self._host = None
             self._port = None
 
         @line_cell_magic
-        def snakeviz(self, line: str, cell: str | None = None) -> None:
+        def snakeviz(self, line: str, cell: Optional[str] = None) -> None:
             """
             Profile code and display the profile in Snakeviz.
             Works as a line or cell magic.
@@ -140,8 +140,8 @@ def _check_ipynb() -> bool:
 
 def open_snakeviz_and_display_in_notebook(
         filename: str,
-        override_host: str | None = None,
-        override_port: int | None = None) -> subprocess.Popen[str]:
+        override_host: Optional[str] = None,
+        override_port: Optional[str] = None) -> subprocess.Popen[str]:
 
     def _find_free_port() -> int:
         import socket
@@ -157,8 +157,8 @@ def open_snakeviz_and_display_in_notebook(
             @overload
             def try_bind(port: Literal[0]) -> int: ...
             @overload
-            def try_bind(port: int) -> int | None: ...
-            def try_bind(port: int) -> int | None:
+            def try_bind(port: int) -> Optional[int]: ...
+            def try_bind(port: int) -> Optional[int]:
                 try:
                     s.bind(("", port))
                 except OSError as e:

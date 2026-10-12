@@ -125,7 +125,8 @@ def main(argv=None):
         print('No available port found.')
         return 1
 
-    url = f"http://{hostname}:{port}/snakeviz/{filename}"
+    url_host = f'[{hostname}]' if ':' in hostname else hostname
+    url = f"http://{url_host}:{port}/snakeviz/{filename}"
     print('snakeviz web server started on %s:%d; enter Ctrl-C to exit' %
            (hostname, port))
     print(url)

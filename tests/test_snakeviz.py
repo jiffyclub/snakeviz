@@ -12,6 +12,7 @@ import pytest
 import requests
 
 from snakeviz import VERSION
+from snakeviz import cli
 
 
 @contextmanager
@@ -85,3 +86,25 @@ def test_version():
     # in Python <= 3.3 this comes out on stderr, otherwise on stdout
     assert VERSION in out.decode('utf-8') or \
         VERSION in err.decode('utf-8')
+
+
+@pytest.mark.parametrize('hostname, url_host', [
+    ('127.0.0.1', '127.0.0.1'),
+    ('localhost', 'localhost'),
+    ('::1', '[::1]'),
+    ('2001:db8::1', '[2001:db8::1]'),
+])
+def test_cli_url_hostname(tmp_path, monkeypatch, capsys, hostname, url_host):
+    from snakeviz.main import app
+    from tornado.ioloop import IOLoop
+
+    addresses = []
+    monkeypatch.setattr(app, 'listen',
+                        lambda port, address: addresses.append(address))
+    monkeypatch.setattr(IOLoop.instance(), 'start', lambda: None)
+
+    assert cli.main(['-s', '-H', hostname, str(tmp_path)]) == 0
+    assert addresses == [hostname]
+    url = capsys.readouterr().out.splitlines()[-1]
+    assert url == 'http://{}:8080/snakeviz/{}'.format(
+        url_host, quote(str(tmp_path), safe=''))
